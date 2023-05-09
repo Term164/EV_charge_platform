@@ -8,6 +8,8 @@ Osnovni potek je vezan na administratorje.
 
 V nadaljevanju so pomembne definicije, ki gradijo celotno platformo.
 
+# KONCEPTUALNI NIVO
+
 ### Polnilnica
 Polnilnica je lahko navadna ali pametna (vsebuje protokole za komunikacijo). Polnilnice pripadajo neki stavbi/zgradbi. Polnilnice lahko uporabljajo vsi, ki so registrirani v stavbi, razen če polnilnice pripadajo določenemu podjetju v teji stavbi - te lahko uporabljajo le zaposleni tega podjetja.
 
@@ -99,27 +101,29 @@ Primeri uporabe:
 
 ## REZERVACIJA
 Rezervacija je jedro platforme.
-Kako pa deluje?!?!?!?
+Ko končni uporabnik želi uporabljati polnilnice, bo na platformi izbral željeni čas polnjenja.
+Ta bo omejen z obeh strani.
+> Trenutno se govori za minimum 30 minut in maksimum 3 ure.
+
+Nato bo še izbral dostopni čas, torej od kdaj do kdaj je na voljo in želi polniti.
+> Če so polnilnice proste, mu bo ena dodeljena, drugače se postavi v čakalno vrsto. Če nekdo drug prekine rezervacijo ali nekdo zaključi prej, se čakalna premakne.
+
+Uporabnik lahko tudi poleg rezervacije ure (zgoraj omenjeno) izbere tudi tip polnilnice, nakar bo logika platforme poskrbela, da dobi izbran tip.
+Če ima uporabnik izbrane 3 ure in dobi 2 uri, je še vedno 1 ura v rezervaciji.
 
 
 
+# TEHNIČNI NIVO
+Tehnični nivo vsebuje tehnične detajle in izraze, zato bo jezik bolj tehnični (ne književni).
 
+ER diagram, trenutna verzija (morda se spremeni, oz. *dopolni* ).
+Baza bo PostgreSQL.
 
+![](/ER_diagram.png)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Nekaj o rezervacijah:
+Tehnično je implentirana kot tabela v bazi, katera se filtrira in sortira, tako se obnaša kot vrsta.
+Sortira se po `creation_time`. Pogojuje se po `allocated_from`, `allocated_to`, `charging_time`, po tem se loči rezervacije, ki so že v izvajanju ali ne.
 
 
 
