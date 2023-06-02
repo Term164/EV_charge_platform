@@ -111,19 +111,186 @@ Nato bo še izbral dostopni čas, torej od kdaj do kdaj je na voljo in želi pol
 Uporabnik lahko tudi poleg rezervacije ure (zgoraj omenjeno) izbere tudi tip polnilnice, nakar bo logika platforme poskrbela, da dobi izbran tip.
 Če ima uporabnik izbrane 3 ure in dobi 2 uri, je še vedno 1 ura v rezervaciji.
 
-
-
 # TEHNIČNI NIVO
 Tehnični nivo vsebuje tehnične detajle in izraze, zato bo jezik bolj tehnični (ne književni).
 
 ER diagram, trenutna verzija (morda se spremeni, oz. *dopolni* ).
 Baza bo PostgreSQL.
+Ta slika je malce outdated (dodali smo še eno tabelo in še en stolpec). Sigruno lahko kje online pretvorimo SQL kodo v ER diagram.
 
 ![](/ER_diagram.png)
 
 Nekaj o rezervacijah:
 Tehnično je implentirana kot tabela v bazi, katera se filtrira in sortira, tako se obnaša kot vrsta.
 Sortira se po `creation_time`. Pogojuje se po `allocated_from`, `allocated_to`, `charging_time`, po tem se loči rezervacije, ki so že v izvajanju ali ne.
+
+Link do začasne baze: [NeonDB](https://console.neon.tech/app/projects) (personal)
+
+Še kaj o podatkovni bazi?
+
+<br>
+
+# API
+Base URL: domain.com/api/v1 (swagger)
+
+Endpointi sledijo principu: api/version/group/method/methodName
+
+V oklepajih so parametri, vprašaj pomeni "nullable", torej optional parameter. Pri vseh pride zraven še secret/token/sessionID. 
+
+Vsakič, ko se izvede klic na endpoint, se v backendu najprej izvede *confirmation* funkcija, ki primerja podan secret/token/sessionID, torej če je potekel (če ni ga osveži), in pa če ima dovoljene pravice za to akcijo (role). Če confirmation vrne *true* se nadaljuje koda, torej klic na dejansko funkcijo, drugače vrne response *401 unathorized*.
+
+Pri vsaki je treba še jasno definirati, kdo lahko dostopa do te metode - katere role so avtorizirane!
+
+Grupe:
+
+<br>
+
+## AUTH: /api/v1/auth
+Metode namenjene avtentikaciji in avtorizaciji. Potrebno je še bolj naštudirati oath 2.0 ali pa lepo dodelati naš prvotni plan.
+
+`/api/v1/auth/login`<br>
+Uporabnik se prijavi, ob tem poda svoj email in geslo, če je uspešno, dobi nazaj generiran secret/token/sessionID
+
+`/api/v1/auth/register/step1`<br>
+Uporabnik se registrira tako, da poda svoj email in geslo. Registracijo mora še potrditi
+
+`/api/v1/auth/register/step2`<br>
+Registracija se potrdi v drugem koraku, ko uporabnik "pride" na ta url, poslan prek maila
+
+`/api/v1/auth/logout`<br>
+Uporabnik se odjavi, pri tem se zbriše secret/token/sessionID
+
+<br>
+
+## USER: /api/v1/user
+Metode namenjene urejanju uporabnikov. *Ustvari se nov nekaj* pomeni le, da se obstoječemu profilu - ki je vedno že registriran po navadnem načinu (auth/register) - doda te pravice.
+
+`/api/v1/user/post/assignBadmin (userID, buildingID)`<br>
+Ustvari se nov admin stavbe
+
+`/api/v1/user/post/assignCadmin (userID, companyID)`<br>
+Ustvari se nov admin podjetja
+
+`/api/v1/user/post/assignCompany (userID, companyID)`<br>
+ Ustvari zaposlenega
+
+`/api/v1/user/post/assignBuilding (userID, buildingID)`<br>
+Zaposlenega se doda v neko stavbo, v kateri operira podjetje
+
+`/api/v1/user/get/buildingAdmins`<br>
+Vsi admini stavb
+
+`/api/v1/user/get/companyAdmins`<br>
+Vsi admin podjetij
+
+`/api/v1/user/get/assignedBadmins (buildingID)`<br>
+Vsi admini stavb določene stavbe
+
+`/api/v1/user/get/assignedCadmins (companyID)`<br>
+Vsi admini podjetij določenega podjetja
+
+`/api/v1/user/delete/employee (userID, companyID?, buildingID?)`<br>
+Izbris uporabnika, največkrat zaposlenega (če podan companyID), lahko tudi le izbris zaposlenega iz neke stavbe od podjetja, lahko splošen izbris uporabnika
+
+`/api/v1/user/delete/badmin (userID)`<br>
+Odstranitev pravice adminu stavbe
+
+`/api/v1/user/delete/cadmin (userID)`<br>
+Odstranitev pravice adminu podjetja
+
+`/api/v1/user/patch/editProfile (userID)`<br>
+Urejanje svojega profila - navaden uporabnik, admini nimajo kaj
+
+<br>
+
+## COMPANY: /api/v1/company
+Metode namenjene urejanju podjetij.
+
+`/api/v1/company/post/new`<br>
+Ustvarjanje novega podjetja
+
+`/api/v1/company/get/all`<br>
+Izpis vsej podjetij
+
+`/api/v1/company/patch/edit`<br>
+Urejanje podjetja
+
+`/api/v1/company/delete/company (companyID)`<br>
+Odstrani podjetje
+
+<br>
+
+## BUILDING: /api/v1/building
+Metode, ki vračajo stavbe.
+
+`/api/v1/building/get/all`<br>
+Izpis vseh stavb
+
+`/api/v1/building/get/companyOwned (companyID)`<br>
+Vse stavbe, v katerih operira dano podjetje
+
+`/api/v1/building/post/new`<br>
+Ustvarjanje nove stavbe
+
+`/api/v1/building/patch/edit`<br>
+Urejanje stavbe
+
+`/api/v1/building/delete/building`<br>
+Odstranjevanje stavbe
+
+`/api/v1/building/post/assignCompany (buildingID)`<br>
+Dodajanje podjetja v stavbo
+
+`/api/v1/building/get/assignedCompanies (buildingID)`<br>
+Podjetja, ki operirajo v dani stavbi
+
+<br>
+
+## STATION: /api/v1/station
+Metode za električne polnilne postaje.
+
+`/api/v1/station/post/new (buildingID)`<br>
+Dodajanje polnilnice ter kateri stavbi pripada
+
+`/api/v1/station/patch/edit (stationID)`<br>
+Urejanje polnilnice
+
+`/api/v1/station/get/all (buildingID?)`<br>
+Izpis vseh polnilnic, oz. pogosteje vseh polnilnic v neki stavbi
+
+`/api/v1/station/get/allAvailable (userID)`<br>
+Izpis vsej polnilnic, ki so dostopne danemu uporabniku (torej upošteva stavbe in podjetja)
+
+`/api/v1/station/post/assignCompany (stationID, companyID)`<br>
+Rezervira polnilnico nekemu podjetju
+
+`/api/v1/station/delete/station (stationID)`<br>
+Odstrani polnilnico
+
+<br>
+
+## RESERVATION: /api/v1/reservation
+Metode namenjene logiki z rezervacijami
+
+`/api/v1/reservation/get/all (userID)`<br>
+Izpis vseh rezervacij danega uporabnika
+
+`/api/v1/reservation/patch/edit (reservationID)`<br>
+Urejanje rezervacije
+
+`/api/v1/reservation/delete/cancel (reservationID)`<br>
+Preklic rezervacije
+
+`/api/v1/reservation/post/new (…)`<br>
+Ustvarjanje rezervacije - tu pride ogromno parametrov, od stavbe, posebnega tipa, podjetja, ...
+
+`/api/v1/reservation/get/stationType (buildingID)`<br>
+Posebna pomožna metoda, izpis vseh tipov polnilnic pri stavbi
+
+
+
+
+
 
 
 
