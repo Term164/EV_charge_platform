@@ -1,12 +1,16 @@
 -- Generated for PostgreSQL
 -- Use the picture ER_diagram.png for reference
 -- 
--- Near final version, could change-- 
 -- V 1.0
 -- -> Wrong definitons for ID primary keys
 -- -> Wrong PK, FK numbers
 --=============================================
 -- V 2.0
+-- -> Missing an attribute "company_id" in table "charging_stations", so now a company can reserve a station
+-- -> Missing a table, version 2.1 adds a whole new table called "Sessions" for storing sessions ids / tokens / secrets, all security wise
+--=============================================
+-- V 2.1
+
 
 CREATE TABLE Accounts
 (
@@ -157,10 +161,12 @@ CREATE TABLE Charging_stations
  "id"             SERIAL,
  charging_type_id int NOT NULL,
  building_id      int NOT NULL,
+ company_id       int NULL,
  name             varchar(50) NULL,
  CONSTRAINT PK_10 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_11 FOREIGN KEY ( charging_type_id ) REFERENCES Charging_types ( "id" ),
- CONSTRAINT FK_12 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" )
+ CONSTRAINT FK_12 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" ),
+ CONSTRAINT FK_16 FOREIGN KEY ( company_id ) REFERENCES Companies ( "id" )
 );
 
 CREATE INDEX FK_11 ON Charging_stations
@@ -171,6 +177,11 @@ CREATE INDEX FK_11 ON Charging_stations
 CREATE INDEX FK_12 ON Charging_stations
 (
  building_id
+);
+
+CREATE INDEX FK_16 ON Charging_stations
+(
+ company_id
 );
 
 
@@ -203,6 +214,21 @@ CREATE INDEX FK_14 ON Reservations
 );
 
 CREATE INDEX FK_15 ON Reservations
+(
+ account_id
+);
+
+CREATE TABLE Sessions
+(
+ "id"            SERIAL,
+ account_id      int NOT NULL,
+ session_secret varchar(100) NOT NULL,
+ expiration_time time NOT NULL,
+ CONSTRAINT PK_12 PRIMARY KEY ( "id" ),
+ CONSTRAINT FK_17 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" )
+);
+
+CREATE INDEX FK_17 ON Sessions
 (
  account_id
 );

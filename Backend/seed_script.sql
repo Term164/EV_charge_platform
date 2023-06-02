@@ -1,5 +1,5 @@
 -- Seeding the database
--- V 1.0
+
 
 -- Accounts
 INSERT INTO Accounts ("username","password_hash", "password_salt","email_account","profile_picture") VALUES
@@ -66,4 +66,9 @@ INSERT INTO Consumers ("account_id","company_id", "building_id", "rfid") VALUES
     (3,null,1,null);
 
 -- Reservations
-???????
+-- ???????
+
+-- Sessions
+INSERT INTO Sessions ("account_id", "session_secret", "expiration_time") VALUES
+    (3, 'asudbšuba2šouisa', '13:14:00'),
+    (2, '072d7ndns29jsdn', '13:58:00');
