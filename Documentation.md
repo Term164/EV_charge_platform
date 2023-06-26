@@ -197,10 +197,10 @@ Vsi admini podjetij določenega podjetja
 Izbris uporabnika, največkrat zaposlenega (če podan companyID), lahko tudi le izbris zaposlenega iz neke stavbe od podjetja, lahko splošen izbris uporabnika
 
 `/api/v1/user/delete/badmin (userID)`<br>
-Odstranitev pravice adminu stavbe
+Odstranitev profila admina stavbe
 
 `/api/v1/user/delete/cadmin (userID)`<br>
-Odstranitev pravice adminu podjetja
+Odstranitev profila admina Podjetja
 
 `/api/v1/user/patch/editProfile (userID)`<br>
 Urejanje svojega profila - navaden uporabnik, admini nimajo kaj
