@@ -70,5 +70,5 @@ INSERT INTO Consumers ("account_id","company_id", "building_id", "rfid") VALUES
 
 -- Sessions
 INSERT INTO Sessions ("account_id", "session_secret", "expiration_time") VALUES
-    (3, 'asudbšuba2šouisa', '13:14:00'),
-    (2, '072d7ndns29jsdn', '13:58:00');
+    (3, 'asudbšuba2šouisa', NOW()+ interval '30 minutes'),
+    (2, '072d7ndns29jsdn', NOW()+ interval '90 minutes');

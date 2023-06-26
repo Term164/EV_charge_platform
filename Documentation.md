@@ -28,7 +28,7 @@ To so bile osnovni izrazi, ki se uporabljajo.
 
 Diagram primerov uporabe za okviren visokonivojski načrt.
 
-![](/Use_case_diagram.png)
+![](doc_img/Use_case_diagram.png)
 
 ### Administrator Platforme
 Plaftorm admin bo nek zaposlen v tem podjetju (EV charge)(TBD), kateri služi kot avtentikator in vrhovni administrator. Ko želi podjetje uporabljati platformo, pošlje vlogo in Admin platforme ustvari novo podjetje v bazi ter temu podjetju dodeli Admina podjetja.
@@ -116,9 +116,11 @@ Tehnični nivo vsebuje tehnične detajle in izraze, zato bo jezik bolj tehnični
 
 ER diagram, trenutna verzija (morda se spremeni, oz. *dopolni* ).
 Baza bo PostgreSQL.
-Ta slika je malce outdated (dodali smo še eno tabelo in še en stolpec). Sigruno lahko kje online pretvorimo SQL kodo v ER diagram.
 
-![](/ER_diagram.png)
+
+![](doc_img/ER_diagram.png)
+
+![](doc_img/ER_diagram_2.png)
 
 Nekaj o rezervacijah:
 Tehnično je implentirana kot tabela v bazi, katera se filtrira in sortira, tako se obnaša kot vrsta.
@@ -135,11 +137,13 @@ Base URL: domain.com/api/v1 (swagger)
 
 Endpointi sledijo principu: api/version/group/method/methodName
 
-V oklepajih so parametri, vprašaj pomeni "nullable", torej optional parameter. Pri vseh pride zraven še secret/token/sessionID. 
+V oklepajih so parametri, vprašaj pomeni "nullable", torej optional parameter. Pri vseh pride zraven še sessionID. 
 
-Vsakič, ko se izvede klic na endpoint, se v backendu najprej izvede *confirmation* funkcija, ki primerja podan secret/token/sessionID, torej če je potekel (če ni ga osveži), in pa če ima dovoljene pravice za to akcijo (role). Če confirmation vrne *true* se nadaljuje koda, torej klic na dejansko funkcijo, drugače vrne response *401 unathorized*.
+Vsakič, ko se izvede klic na endpoint, se v backendu najprej izvede *confirmation* funkcija, ki primerja podan sessionID, torej če je potekel (če ni, ga osveži) in če ima dovoljene pravice za to akcijo (role). Če confirmation vrne *true* se nadaljuje koda, torej klic na dejansko funkcijo, drugače vrne response *401 unathorized*.
 
 Pri vsaki je treba še jasno definirati, kdo lahko dostopa do te metode - katere role so avtorizirane!
+
+Nekaj funkcij, ki samo pregledujejo stvari (npr. pregled polnilnic) je dovoljeno za profile, ki še niso validirani. Za ostale funkcije (npr. narediti rezervacijo) pa mora biti profil validiran.
 
 Grupe:
 
@@ -149,16 +153,16 @@ Grupe:
 Metode namenjene avtentikaciji in avtorizaciji. Potrebno je še bolj naštudirati oath 2.0 ali pa lepo dodelati naš prvotni plan.
 
 `/api/v1/auth/login`<br>
-Uporabnik se prijavi, ob tem poda svoj email in geslo, če je uspešno, dobi nazaj generiran secret/token/sessionID
+Uporabnik se prijavi, ob tem poda svoje uporabniško ime in geslo, če je uspešno, dobi nazaj generiran sessionID.
 
 `/api/v1/auth/register/step1`<br>
-Uporabnik se registrira tako, da poda svoj email in geslo. Registracijo mora še potrditi
+Uporabnik se registrira tako, da poda svoj email in geslo. Registracijo mora še potrditi.
 
 `/api/v1/auth/register/step2`<br>
-Registracija se potrdi v drugem koraku, ko uporabnik "pride" na ta url, poslan prek maila
+Registracija se potrdi v drugem koraku, ko uporabnik "pride" na ta url, poslan prek maila.
 
 `/api/v1/auth/logout`<br>
-Uporabnik se odjavi, pri tem se zbriše secret/token/sessionID
+Uporabnik se odjavi, pri tem se zbriše sessionID.
 
 <br>
 
@@ -238,7 +242,7 @@ Urejanje stavbe
 `/api/v1/building/delete/building`<br>
 Odstranjevanje stavbe
 
-`/api/v1/building/post/assignCompany (buildingID)`<br>
+`/api/v1/building/post/assignCompany (companyID, buildingID)`<br>
 Dodajanje podjetja v stavbo
 
 `/api/v1/building/get/assignedCompanies (buildingID)`<br>

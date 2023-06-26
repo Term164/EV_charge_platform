@@ -1,15 +1,23 @@
--- Generated for PostgreSQL
+-- Prepared for PostgreSQL
 -- Use the picture ER_diagram.png for reference
--- 
+--
+-- Version history: the last version number is the current one.
+--=============================================
 -- V 1.0
--- -> Wrong definitons for ID primary keys
--- -> Wrong PK, FK numbers
+-- -> Inital script
 --=============================================
 -- V 2.0
--- -> Missing an attribute "company_id" in table "charging_stations", so now a company can reserve a station
--- -> Missing a table, version 2.1 adds a whole new table called "Sessions" for storing sessions ids / tokens / secrets, all security wise
+-- -> Fixes definitons for ID primary keys
+-- -> Fixes PK, FK numbers
 --=============================================
 -- V 2.1
+-- -> Adds an attribute "company_id" in table "charging_stations", so now a company can reserve a station
+-- -> Adds a table called "Sessions" for storing sessions ids / tokens / secrets, all security wise
+--=============================================
+-- V 2.2
+-- -> Changes 'expiration_time' to timestmap, not just time (timestamp is date+time)
+-- -> Adds attribute "validated" in "accounts" table
+--=============================================
 
 
 CREATE TABLE Accounts
@@ -19,7 +27,8 @@ CREATE TABLE Accounts
  password_hash   varchar(100) NOT NULL,
  password_salt   varchar(50) NOT NULL,
  email_account   varchar(50) NOT NULL,
- profile_picture bytea NOT NULL,
+ validated       boolean DEFAULT FALSE,
+ profile_picture bytea NULL,
  CONSTRAINT PK_1 PRIMARY KEY ( "id" )
 );
 
@@ -223,7 +232,7 @@ CREATE TABLE Sessions
  "id"            SERIAL,
  account_id      int NOT NULL,
  session_secret varchar(100) NOT NULL,
- expiration_time time NOT NULL,
+ expiration_time timestamp NOT NULL,
  CONSTRAINT PK_12 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_17 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" )
 );
