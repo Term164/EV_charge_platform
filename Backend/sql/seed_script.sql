@@ -1,21 +1,19 @@
 -- Seeding the database
 
-
--- Accounts
-INSERT INTO Accounts ("username","password_hash", "password_salt","email_account","profile_picture") VALUES
-    ('Term', 'lol','xd','jani.bangiev@islonline.com',':p'),
-    ('sivictank123', 'lolol','xdddd','tadej.sivic@a1.si','sdfasdxycasdaizutv'),
-    ('wazzadude', 'warthunder','1432131','wazzadude@discord.gg','-sdasdlikj6'),
-    ('sivictank123_admin', 'god','god','tadej.sivic@a1.si', 'asd'),
-    ('Term_b_admin', 'blol','bxd','jani.bangiev@islonline.com',':pb'),
-    ('tadej_a1', 'god','god','tadej.sivic@a1.si', 'a1111111');
-
-
 -- Companies
 INSERT INTO Companies ("company_name") VALUES
     ('XLAB'),
     ('A1'),
     ('Lenovo');
+
+-- Accounts
+INSERT INTO Accounts ("username","password_hash", "password_salt","email_account","profile_picture", "rfid", "company_id") VALUES
+    ('Term', 'lol','xd','jani.bangiev@islonline.com',':p', 12547, 1),
+    ('sivictank123', 'lolol','xdddd','tadej.sivic@a1.si','sdfasdxycasdaizutv', 9867124, 1),
+    ('wazzadude', 'warthunder','1432131','wazzadude@discord.gg','-sdasdlikj6', 16234, 2),
+    ('sivictank123_admin', 'god','god','tadej.sivic@a1.si', 'asd', null, 2),
+    ('Term_b_admin', 'blol','bxd','jani.bangiev@islonline.com',':pb', null, 1),
+    ('tadej_a1', 'god','god','tadej.sivic@a1.si', 'a1111111', null, 3);
 
 -- Buildings
 INSERT INTO Buildings ("building_name", "building_location") VALUES
@@ -60,10 +58,11 @@ INSERT INTO "Building-Company" ("company_id","building_id") VALUES
     (2,3);
 
 -- Consumers
-INSERT INTO Consumers ("account_id","company_id", "building_id", "rfid") VALUES
-    (1,1,null,184672),
-    (2,2,2,510867123),
-    (3,null,1,null);
+INSERT INTO Building_accesses ("account_id", "building_id", "company_admin_id") VALUES
+    (1,1,1),
+    (1,2,1),
+    (1,3,1),
+    (2,1,1);
 
 -- Reservations
 -- ???????

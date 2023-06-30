@@ -18,6 +18,19 @@
 -- -> Changes 'expiration_time' to timestmap, not just time (timestamp is date+time)
 -- -> Adds attribute "validated" in "accounts" table
 --=============================================
+-- V 2.3
+-- -> Restructures the table 'Consumers' into 'Building_accesses', which changes the then 'company_id'
+-- into 'company_admin_id', which changes the relationship (points to different table)
+-- -> 'RFID' and 'company_id' have been moved to 'Accounts' table, since it's person dependent
+--=============================================
+
+
+CREATE TABLE Companies
+(
+ "id"         SERIAL,
+ company_name varchar(50) NOT NULL,
+ CONSTRAINT PK_5 PRIMARY KEY ( "id" )
+);
 
 
 CREATE TABLE Accounts
@@ -29,7 +42,15 @@ CREATE TABLE Accounts
  email_account   varchar(50) NOT NULL,
  validated       boolean DEFAULT FALSE,
  profile_picture bytea NULL,
- CONSTRAINT PK_1 PRIMARY KEY ( "id" )
+ rfid            int NULL,
+ company_id      int NULL,
+ CONSTRAINT PK_1 PRIMARY KEY ( "id" ),
+ CONSTRAINT FK_18 FOREIGN KEY ( company_id ) REFERENCES Companies ( "id" )
+);
+
+CREATE INDEX FK_18 ON Accounts
+(
+ company_id
 );
 
 
@@ -77,14 +98,6 @@ CREATE INDEX FK_3 ON Building_admins
 );
 
 
-CREATE TABLE Companies
-(
- "id"         SERIAL,
- company_name varchar(50) NOT NULL,
- CONSTRAINT PK_5 PRIMARY KEY ( "id" )
-);
-
-
 CREATE TABLE Company_admins
 (
  "id"       SERIAL,
@@ -127,33 +140,32 @@ CREATE INDEX FK_7 ON "Building-Company"
 );
 
 
-CREATE TABLE Consumers
+CREATE TABLE Building_accesses
 (
  "id"            SERIAL,
  account_id      int NOT NULL,
  building_id     int NULL,
- company_id      int NULL,
+ company_admin_id   int NULL,
  expiration_date date NULL,
- rfid            int NULL,
  CONSTRAINT PK_8 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_8 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" ),
  CONSTRAINT FK_9 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" ),
- CONSTRAINT FK_10 FOREIGN KEY ( company_id ) REFERENCES Companies ( "id" )
+ CONSTRAINT FK_10 FOREIGN KEY ( company_admin_id ) REFERENCES Company_admins ( "id" )
 );
 
-CREATE INDEX FK_8 ON Consumers
+CREATE INDEX FK_8 ON Building_accesses
 (
  account_id
 );
 
-CREATE INDEX FK_9 ON Consumers
+CREATE INDEX FK_9 ON Building_accesses
 (
  building_id
 );
 
-CREATE INDEX FK_10 ON Consumers
+CREATE INDEX FK_10 ON Building_accesses
 (
- company_id
+ company_admin_id
 );
 
 

@@ -38,7 +38,7 @@ QUERY_STATEMENT;
 -- V 1.0
 
 
---========= AUTH =========
+--=============================== AUTH ===============================
 
 -- login, this returns the password hash and salt, if the unique username exists
 -- /api/v1/auth/login
@@ -69,7 +69,7 @@ DELETE FROM Sessions
 WHERE session_secret LIKE {session_id};
 
 
---== AUTH SUPPORT CALL ==
+--=== AUTH SUPPORT CALL ===
 
 -- username uniqueness, check if the username exists
 -- {username}
@@ -89,7 +89,7 @@ SET expiration_time = expiration_time + interval '{refresh_time} minutes'
 WHERE session_secret LIKE {session_id};
 
 
---========= USER =========
+--=============================== USER ===============================
 
 -- All building admins
 -- /api/v1/user/get/buildingAdmins
@@ -150,17 +150,46 @@ INSERT INTO Company_admins (account_id, company_id)
 VALUES ({account_id}, {company_id});
 
 
--- Make a consumer and assign him a company he works for
+-- Make an employee and assign him a company he works for
+-- Optionally, give him an rfid card, or null
 -- /api/v1/user/post/assignCompany (userID, companyID)
 -- { account_id, company_id }
 INSERT INTO Company_admins (account_id, company_id)
 VALUES ({account_id}, {company_id});
 
 
+-- Add an employee to a specific building (company owned)
+-- /api/v1/user/post/assignBuilding (userID, buildingID)
+-- { accout_id, building_id, company_admin_id, expiration_date? }
+-- Company_admin_id refers to the admin which "creates" the guest. Can be tracked down for company name
+INSERT INTO Building_accesses (account_id, building_id, company_admin_id)
+VALUES (
+    {account_id}, {building_id}, {company_admin_id}, {expiration_date}
+);
+
+
 -- TODO:
--- /api/v1/user/post/assignBuilding (userID, buildingID) complex
+-- Removes an employee from a building, or from a company
 -- /api/v1/user/delete/employee (userID, companyID?, buildingID?) complex
+-- If a buildingID is specified, removes an employee from only that building
+
+
+
+
+-- Remove an account. DISCLAIMER: Deleting a company/building/platform admin should happen first!
+-- Not an endpoint
+-- { account_id }
+DELETE FROM Accounts
+WHERE id = {account_id};
+
+
+-- Edit user profile
 -- /api/v1/user/patch/editProfile (userID)
+-- { account_id, ... }
+UPDATE Accounts
+SET {attr1_name} = {attr1_value}    , {attr2_name} = {attr2_value}
+WHERE id = {account_id};
+
 
 -- What are the endpoints for these??
 
@@ -181,7 +210,7 @@ SELECT *
 FROM Consumers c JOIN Accounts a ON c.account_id = a.id 
 WHERE expiration_date IS NOT NULL;
 
---======== COMPANY ========
+--=============================== COMPANY ===============================
 
 -- All companies
 -- /api/v1/company/get/all
@@ -203,8 +232,14 @@ DELETE FROM Companies
 WHERE id = {company_id};
 
 
--- TODO:
--- /api/v1/company/patch/edit
+-- Edit company info
+-- /api/v1/company/patch/edit (companyID)
+-- {company_id, new_company_name }
+-- Disclaimer: 'Companies' table only has 1 attribute (company_name), but this can change anytime
+UPDATE Companies
+SET company_name = {new_company_name}
+WHERE id = {company_id};
+
 
 -- What are the endpoints for these??
 
@@ -215,7 +250,7 @@ FROM Companies c JOIN Company_admins ca ON c.id = ca.company_id
 WHERE ca.id = {selected_company_admin_id};
 
 
---======== BUILDING ========
+--=============================== BUILDING ===============================
 
 -- All buildings
 -- /api/v1/building/get/all
@@ -262,8 +297,14 @@ INSERT INTO "Building-Company" ("company_id", "building_id")
 VALUES ({company_id}, {building_id});
 
 
--- TODO:
--- /api/v1/building/patch/edit
+
+-- Edit building info
+-- /api/v1/building/patch/edit (buildingID)
+-- { building_id, ... }
+UPDATE Buildings
+SET {attr1_name} = {attr1_value}    , {attr2_name} = {attr2_value}
+WHERE id = {building_id};
+
 
 -- What are the endpoints for these??
 
@@ -274,7 +315,7 @@ FROM Buildings b JOIN Building_admins ba ON b.id = ba.building_id
 WHERE ba.id = {selected_building_admin_id};
 
 
---========= STATION =========
+--=============================== STATION ===============================
 
 
 -- All charging stations
@@ -293,9 +334,9 @@ WHERE b.id = {selected_building_id};
 
 -- Make a new charging station
 -- /api/v1/station/post/new (buildingID)
--- { charging_type?, building_id, name }
+-- { charging_type_id?, building_id, name }
 INSERT INTO Charging_stations ("charging_type_id", "building_id", "name")
-VALUES ({charging_type_id} or NULL, {building_id}, {name});
+VALUES ({charging_type_id}, {building_id}, {name});
 
 
 -- Remove a charging station
@@ -321,7 +362,7 @@ WHERE id = {station_id};
 
 -- What are the endpoints for these??
 
---======= RESERVATION =======
+--=============================== RESERVATION ===============================
 
 -- All available charging types for some selected building
 -- /api/v1/reservation/get/stationType (buildingID)
@@ -361,21 +402,5 @@ WHERE id = {reservation_id};
 -- All "connected" buildings and companies. Not to be used, really
 SELECT b.id building_id, building_name, building_location, c.id company_id, company_name
 FROM Buildings b JOIN "Building-Company" bc ON b.id = bc.building_id JOIN Companies c ON c.id = bc.company_id;
-
-
-
-
-
-/*
-All code below is not finished, since Consumers table is a bit complex.
-Some columns are nullable and because of that the tripple join fail.
-Untested.
-*/ 
--- All consumers that work for a selected company
--- [ Building_admin, Company_admin]
-SELECT *
-FROM Consumers c JOIN Accounts a ON c.account_id = a.id
-WHERE c.company_id = 1;
-
 
 

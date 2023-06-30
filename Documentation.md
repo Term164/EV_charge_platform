@@ -120,8 +120,6 @@ Baza bo PostgreSQL.
 
 ![](doc_img/ER_diagram.png)
 
-![](doc_img/ER_diagram_2.png)
-
 Nekaj o rezervacijah:
 Tehnično je implentirana kot tabela v bazi, katera se filtrira in sortira, tako se obnaša kot vrsta.
 Sortira se po `creation_time`. Pogojuje se po `allocated_from`, `allocated_to`, `charging_time`, po tem se loči rezervacije, ki so že v izvajanju ali ne.
@@ -203,7 +201,8 @@ Odstranitev profila admina stavbe
 Odstranitev profila admina Podjetja
 
 `/api/v1/user/patch/editProfile (userID)`<br>
-Urejanje svojega profila - navaden uporabnik, admini nimajo kaj
+Urejanje svojega profila - navaden uporabnik, admini nimajo kaj <br>
+Profil ima atribute: `username`, `profile_picture`
 
 <br>
 
@@ -216,8 +215,9 @@ Ustvarjanje novega podjetja
 `/api/v1/company/get/all`<br>
 Izpis vsej podjetij
 
-`/api/v1/company/patch/edit`<br>
-Urejanje podjetja
+`/api/v1/company/patch/edit (companyID)`<br>
+Urejanje podjetja <br>
+Podjetje ima atribute: `company_name`
 
 `/api/v1/company/delete/company (companyID)`<br>
 Odstrani podjetje
@@ -236,8 +236,9 @@ Vse stavbe, v katerih operira dano podjetje
 `/api/v1/building/post/new`<br>
 Ustvarjanje nove stavbe
 
-`/api/v1/building/patch/edit`<br>
-Urejanje stavbe
+`/api/v1/building/patch/edit (buildingID)`<br>
+Urejanje stavbe <br>
+Stavba ima atribute: `building_name` , `building_location`
 
 `/api/v1/building/delete/building`<br>
 Odstranjevanje stavbe
