@@ -38,7 +38,6 @@ CREATE TABLE Accounts
  "id"            SERIAL,
  username        varchar(50) NOT NULL,
  password_hash   varchar(100) NOT NULL,
- password_salt   varchar(50) NOT NULL,
  email_account   varchar(50) NOT NULL,
  validated       boolean DEFAULT FALSE,
  profile_picture bytea NULL,

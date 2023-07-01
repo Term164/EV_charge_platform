@@ -12,9 +12,9 @@ const unknownEndpoints = (_request: Request, response: Response): void => {
     });
 };
 
-const errorHandler = (error: Error, request: Request, response: Response, next: NextFunction): void => {
+const errorHandler = (error: Error, _request: Request, _response: Response, next: NextFunction): void => {
     log.error(error.message);
-    next(error);
+    next("an error occured!"); // TODO: When on dev mode return the actual error when on prod return just an error occured!
 };
 
 export default {

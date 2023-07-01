@@ -49,9 +49,9 @@ WHERE username LIKE {username};
 
 -- register (step 1), adds an accounts, unvalidated
 -- /api/v1/auth/register/step1
--- { username, password_hash, password_salt, email_account }
-INSERT INTO Accounts ("username","password_hash", "password_salt","email_account")
-VALUES ({username}, {password_hash}, {password_salt}, {email_account});
+-- { username, password_hash, email_account }
+INSERT INTO Accounts ("username","password_hash", "email_account")
+VALUES ({username}, {password_hash}, {email_account});
 
 
 -- register step 2, validates an account
@@ -75,6 +75,12 @@ WHERE session_secret LIKE {session_id};
 -- {username}
 SELECT id FROM Accounts
 WHERE username LIKE {username};
+
+
+SELECT id FROM Accounts
+WHERE email_account LIKE {email_account}
+
+
 
 -- session confirmation, confirm that the given sessionID exists and didn't expire
 -- { session_id }
