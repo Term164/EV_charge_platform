@@ -1,10 +1,24 @@
-import { NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import log from './logger';
-const requestLogger = (req: Request, _res: Response, next: NextFunction): void => {
-    log.info('Method: ', req.method);
-    log.info('Path: ', req.url);
-    log.info('Body: ', req.body);
+
+const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
+    log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
     next();
 };
 
-export default requestLogger;
+const unknownEndpoints = (_request: Request, response: Response): void => {
+    response.status(404).send({
+        error: 'unknown endpoint'
+    });
+};
+
+const errorHandler = (error: Error, _request: Request, _response: Response, next: NextFunction): void => {
+    log.error(error.message);
+    next("an error occured!"); // TODO: When on dev mode return the actual error when on prod return just an error occured!
+};
+
+export default {
+    requestLogger,
+    unknownEndpoints,
+    errorHandler
+};
