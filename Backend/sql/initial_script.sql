@@ -23,6 +23,10 @@
 -- into 'company_admin_id', which changes the relationship (points to different table)
 -- -> 'RFID' and 'company_id' have been moved to 'Accounts' table, since it's person dependent
 --=============================================
+-- V 2.4
+-- -> Adds 'regtistration_secrets' table for creating step 2 of registration urls
+--=============================================
+
 
 
 CREATE TABLE Companies
@@ -38,7 +42,6 @@ CREATE TABLE Accounts
  "id"            SERIAL,
  username        varchar(50) NOT NULL,
  password_hash   varchar(100) NOT NULL,
- password_salt   varchar(50) NOT NULL,
  email_account   varchar(50) NOT NULL,
  validated       boolean DEFAULT FALSE,
  profile_picture bytea NULL,
@@ -254,3 +257,17 @@ CREATE INDEX FK_17 ON Sessions
  account_id
 );
 
+CREATE TABLE Registration_secrets
+(
+ "id"            SERIAL,
+ account_id      int NOT NULL,
+ registration_secret varchar(100) NOT NULL,
+ expiration_time timestamp NOT NULL,
+ CONSTRAINT PK_13 PRIMARY KEY ( "id" ),
+ CONSTRAINT FK_19 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" )
+);
+
+CREATE INDEX FK_19 ON Registration_secrets
+(
+ account_id
+);
