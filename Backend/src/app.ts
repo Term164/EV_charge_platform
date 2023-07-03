@@ -25,8 +25,3 @@ app.use(middleware.unknownEndpoints);
 app.use(middleware.errorHandler);
 
 export default app;
-
-// const result = await connection.query(
-//     'SELECT * FROM public.accounts'
-// );
-// console.log(result.rows);

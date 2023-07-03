@@ -2,12 +2,8 @@ import db from '.././utils/database';
 import { DataTypeOIDs } from 'postgresql-client';
 import log from '../utils/logger';
 import bcrypt from 'bcrypt';
+import { UserRegistrationRequest } from '../models/requestModels';
 
-interface UserRegistrationValues {
-    username: string;
-    email_account: string;
-    password: string;
-}
 
 async function checkUsernameUnique(username: string): Promise<boolean> {
     const statment = await db.connection.prepare(
@@ -39,7 +35,7 @@ async function firstStep(body: unknown): Promise<object> {
         return {'Failed': 'Registration failed the body of the request was empty.'};
     }
 
-    const userData = body as UserRegistrationValues;
+    const userData = body as UserRegistrationRequest;
 
     log.info(userData);
 
@@ -56,10 +52,11 @@ async function firstStep(body: unknown): Promise<object> {
         VALUES ($1, $2, $3);`
     );
 
-    const result = await statement.execute({params: [userData.username, passwordHash, userData.email_account]});
-    log.info(result);
+    //const result =
+    await statement.execute({params: [userData.username, passwordHash, userData.email_account]});
+    //log.info(result);
 
     return {"Success": "Registration succesfull"};
 }
 
-export default { firstStep };
+export default { firstStep, checkEmailUnique, checkUsernameUnique };

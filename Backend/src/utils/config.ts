@@ -25,18 +25,32 @@ const checkEnvVariableIsNumber = (variable: unknown, variableName: string, defau
     return variable as number;
 };
 
+const NODE_ENV: string = checkEnvVariable(process.env.NODE_ENV, 'NODE_ENV');
 
 // =================================== SQL connection variables =================================
-const SQL_HOST: string = checkEnvVariable(process.env.SQL_HOST, 'SQL_HOST');
-const SQL_USER: string = checkEnvVariable(process.env.SQL_USER, 'SQL_USER');
-const SQL_PASS: string = checkEnvVariable(process.env.SQL_PASS, 'SQL_PASS');
-const SQL_DB: string = checkEnvVariable(process.env.SQL_DB, 'SQL_DB');
-const PORT: number =  checkEnvVariableIsNumber(process.env.PORT, 'PORT' , 4200);
+let SQL_HOST: string;
+let SQL_USER: string;
+let SQL_PASS: string;
+let SQL_DB: string;
+
+
+if(NODE_ENV === 'test'){
+    SQL_HOST = checkEnvVariable(process.env.SQL_HOST_TEST, 'SQL_HOST');
+    SQL_USER = checkEnvVariable(process.env.SQL_USER_TEST, 'SQL_USER');
+    SQL_PASS = checkEnvVariable(process.env.SQL_PASS_TEST, 'SQL_PASS');
+    SQL_DB = checkEnvVariable(process.env.SQL_DB_TEST, 'SQL_DB');
+}else{
+    SQL_HOST = checkEnvVariable(process.env.SQL_HOST, 'SQL_HOST');
+    SQL_USER = checkEnvVariable(process.env.SQL_USER, 'SQL_USER');
+    SQL_PASS = checkEnvVariable(process.env.SQL_PASS, 'SQL_PASS');
+    SQL_DB = checkEnvVariable(process.env.SQL_DB, 'SQL_DB');
+}
 
 // ================================== LOGGER ===========================================
 const LOG_LEVEL: number = checkEnvVariableIsNumber(process.env.LOG_LEVEL, 'LOG_LEVEL', 0);
+
 // ================================== OTHER ===============================================
-const NODE_ENV: string = checkEnvVariable(process.env.NODE_ENV, 'NODE_ENV');
+const PORT: number =  checkEnvVariableIsNumber(process.env.PORT, 'PORT' , 4200);
 
 export default {
     SQL_HOST,
