@@ -55,7 +55,7 @@ VALUES ({username}, {password_hash}, {email_account});
 
 
 -- register step 2, validates an account
--- /api/v1/auth/register/step2
+-- /api/v1/auth/register/step2/:id/:token
 -- { username }
 UPDATE Accounts
 SET validated = TRUE
@@ -80,7 +80,11 @@ WHERE username LIKE {username};
 SELECT id FROM Accounts
 WHERE email_account LIKE {email_account}
 
+-- Insert validation secret token into database
+-- { account_id, registration_secret, expiration_time }
 
+INSERT INTO Registration_secrets ("account_id", "registration_secret", "expiration_time")
+VALUES ({account_id}, {registration_secret}, {expiration_time});
 
 -- session confirmation, confirm that the given sessionID exists and didn't expire
 -- { session_id }
