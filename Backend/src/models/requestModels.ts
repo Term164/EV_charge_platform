@@ -4,7 +4,12 @@ interface UserRegistrationRequest {
     password: string;
 }
 
+interface userVerificationParams {
+    id: string;
+    token: string;
+}
 
 export {
-    UserRegistrationRequest
+    UserRegistrationRequest,
+    userVerificationParams
 };
