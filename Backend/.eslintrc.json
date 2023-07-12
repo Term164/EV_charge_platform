@@ -23,6 +23,10 @@
       ],
       "no-case-declarations": "off",
       "no-trailing-spaces": "error",
+      "space-before-blocks": "error",
+      "keyword-spacing": ["error", {"after": true}],
+      "func-call-spacing": ["error", "never"],
+      "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
       "indent": ["error", 4]
     },
     "parser": "@typescript-eslint/parser",
