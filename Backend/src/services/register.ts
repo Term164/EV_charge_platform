@@ -1,9 +1,10 @@
 import db from '.././utils/database';
 import { DataTypeOIDs } from 'postgresql-client';
-import log from '../utils/logger';
 import bcrypt from 'bcrypt';
-import { UserRegistrationRequest, userVerificationParams } from '../models/requestModels';
+import parser from '../models/modelParser';
 import crypto from 'crypto';
+import log from '../utils/logger';
+import { UserVerificationRequest } from '../models/requestModels';
 
 // ================================ HELPER FUNCTIONS ===============================
 
@@ -38,23 +39,17 @@ async function generateVerificationTokenAndSave(userId: number) {
         {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.varchar]}
     );
 
-    //const result =
-    await statement.execute({params: [userId, token]});
+    return await statement.execute({params: [userId, token]});
 }
 
-async function checkUserVerificationToken(params: userVerificationParams): Promise<boolean> {
+async function getUserVerificationToken(params: UserVerificationRequest) {
     const statement = await db.connection.prepare(
         `SELECT registration_secret, expiration_time FROM Registration_secrets
         WHERE account_id = $1`,
         {paramTypes: [DataTypeOIDs.int4]}
     );
 
-    const result = await statement.execute({params: [parseInt(params.id)]});
-
-    // TODO: check that the request has been made in the specified time limit
-
-    return result.rows?.at(0)[0] === params.token;
-
+    return await statement.execute({params: [params.id]});
 }
 
 async function validateUserAccount(userID: number) {
@@ -65,23 +60,26 @@ async function validateUserAccount(userID: number) {
         {paramTypes: [DataTypeOIDs.int4]}
     );
 
-    await statement.execute({params: [userID]});
+    return await statement.execute({params: [userID]});
+}
+
+async function removeUserValidationToken(accountID: number) {
+    const statment = await db.connection.prepare(
+        `DELETE FROM Registration_secrets
+        WHERE account_id = $1`,
+        {paramTypes: [DataTypeOIDs.int4]}
+    );
+
+    return await statment.execute({params: [accountID]});
 }
 
 async function firstStep(body: unknown): Promise<object> {
 
-    if(!body){
-        log.warn('User registration failed as the body of the request is emtpy.');
-        return {'Failed': 'Registration failed the body of the request was empty.'};
-    }
+    const userData = parser.parseUserRegistrationRequest(body);
 
-    const userData = body as UserRegistrationRequest;
-
-    log.info(userData);
-
-    if (!(await checkUsernameUnique(userData.username))){
+    if (!(await checkUsernameUnique(userData.username))) {
         return {'Failed': 'Username is already taken.'};
-    }else if (!(await checkEmailUnique(userData.email_account))){
+    } else if (!(await checkEmailUnique(userData.email_account))) {
         return {'Failed': 'Email is already in use.'};
     }
 
@@ -93,29 +91,54 @@ async function firstStep(body: unknown): Promise<object> {
         {paramTypes: [DataTypeOIDs.varchar,DataTypeOIDs.varchar,DataTypeOIDs.varchar]}
     );
 
-    const result = await statement.execute({params: [userData.username, passwordHash, userData.email_account]}); // TODO check if succeful.
-    await generateVerificationTokenAndSave(result.rows?.at(0) as number); // TODO check if succeful.
-    //log.info(result);
+    const result = await statement.execute({params: [userData.username, passwordHash, userData.email_account]});
+
+    if (result.rowsAffected != 1) {
+        throw new Error(`An error occured while trying to create a new user in the database.`);
+    }
+
+    const check = await generateVerificationTokenAndSave(result.rows?.at(0)[0] as number);
+
+    if (check.rowsAffected != 1) {
+        throw new Error(`Could not generate a user verification token`);
+    }
 
     //TODO Send email to user, this is to be implemented once we figure out what kind of platform will host our application.
-
+    log.info(`User '${userData.username}' has successfully created a new account.`);
     return {"Success": "Registration succesfull"};
 }
 
 async function secondStep(params: unknown): Promise<object> {
 
-    if(!params){
-        log.warn('User verification failed as the parameters do not match the required types or are empty.');
-        return {'Failed': 'Verification failed'};
+    const info = parser.parseUserVerificationRequest(params);
+
+    const result = await getUserVerificationToken(info);
+
+    const currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() - 2); // ! This is needed for the current DB as it is set 2 hours behind our time.
+
+    const tokenTimeLimit = new Date(result.rows?.at(0)[1] as string);
+
+    if (currentDate > tokenTimeLimit) {
+        return {"Failed": "Validation token has expired"};
     }
 
-    const info = params as userVerificationParams;
-
-    if(await checkUserVerificationToken(info)){
-        void validateUserAccount(parseInt(info.id)); // TODO: Check if request completed successfuly.
-        return {"Success": "User successfuly verified"};
+    if (result.rows?.at(0)[0] !== info.token) {
+        return {"Failed": "User could not be validated"};
     }
-    return {"Failed": "User could not be validated"};
+
+    const validationResult = await validateUserAccount(info.id);
+    if (validationResult.rowsAffected !== 1) {
+        throw new Error(`User could not be validated`);
+    }
+
+    const removalResult = await removeUserValidationToken(info.id);
+    if (removalResult.rowsAffected !== 1) {
+        log.error(`Could not remove validation token of user with id ${info.id}`);
+    }
+
+    log.info(`User with id '${info.id}' is now succesfully registered.`);
+    return {"Success": "User successfuly verified"};
 }
 
 export default { firstStep, secondStep, checkEmailUnique, checkUsernameUnique };
