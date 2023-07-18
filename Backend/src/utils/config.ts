@@ -6,7 +6,7 @@ const log: Logger<ILogObj> = new Logger({name: "configLogger"});
 
 // =================================== Type Guards ==================================
 const checkEnvVariable = (variable: unknown, variableName: string): string => {
-    if(!variable || !(typeof variable === 'string')){
+    if (!variable || !(typeof variable === 'string')) {
         log.fatal(new Error(`Enviromental variable ${variableName} is not set.`));
         exit();
     }
@@ -16,7 +16,7 @@ const checkEnvVariable = (variable: unknown, variableName: string): string => {
 
 const checkEnvVariableIsNumber = (variable: unknown, variableName: string, defaultValue: number): number => {
 
-    if(!variable || isNaN(Number(variable))){
+    if (!variable || isNaN(Number(variable))) {
         log.warn(`Enviromental variable ${variableName} is not set or is not a number, defaulting to ${defaultValue}.`);
         return defaultValue;
     }
@@ -34,12 +34,12 @@ let SQL_PASS: string;
 let SQL_DB: string;
 
 
-if(NODE_ENV === 'test'){
+if (NODE_ENV === 'test') {
     SQL_HOST = checkEnvVariable(process.env.SQL_HOST_TEST, 'SQL_HOST');
     SQL_USER = checkEnvVariable(process.env.SQL_USER_TEST, 'SQL_USER');
     SQL_PASS = checkEnvVariable(process.env.SQL_PASS_TEST, 'SQL_PASS');
     SQL_DB = checkEnvVariable(process.env.SQL_DB_TEST, 'SQL_DB');
-}else{
+} else {
     SQL_HOST = checkEnvVariable(process.env.SQL_HOST, 'SQL_HOST');
     SQL_USER = checkEnvVariable(process.env.SQL_USER, 'SQL_USER');
     SQL_PASS = checkEnvVariable(process.env.SQL_PASS, 'SQL_PASS');

@@ -103,6 +103,7 @@ async function firstStep(body: unknown): Promise<object> {
         throw new Error(`Could not generate a user verification token`);
     }
 
+    //TODO: cleanup if any error is thrown the user should be removed from the DB.
     //TODO Send email to user, this is to be implemented once we figure out what kind of platform will host our application.
     log.info(`User '${userData.username}' has successfully created a new account.`);
     return {"Success": "Registration succesfull"};

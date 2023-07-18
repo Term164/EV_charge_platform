@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import log from './logger';
+import config from './config';
 
 const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
     log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
@@ -12,10 +13,13 @@ const unknownEndpoints = (_request: Request, response: Response): void => {
     });
 };
 
-const errorHandler = (error: Error, _request: Request, _response: Response, next: NextFunction): void => {
-    log.trace(error);
-    next(error);
-    //next("an error occured!"); // TODO: When on dev mode return the actual error when on prod return just an error occured!
+const errorHandler = (error: Error, _request: Request, response: Response, next: NextFunction): void => {
+    if (config.NODE_ENV == 'production' || config.NODE_ENV == 'test' ) {
+        response.status(500).send({"Failed": "An error occured."});
+    } else {
+        log.trace(error);
+        next(error);
+    }
 };
 
 export default {

@@ -10,4 +10,36 @@ async function clearAccountsTable() {
     );
 }
 
-export default { clearAccountsTable };
+async function clearRegistrationSecretsTable() {
+    await database.connection.query(
+        `DELETE FROM registration_secrets`
+    );
+}
+
+async function getNumberOfAccounts(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM accounts`)).rows?.at(0)[0] as number;
+}
+
+async function getNumberOfTokens(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM registration_secrets`)).rows?.at(0)[0] as number;
+}
+
+async function getValidationURL(username: string): Promise<string> {
+    const result = await database.connection.query(`SELECT id FROM accounts WHERE username = '${username}'`);
+    const token = await database.connection.query(`SELECT registration_secret FROM registration_secrets where account_id = ${result.rows?.at(0)[0]}`);
+    return `/api/v1/auth/register/step2/${result.rows?.at(0)[0]}/${token.rows?.at(0)[0]}`;
+}
+
+async function getAccountValidatedParameter(username: string): Promise<string> {
+    return (await database.connection.query(`SELECT validated FROM accounts WHERE username = '${username}'`)).rows?.at(0)[0] as string;
+}
+
+
+export default {
+    clearAccountsTable,
+    clearRegistrationSecretsTable,
+    getNumberOfAccounts,
+    getNumberOfTokens,
+    getValidationURL,
+    getAccountValidatedParameter
+};
