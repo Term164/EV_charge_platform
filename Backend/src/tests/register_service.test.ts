@@ -68,7 +68,7 @@ describe('register a new user', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({'Failed': 'Username is already taken.'});
+        expect(response.body).toEqual({'Error': 'Username is already taken.'});
         const accountsAfterRequest = await helper.getNumberOfAccounts();
 
         expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
@@ -89,7 +89,7 @@ describe('register a new user', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({'Failed': 'Email is already in use.'});
+        expect(response.body).toEqual({'Error': 'Email is already in use.'});
 
         const accountsAfterRequest = await helper.getNumberOfAccounts();
 
@@ -135,6 +135,14 @@ describe('register a new user', () => {
         const accountsAfterRequest = await helper.getNumberOfAccounts();
 
         expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
+    });
+
+    test('registration step 2 request to non existant URL not found', async () => {
+        const response = await request.get('/api/v1/auth/register/step2/1/1123')
+            .expect(404)
+            .expect('Content-Type', /application\/json/);
+
+        expect(response.body).toEqual({'Error': 'This address does not exist'});
     });
 
 

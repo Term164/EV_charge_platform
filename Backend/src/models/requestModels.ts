@@ -1,3 +1,8 @@
+interface APIResponse {
+    status: number,
+    data: object
+}
+
 interface UserRegistrationRequest {
     username: string;
     email_account: string;
@@ -9,7 +14,15 @@ interface UserVerificationRequest {
     token: string;
 }
 
+interface UserLoginRequest {
+    username?: string;
+    email?: string;
+    password: string;
+}
+
 export {
     UserRegistrationRequest,
-    UserVerificationRequest
+    UserVerificationRequest,
+    UserLoginRequest,
+    APIResponse
 };

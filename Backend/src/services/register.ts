@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import parser from '../models/modelParser';
 import crypto from 'crypto';
 import log from '../utils/logger';
-import { UserVerificationRequest } from '../models/requestModels';
+import { APIResponse, UserVerificationRequest } from '../models/requestModels';
 
 // ================================ HELPER FUNCTIONS ===============================
 
@@ -73,14 +73,16 @@ async function removeUserValidationToken(accountID: number) {
     return await statment.execute({params: [accountID]});
 }
 
-async function firstStep(body: unknown): Promise<object> {
+// =========================================== MAIN FUNCTIONS =======================================
+
+async function firstStep(body: unknown): Promise<APIResponse> {
 
     const userData = parser.parseUserRegistrationRequest(body);
 
     if (!(await checkUsernameUnique(userData.username))) {
-        return {'Failed': 'Username is already taken.'};
+        return { status: 400, data: {'Error': 'Username is already taken.'}};
     } else if (!(await checkEmailUnique(userData.email_account))) {
-        return {'Failed': 'Email is already in use.'};
+        return { status: 400, data: {'Error': 'Email is already in use.'}};
     }
 
     const passwordHash = await bcrypt.hash(userData.password, 10);
@@ -106,14 +108,18 @@ async function firstStep(body: unknown): Promise<object> {
     //TODO: cleanup if any error is thrown the user should be removed from the DB.
     //TODO Send email to user, this is to be implemented once we figure out what kind of platform will host our application.
     log.info(`User '${userData.username}' has successfully created a new account.`);
-    return {"Success": "Registration succesfull"};
+    return {status: 200, data: {"Success": "Registration succesfull"}};
 }
 
-async function secondStep(params: unknown): Promise<object> {
+async function secondStep(params: unknown): Promise<APIResponse> {
 
     const info = parser.parseUserVerificationRequest(params);
 
     const result = await getUserVerificationToken(info);
+
+    if (result.rows?.length === 0) {
+        return {status: 404, data: {'Error': 'This address does not exist'}};
+    }
 
     const currentDate = new Date();
     currentDate.setHours(currentDate.getHours() - 2); // ! This is needed for the current DB as it is set 2 hours behind our time.
@@ -121,11 +127,11 @@ async function secondStep(params: unknown): Promise<object> {
     const tokenTimeLimit = new Date(result.rows?.at(0)[1] as string);
 
     if (currentDate > tokenTimeLimit) {
-        return {"Failed": "Validation token has expired"};
+        return {status: 400, data: {"Error": "Validation token has expired"}};
     }
 
     if (result.rows?.at(0)[0] !== info.token) {
-        return {"Failed": "User could not be validated"};
+        return {status: 400, data: {"Error": "User could not be validated"}};
     }
 
     const validationResult = await validateUserAccount(info.id);
@@ -139,7 +145,7 @@ async function secondStep(params: unknown): Promise<object> {
     }
 
     log.info(`User with id '${info.id}' is now succesfully registered.`);
-    return {"Success": "User successfuly verified"};
+    return {status: 200, data: {"Success": "User successfuly verified"}};
 }
 
 export default { firstStep, secondStep, checkEmailUnique, checkUsernameUnique };
