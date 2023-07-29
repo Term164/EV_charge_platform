@@ -62,6 +62,9 @@ SET validated = TRUE
 WHERE username LIKE {username};
 
 
+INSERT INTO Sessions ("account_id", "session_id", "expiration_time")
+VALUES ({account_id}, {session_id}, {expiration_time});
+
 -- logout, sessionID gets deleted
 -- /api/v1/auth/logout
 -- { session_id }
