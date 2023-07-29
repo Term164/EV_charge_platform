@@ -63,7 +63,7 @@ WHERE username LIKE {username};
 
 
 INSERT INTO Sessions ("account_id", "session_id", "expiration_time")
-VALUES ({account_id}, {session_id}, {expiration_time});
+VALUES ({account_id}, {session_id}, NOW() + interval '30 minutes');
 
 -- logout, sessionID gets deleted
 -- /api/v1/auth/logout
