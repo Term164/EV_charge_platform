@@ -1,4 +1,7 @@
-import { UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { UserAccount } from "./databaseModels";
+import { UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+
+// ================================== TYPE CHECKER FUNCTIONS ==============================
 
 function isString(text: unknown): text is string {
     return typeof text === 'string' || text instanceof String;
@@ -6,6 +9,10 @@ function isString(text: unknown): text is string {
 
 function isInt(number: unknown): number is number {
     return typeof number === 'number' || number instanceof Number;
+}
+
+function isBool (booleanValue: unknown): booleanValue is boolean {
+    return typeof booleanValue === 'boolean' || booleanValue instanceof Boolean;
 }
 
 function parseIntegerParameter(param: unknown, paramName: string): number {
@@ -23,6 +30,16 @@ function parseStringParameter(param: unknown, paramName: string): string {
 
     return param;
 }
+
+function parseBooleanParameter(param: unknown, paramName: string): boolean {
+    if (param === null || !isBool(param)) {
+        throw new Error(`Incorrect or missing ${paramName}`);
+    }
+
+    return param;
+}
+
+// ==================================== REQUEST MODEL PARSERS ========================================
 
 function parseUserRegistrationRequest(request: unknown): UserRegistrationRequest {
 
@@ -60,7 +77,56 @@ function parseUserVerificationRequest(request: unknown): UserVerificationRequest
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseUserLoginRequest(request: unknown): UserLoginRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('username' in request && 'password' in request) {
+        const userRequest: UserLoginRequest = {
+            username: parseStringParameter(request.username, 'username'),
+            password: parseStringParameter(request.password, 'password')
+        };
+
+        return userRequest;
+    } else if ('email' in request && 'password' in request) {
+        const userRequest: UserLoginRequest = {
+            email: parseStringParameter(request.email, 'email'),
+            password: parseStringParameter(request.password, 'password')
+        };
+
+        return userRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+// ==================================== DATABASE MODEL PARSERS ==============================================
+
+function parseUserAccountData(data: unknown): UserAccount {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: User account data should be passed as an array');
+
+    const userAccount: UserAccount = {
+        id: parseIntegerParameter(data[0], 'id'),
+        username: parseStringParameter(data[1], 'username'),
+        password_hash: parseStringParameter(data[2], 'password_hash'),
+        email_account: parseStringParameter(data[3], 'email_account'),
+        validated: parseBooleanParameter(data[4], 'validated'),
+        profile_picture: data[5] === null ? undefined : parseStringParameter(data[5], 'profile_picture'),
+        rfid: data[6] === null ? undefined : parseIntegerParameter(data[6], 'rfid'),
+        company_id: data[7] === null ? undefined : parseIntegerParameter(data[7], 'company_id')
+    };
+
+    return userAccount;
+}
+
 export default {
     parseUserRegistrationRequest,
-    parseUserVerificationRequest
+    parseUserVerificationRequest,
+    parseUserLoginRequest,
+    parseUserAccountData
 };
