@@ -26,7 +26,12 @@ async function getUserDataFromEmail(email: string): Promise<UserAccount> {
         {paramTypes: [DataTypeOIDs.varchar]}
     );
 
-    return parser.parseUserAccountData((await statement.execute({params: [email]})).rows?.at(0));
+    const response = await statement.execute({params: [email]});
+
+    if (response.rows === undefined) throw new Error('response is undefined.');
+    if (response.rows.length === 0) throw new Error('User does not exist.');
+
+    return parser.parseUserAccountData(response.rows.at(0));
 }
 
 async function getUserDataFromUsername(username: string): Promise<UserAccount> {
@@ -37,18 +42,44 @@ async function getUserDataFromUsername(username: string): Promise<UserAccount> {
         {paramTypes: [DataTypeOIDs.varchar]}
     );
 
-    return parser.parseUserAccountData((await statement.execute({params: [username]})).rows?.at(0));
+    const response = await statement.execute({params: [username]});
+
+    if (response.rows === undefined) throw new Error('response is undefined.');
+    if (response.rows.length === 0) throw new Error('User does not exist.');
+
+    return parser.parseUserAccountData(response.rows.at(0));
 }
 
 // =========================================== MAIN FUNCTION =======================================
 async function login (body: unknown): Promise<APIResponse> {
 
-    const userLoginInfo = parser.parseUserLoginRequest(body);
+    let userLoginInfo;
+
+    try {
+        userLoginInfo = parser.parseUserLoginRequest(body);
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === 'Incorrect data: some fields are missing') return {status: 400, data: {'Error': error.message}};
+            else throw new Error("An error occured while processing user login request data.");
+        }
+        throw new Error('Secret error 42.');
+    }
+
     let userData: UserAccount;
 
-    if (userLoginInfo.email != null) userData = await getUserDataFromEmail(userLoginInfo.email);
-    else if (userLoginInfo.username != null) userData = await getUserDataFromUsername(userLoginInfo.username);
-    else throw new Error("Both username and password are null, which should not be possible");
+    try {
+        if (userLoginInfo.email != null) userData = await getUserDataFromEmail(userLoginInfo.email);
+        else if (userLoginInfo.username != null) userData = await getUserDataFromUsername(userLoginInfo.username);
+        else throw new Error("Both username and password are null, which should not be possible");
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === 'User does not exist.') return {status: 400, data: {'Error': 'The username/email or password is incorrect'}};
+            else throw error;
+        }
+
+        throw new Error('Secret error 42.');
+    }
+
 
     if (!(await bcrypt.compare(userLoginInfo.password, userData.password_hash))) {
         return {status: 400, data: {'Error': 'The username/email or password is incorrect'}};

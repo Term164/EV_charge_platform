@@ -4,6 +4,9 @@ import app from "../app";
 
 export const request = _request(app);
 
+
+// ============================== CLEAR TALBES ================================
+
 async function clearAccountsTable() {
     await database.connection.query(
         `DELETE FROM accounts`
@@ -16,12 +19,24 @@ async function clearRegistrationSecretsTable() {
     );
 }
 
+async function clearSessionsTable() {
+    await database.connection.query(
+        `DELETE FROM sessions`
+    );
+}
+
+// ============================== RETRIEVE SPECIFIC DATA ==============================
+
 async function getNumberOfAccounts(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM accounts`)).rows?.at(0)[0] as number;
 }
 
 async function getNumberOfTokens(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM registration_secrets`)).rows?.at(0)[0] as number;
+}
+
+async function getNumberOfSessions(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM sessions`)).rows?.at(0)[0] as number;
 }
 
 async function getValidationURL(username: string): Promise<string> {
@@ -38,8 +53,10 @@ async function getAccountValidatedParameter(username: string): Promise<string> {
 export default {
     clearAccountsTable,
     clearRegistrationSecretsTable,
+    clearSessionsTable,
     getNumberOfAccounts,
     getNumberOfTokens,
+    getNumberOfSessions,
     getValidationURL,
     getAccountValidatedParameter
 };
