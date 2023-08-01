@@ -92,14 +92,14 @@ VALUES ({account_id}, {registration_secret}, {expiration_time});
 -- session confirmation, confirm that the given sessionID exists and didn't expire
 -- { session_id }
 SELECT * FROM Sessions
-WHERE session_secret LIKE {session_id} AND NOW() < expiration_time;
+WHERE session_secret = {session_id} AND NOW() < expiration_time;
 
 -- session refresh, when a call succeeds, refresh the session
 -- { session_id, refresh_time }
 -- -> refresh_time is a number in minutes
 UPDATE Session
-SET expiration_time = expiration_time + interval '{refresh_time} minutes'
-WHERE session_secret LIKE {session_id};
+SET expiration_time = NOW() + interval '30 minutes'
+WHERE session_secret = {session_id};
 
 
 --=============================== USER ===============================
