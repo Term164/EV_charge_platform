@@ -50,8 +50,37 @@ describe('sessionID middleware checker', () => {
         expect(response.body.error).toEqual("No session with this ID exists.");
     });
 
+
+    test('session is extended upon succesfull request', async () => {
+        const expirationBeforeRequest = new Date(await helper.getSessionExpirationDate(currentSessionID));
+
+        const response = await request.get('/api/v1/dev/ping')
+            .send({sessionID: currentSessionID})
+            .expect(200)
+            .expect('Content-Type', /application\/json/);
+
+        const expirationAfterRequest = new Date(await helper.getSessionExpirationDate(currentSessionID));
+
+        expect(expirationBeforeRequest < expirationAfterRequest).toEqual(true);
+        expect(response.body).toHaveProperty('success');
+        expect(response.body.success).toEqual('pong');
+    });
+
+    test('request denied due to expired session', async () => {
+        await helper.makeSessionExpired(currentSessionID);
+
+        const response = await request.get('/api/v1/dev/ping')
+            .send({sessionID: currentSessionID})
+            .expect(401)
+            .expect('Content-Type', /application\/json/);
+
+
+        expect(response.body).toHaveProperty('error');
+        expect(response.body.error).toEqual('This sessionID has expired.');
+    });
+
+
     // TODO: test that the session expiration time is extended.
-    // TODO: test that the session is denide when the sessionID is expired.
 
     afterAll(async () => {
         // !IMPORTANT NOTE: The sequence wich the tables are cleared is important as there are foreign keys.

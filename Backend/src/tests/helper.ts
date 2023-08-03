@@ -48,7 +48,15 @@ async function getValidationURL(username: string): Promise<string> {
 async function getAccountValidatedParameter(username: string): Promise<string> {
     return (await database.connection.query(`SELECT validated FROM accounts WHERE username = '${username}'`)).rows?.at(0)[0] as string;
 }
+async function getSessionExpirationDate(sessionSecret: string) {
+    return (await database.connection.query(`SELECT expiration_time FROM sessions WHERE session_secret = '${sessionSecret}'`)).rows?.at(0)[0] as number;
+}
 
+// ============================ MODIFY DATA ===========================
+
+async function makeSessionExpired(sessionSecret: string) {
+    await database.connection.query(`UPDATE Sessions SET expiration_time = NOW() - interval '60 minutes' WHERE session_secret = '${sessionSecret}'`);
+}
 
 export default {
     clearAccountsTable,
@@ -58,5 +66,7 @@ export default {
     getNumberOfTokens,
     getNumberOfSessions,
     getValidationURL,
-    getAccountValidatedParameter
+    getAccountValidatedParameter,
+    makeSessionExpired,
+    getSessionExpirationDate
 };
