@@ -17,7 +17,9 @@ This is a quick guide on how to configure the backend for development and everyt
 -  Integrate Etrel charging point simulator [@tadejsivic](https://github.com/tadejsivic) [@Term164](https://github.com/Term164)
 
 ### Subtasks
-[!NOTE] if you feel like a task is too big you can make subtasks here
+> **ℹ️ Note**
+>
+> if you feel like a task is too big you can make subtasks here
 
 ### Task list legend
 - :white_check_mark: - Task completed successfully
@@ -77,8 +79,10 @@ For now only 2 types of models have been defined.
 
 1. Request models - These are models of API requests and responses
 2. Database models - These are models of the different types of data inisde the database
-
-[!NOTE] There is also a parser class that has to be called when the data is recieved to check that all types match the model.
+   
+> **ℹ️ Note**
+>
+> There is also a parser class that has to be called when the data is recieved to check that all types match the model.
 
 ### ROUTES
 
@@ -90,7 +94,7 @@ This folder contains files for each parent route.
 - reservation.ts
 - station.ts
 - user.ts
-- dev
+- dev.ts
 
 All API calls are defined in the [documentation](/Documentation.md#API) file in the root directory.
 
@@ -147,10 +151,11 @@ A linter is currently used to enforce the same code style across the entire code
 ## UNIT TESTS
 Unit tests are run using jest. They can be run in the terminal with the command `npm run test`.
 
-[!IMPORTANT]
-the command `npm run test` will run all .test.ts files inside the test folder with the option **runInBand** that executes the files sequentially.
+> **⚠️ Important**
+>
+> the command `npm run test` will run all .test.ts files inside the test folder with the option **runInBand** that executes the files sequentially.
 
-[!NOTE]
+
 If you want to run a single test file you can do so with the following command
 `npm run test -- NameOfFile`
 For example if you want to run only the auth service unit tests you would write this
@@ -158,9 +163,12 @@ For example if you want to run only the auth service unit tests you would write 
 
 ## DEPENDENCIES
 
-[!IMPORTANT] If you are importing dependencies make sure you also import their types so the IDE will be able to process the correct method types. Usualy the types are named after the package (@types/node)
+> **⚠️ Important**
+>
+> If you are importing dependencies make sure you also import their types so the IDE will be able to process the correct method types. Usualy the types are named after the package (@types/node)
 
-Example: `npm install node @type/node`
+
+Example: `npm install node @types/node`
 
 1. Logger: [ts-log](https://tslog.js.org/#/)
 2. Password hasher: [bcrypt](https://www.npmjs.com/package/bcrypt)
