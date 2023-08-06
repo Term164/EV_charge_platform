@@ -20,9 +20,15 @@ interface UserLoginRequest {
     password: string;
 }
 
+interface AssignAdminRequest {
+    userID: number;
+    otherID: number;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
     UserLoginRequest,
+    AssignAdminRequest,
     APIResponse
 };

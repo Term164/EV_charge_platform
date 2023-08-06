@@ -1,5 +1,6 @@
+import log from "../utils/logger";
 import { UserAccount } from "./databaseModels";
-import { UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignAdminRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -21,6 +22,14 @@ function parseIntegerParameter(param: unknown, paramName: string): number {
     }
 
     return param;
+}
+
+function parseIntegerParameterFromString(param: unknown, paramName: string): number {
+    if (!param || !isString(param)) {
+        throw new Error(`Incorrect or missing ${paramName}`);
+    }
+
+    return Number.parseInt(param);
 }
 
 function parseStringParameter(param: unknown, paramName: string): string {
@@ -101,6 +110,32 @@ function parseUserLoginRequest(request: unknown): UserLoginRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseAssignAdminRequest(request: unknown): AssignAdminRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    log.debug(request);
+
+    if ('userID' in request && 'companyID' in request) {
+        const assignAdminRequest: AssignAdminRequest = {
+            userID: parseIntegerParameter(request.userID, 'userID'),
+            otherID: parseIntegerParameter(request.companyID, 'companyID')
+        };
+
+        return assignAdminRequest;
+    } else if ('userID' in request && 'buildingID' in request) {
+        const assignAdminRequest: AssignAdminRequest = {
+            userID: parseIntegerParameterFromString(request.userID, 'userID'),
+            otherID: parseIntegerParameterFromString(request.buildingID, 'buildingID')
+        };
+
+        return assignAdminRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 // ==================================== DATABASE MODEL PARSERS ==============================================
 
 function parseUserAccountData(data: unknown): UserAccount {
@@ -128,5 +163,6 @@ export default {
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
     parseUserLoginRequest,
+    parseAssignAdminRequest,
     parseUserAccountData
 };

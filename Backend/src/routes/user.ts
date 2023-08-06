@@ -1,10 +1,15 @@
 import express from 'express';
+import asyncHanlder from 'express-async-handler';
+import assignAdminService from '../services/assignAdminService';
 
 const router = express.Router();
 
-router.post('/post/assignBadmin', (_req, res) => {
-    res.send('Assign new building admin');
-});
+router.post('/post/assignBadmin', asyncHanlder( async (req, res) => {
+    const response = await assignAdminService.assignBadmin(req.body);
+    res.status(response.status)
+        .send(response.data);
+    //res.send('Assign new building admin');
+}));
 
 router.post('/post/assignCadmin', (_req, res) => {
     res.send('Assign new company admin');
