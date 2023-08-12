@@ -8,12 +8,13 @@ router.post('/post/assignBadmin', asyncHanlder( async (req, res) => {
     const response = await assignAdminService.assignBadmin(req.body);
     res.status(response.status)
         .send(response.data);
-    //res.send('Assign new building admin');
 }));
 
-router.post('/post/assignCadmin', (_req, res) => {
-    res.send('Assign new company admin');
-});
+router.post('/post/assignCadmin', asyncHanlder( async (req, res) => {
+    const response = await assignAdminService.assignCadmin(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
 router.post('/post/assignCompany', (_req, res) => {
     res.send('Assign employee to company');

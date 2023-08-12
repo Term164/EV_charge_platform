@@ -25,6 +25,30 @@ async function clearSessionsTable() {
     );
 }
 
+async function clearBuildingAdminsTable() {
+    await database.connection.query(
+        `DELETE FROM building_admins`
+    );
+}
+
+async function clearCompanyAdminsTable() {
+    await database.connection.query(
+        `DELETE FROM company_admins`
+    );
+}
+
+async function clearBuildingsTable() {
+    await database.connection.query(
+        `DELETE FROM buildings`
+    );
+}
+
+async function clearCompaniesTable() {
+    await database.connection.query(
+        `DELETE FROM companies`
+    );
+}
+
 // ============================== RETRIEVE SPECIFIC DATA ==============================
 
 async function getNumberOfAccounts(): Promise<number> {
@@ -38,6 +62,15 @@ async function getNumberOfTokens(): Promise<number> {
 async function getNumberOfSessions(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM sessions`)).rows?.at(0)[0] as number;
 }
+
+async function getNumberOfBuildingAdmins(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM building_admins`)).rows?.at(0)[0] as number;
+}
+
+async function getNumberOfCompanyAdmins(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM company_admins`)).rows?.at(0)[0] as number;
+}
+
 
 async function getValidationURL(username: string): Promise<string> {
     const result = await database.connection.query(`SELECT id FROM accounts WHERE username = '${username}'`);
@@ -58,15 +91,37 @@ async function makeSessionExpired(sessionSecret: string) {
     await database.connection.query(`UPDATE Sessions SET expiration_time = NOW() - interval '60 minutes' WHERE session_secret = '${sessionSecret}'`);
 }
 
+function createExampleBuildings() {
+    void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
+    ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
+    ('A1 poslovna stavba', 'Ameriška ulica 4'),
+    ('A1 Maribor','Mariborska cesta');`);
+}
+
+function createExampleCompanies() {
+    void database.connection.query(`INSERT INTO Companies ("company_name") VALUES
+    ('XLAB'),
+    ('A1'),
+    ('Lenovo');`);
+}
+
 export default {
     clearAccountsTable,
     clearRegistrationSecretsTable,
     clearSessionsTable,
+    clearBuildingAdminsTable,
+    clearCompanyAdminsTable,
+    clearBuildingsTable,
+    clearCompaniesTable,
     getNumberOfAccounts,
     getNumberOfTokens,
     getNumberOfSessions,
+    getNumberOfBuildingAdmins,
+    getNumberOfCompanyAdmins,
     getValidationURL,
     getAccountValidatedParameter,
     makeSessionExpired,
+    createExampleBuildings,
+    createExampleCompanies,
     getSessionExpirationDate
 };
