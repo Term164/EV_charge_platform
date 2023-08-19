@@ -91,19 +91,20 @@ async function makeSessionExpired(sessionSecret: string) {
     await database.connection.query(`UPDATE Sessions SET expiration_time = NOW() - interval '60 minutes' WHERE session_secret = '${sessionSecret}'`);
 }
 
-function createExampleBuildings() {
-    void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
-    ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
-    ('A1 poslovna stavba', 'Ameriška ulica 4'),
-    ('A1 Maribor','Mariborska cesta');`);
-}
+// This example data was already inserted into the database and will currently not change
+// function createExampleBuildings() {
+//     void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
+//     ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
+//     ('A1 poslovna stavba', 'Ameriška ulica 4'),
+//     ('A1 Maribor','Mariborska cesta');`);
+// }
 
-function createExampleCompanies() {
-    void database.connection.query(`INSERT INTO Companies ("company_name") VALUES
-    ('XLAB'),
-    ('A1'),
-    ('Lenovo');`);
-}
+// function createExampleCompanies() {
+//     void database.connection.query(`INSERT INTO Companies ("company_name") VALUES
+//     ('XLAB'),
+//     ('A1'),
+//     ('Lenovo');`);
+// }
 
 export default {
     clearAccountsTable,
@@ -121,7 +122,7 @@ export default {
     getValidationURL,
     getAccountValidatedParameter,
     makeSessionExpired,
-    createExampleBuildings,
-    createExampleCompanies,
+    // createExampleBuildings,
+    // createExampleCompanies,
     getSessionExpirationDate
 };

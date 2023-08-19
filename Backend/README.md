@@ -126,6 +126,11 @@ It connects to the database and then starts the app on a port specified in the e
 
 The app then prepares all the routes with express and loads the necessary middleware, after that it is ready to serve requests.
 
+### LIST OF ERROR CODES
+
+1. Error code 1: unknown foreign key constraint when assigning building admins (should not happen).
+2. Error code 2: unknown foreign key constraint when assigning company admins (should not happen).
+
 ## SETUP DEV ENVIRONMENT
 
 1. Clone the repository
