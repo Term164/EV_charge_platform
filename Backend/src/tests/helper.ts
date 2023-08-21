@@ -71,6 +71,9 @@ async function getNumberOfCompanyAdmins(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM company_admins`)).rows?.at(0)[0] as number;
 }
 
+async function getNumberOfCompanies(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM Companies`)).rows?.at(0)[0] as number;
+}
 
 async function getValidationURL(username: string): Promise<string> {
     const result = await database.connection.query(`SELECT id FROM accounts WHERE username = '${username}'`);
@@ -92,19 +95,27 @@ async function makeSessionExpired(sessionSecret: string) {
 }
 
 // This example data was already inserted into the database and will currently not change
-// function createExampleBuildings() {
-//     void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
-//     ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
-//     ('A1 poslovna stavba', 'Ameriška ulica 4'),
-//     ('A1 Maribor','Mariborska cesta');`);
-// }
+function createExampleBuildings() {
+    void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
+    ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
+    ('A1 poslovna stavba', 'Ameriška ulica 4'),
+    ('A1 Maribor','Mariborska cesta');`);
+}
 
-// function createExampleCompanies() {
-//     void database.connection.query(`INSERT INTO Companies ("company_name") VALUES
-//     ('XLAB'),
-//     ('A1'),
-//     ('Lenovo');`);
-// }
+function createExampleCompanies() {
+    void database.connection.query(`INSERT INTO Companies ("company_name") VALUES
+    ('XLAB'),
+    ('A1'),
+    ('Lenovo');`);
+}
+
+async function insertDummyCompanyReturningID(): Promise<number> {
+    return (await database.connection.query(`INSERT INTO Companies ("company_name") VALUES ('dummy') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
+async function getCompanyName(id: number): Promise<string> {
+    return (await database.connection.query(`SELECT "company_name" FROM Companies WHERE ID = '${id}';`)).rows?.at(0)[0] as string;
+}
 
 export default {
     clearAccountsTable,
@@ -119,10 +130,13 @@ export default {
     getNumberOfSessions,
     getNumberOfBuildingAdmins,
     getNumberOfCompanyAdmins,
+    getNumberOfCompanies,
     getValidationURL,
     getAccountValidatedParameter,
     makeSessionExpired,
-    // createExampleBuildings,
-    // createExampleCompanies,
-    getSessionExpirationDate
+    createExampleBuildings,
+    createExampleCompanies,
+    getSessionExpirationDate,
+    insertDummyCompanyReturningID,
+    getCompanyName
 };
