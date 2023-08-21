@@ -137,7 +137,7 @@ describe('register a new user', () => {
         expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
     });
 
-    test('registration step 2 request to non existant URL not found', async () => {
+    test('registration step 2 request to non existent URL not found', async () => {
         const response = await request.get('/api/v1/auth/register/step2/1/1123')
             .expect(404)
             .expect('Content-Type', /application\/json/);

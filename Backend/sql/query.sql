@@ -167,8 +167,7 @@ VALUES ({account_id}, {company_id});
 -- Optionally, give him an rfid card, or null
 -- /api/v1/user/post/assignCompany (userID, companyID)
 -- { account_id, company_id }
-UPDATE TABLE accounts SET company_id = company_id
-WHERE id = account_id
+UPDATE Accounts SET "company_id" = {company_id} WHERE ID = {account_id};
 
 
 -- Add an employee to a specific building (company owned)

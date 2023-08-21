@@ -25,6 +25,19 @@ interface AssignRequest {
     otherID: number;
 }
 
+interface CreateCompanyRequest {
+    companyName: string;
+}
+
+interface DeleteCompanyRequest {
+    companyID: number;
+}
+
+interface EditCompanyRequest {
+    companyID: number;
+    newCompanyName: string;
+}
+
 interface AssignEmployeeToBuildingRequest {
     userID: number;
     buildingID: number;
@@ -38,5 +51,8 @@ export {
     UserLoginRequest,
     AssignRequest,
     AssignEmployeeToBuildingRequest,
-    APIResponse
+    APIResponse,
+    CreateCompanyRequest,
+    DeleteCompanyRequest,
+    EditCompanyRequest
 };

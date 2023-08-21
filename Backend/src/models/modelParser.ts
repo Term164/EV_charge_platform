@@ -1,5 +1,5 @@
 import { UserAccount } from "./databaseModels";
-import { AssignEmployeeToBuildingRequest, AssignRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignEmployeeToBuildingRequest, AssignRequest, CreateCompanyRequest, DeleteCompanyRequest, EditCompanyRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -133,6 +133,61 @@ function parseAssignRequest(request: unknown): AssignRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseCreateCompanyRequest(request: unknown): CreateCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    log.debug(request);
+
+    if ('companyName' in request) {
+        const CreateCompanyRequest: CreateCompanyRequest = {
+            companyName: parseStringParameter(request.companyName, 'companyName')
+        };
+
+        return CreateCompanyRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseDeleteCompanyRequest(request: unknown): DeleteCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    log.debug(request);
+
+    if ('companyID' in request) {
+        const DeleteCompanyRequest: DeleteCompanyRequest = {
+            companyID: parseIntegerParameter(request.companyID, 'companyID')
+        };
+
+        return DeleteCompanyRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditCompanyRequest(request: unknown): EditCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    log.debug(request);
+
+    if ('companyID' in request && 'newCompanyName' in request) {
+        const EditCompanyRequest: EditCompanyRequest = {
+            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+            newCompanyName: parseStringParameter(request.newCompanyName, 'newCompanyName')
+        };
+
+        return EditCompanyRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeToBuildingRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
@@ -182,5 +237,8 @@ export default {
     parseUserLoginRequest,
     parseAssignRequest,
     parseAssignEmployeeToBuildingRequest,
-    parseUserAccountData
+    parseUserAccountData,
+    parseCreateCompanyRequest,
+    parseDeleteCompanyRequest,
+    parseEditCompanyRequest
 };

@@ -90,6 +90,12 @@ CREATE TABLE Building_admins
  CONSTRAINT FK_3 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" )
 );
 
+-- Didn't test, should work.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+ALTER TABLE Building_admins
+ADD CONSTRAINT unique_account_building
+UNIQUE (account_id, building_id);
+
 CREATE INDEX FK_2 ON Building_admins
 (
  account_id
@@ -111,6 +117,12 @@ CREATE TABLE Company_admins
  CONSTRAINT FK_5 FOREIGN KEY ( company_id ) REFERENCES Companies ( "id" )
 );
 
+-- Didn't test, should work.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+ALTER TABLE Company_admins
+ADD CONSTRAINT unique_account_company
+UNIQUE (account_id, company_id);
+
 CREATE INDEX FK_4 ON Company_admins
 (
  account_id
@@ -131,6 +143,12 @@ CREATE TABLE "Building-Company"
  CONSTRAINT FK_6 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" ),
  CONSTRAINT FK_7 FOREIGN KEY ( company_id ) REFERENCES Companies ( "id" )
 );
+
+-- Didn't test, should work.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+ALTER TABLE "Building-Company"
+ADD CONSTRAINT unique_building_company
+UNIQUE (building_id, company_id);
 
 CREATE INDEX FK_6 ON "Building-Company"
 (
