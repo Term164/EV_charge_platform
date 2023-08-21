@@ -98,6 +98,10 @@ async function getSessionExpirationDate(sessionSecret: string) {
     return (await database.connection.query(`SELECT expiration_time FROM sessions WHERE session_secret = '${sessionSecret}'`)).rows?.at(0)[0] as number;
 }
 
+async function getUserAssignedCompanyID(userID: string): Promise<number> {
+    return (await database.connection.query(`SELECT company_id FROM accounts WHERE id = '${userID}'`)).rows?.at(0)[0] as number;
+}
+
 // ============================ MODIFY DATA ===========================
 
 async function makeSessionExpired(sessionSecret: string) {
@@ -131,8 +135,8 @@ async function insertDummyBuildingReturningID(): Promise<number> {
     return (await database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('dummy', 'location') RETURNING ID;`)).rows?.at(0)[0] as number;
 }
 
-async function insertDummyCompanyAdminReturningID(userID: string): Promise<number> {
-    return (await database.connection.query(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '1') RETURNING ID;`)).rows?.at(0)[0] as number;
+async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
+    return (await database.connection.query(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '${companyID}') RETURNING ID;`)).rows?.at(0)[0] as number;
 }
 
 export default {
@@ -153,6 +157,7 @@ export default {
     getNumberOfBuildingAccesses,
     getValidationURL,
     getAccountValidatedParameter,
+    getUserAssignedCompanyID,
     makeSessionExpired,
     createExampleBuildings,
     createExampleCompanies,

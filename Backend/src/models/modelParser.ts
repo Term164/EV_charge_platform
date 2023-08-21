@@ -138,8 +138,6 @@ function parseCreateCompanyRequest(request: unknown): CreateCompanyRequest {
         throw new Error('Incorrect or missing data');
     }
 
-    log.debug(request);
-
     if ('companyName' in request) {
         const CreateCompanyRequest: CreateCompanyRequest = {
             companyName: parseStringParameter(request.companyName, 'companyName')
@@ -156,8 +154,6 @@ function parseDeleteCompanyRequest(request: unknown): DeleteCompanyRequest {
         throw new Error('Incorrect or missing data');
     }
 
-    log.debug(request);
-
     if ('companyID' in request) {
         const DeleteCompanyRequest: DeleteCompanyRequest = {
             companyID: parseIntegerParameter(request.companyID, 'companyID')
@@ -173,8 +169,6 @@ function parseEditCompanyRequest(request: unknown): EditCompanyRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
-
-    log.debug(request);
 
     if ('companyID' in request && 'newCompanyName' in request) {
         const EditCompanyRequest: EditCompanyRequest = {

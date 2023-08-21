@@ -55,7 +55,6 @@ async function assignToBuilding(body: unknown) {
     try {
         result = await statement.execute({params: [data.userID, data.buildingID, data.companyAdminID]});
     } catch (error) {
-        console.debug(error);
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
