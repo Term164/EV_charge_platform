@@ -71,6 +71,9 @@ async function getNumberOfCompanyAdmins(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM company_admins`)).rows?.at(0)[0] as number;
 }
 
+async function getNumberOfCompanies(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM Companies`)).rows?.at(0)[0] as number;
+}
 
 async function getValidationURL(username: string): Promise<string> {
     const result = await database.connection.query(`SELECT id FROM accounts WHERE username = '${username}'`);
@@ -105,6 +108,14 @@ function createExampleCompanies() {
     ('Lenovo');`);
 }
 
+async function insertDummyCompanyReturningID(): Promise<number> {
+    return (await database.connection.query(`INSERT INTO Companies ("company_name") VALUES ('dummy') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
+async function getCompanyName(id: number): Promise<string> {
+    return (await database.connection.query(`SELECT "company_name" FROM Companies WHERE ID = '${id}';`)).rows?.at(0)[0] as string;
+}
+
 export default {
     clearAccountsTable,
     clearRegistrationSecretsTable,
@@ -118,10 +129,13 @@ export default {
     getNumberOfSessions,
     getNumberOfBuildingAdmins,
     getNumberOfCompanyAdmins,
+    getNumberOfCompanies,
     getValidationURL,
     getAccountValidatedParameter,
     makeSessionExpired,
     createExampleBuildings,
     createExampleCompanies,
-    getSessionExpirationDate
+    getSessionExpirationDate,
+    insertDummyCompanyReturningID,
+    getCompanyName
 };

@@ -25,10 +25,26 @@ interface AssignAdminRequest {
     otherID: number;
 }
 
+interface CreateCompanyRequest {
+    companyName: string;
+}
+
+interface DeleteCompanyRequest {
+    companyID: number;
+}
+
+interface EditCompanyRequest {
+    companyID: number;
+    newCompanyName: string;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
     UserLoginRequest,
     AssignAdminRequest,
-    APIResponse
+    APIResponse,
+    CreateCompanyRequest,
+    DeleteCompanyRequest,
+    EditCompanyRequest
 };

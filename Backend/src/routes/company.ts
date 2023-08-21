@@ -1,21 +1,31 @@
 import express from 'express';
+import asyncHanlder from 'express-async-handler';
+import companyService from '../services/companyService';
 
 const router = express.Router();
 
-router.post('/post/new', (_req, res) => {
-    res.send('Create new company');
-});
+router.post('/post/new', asyncHanlder(async (req, res) => {
+    const response = await companyService.createCompany(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/all', (_req, res) => {
-    res.send('Get all companies');
-});
+router.get('/get/all', asyncHanlder(async (_req, res) => {
+    const response = await companyService.getAllCompanies();
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/patch/edit', (_req, res) => {
-    res.send('Edit company details');
-});
+router.delete('/delete/company', asyncHanlder(async (req, res) => {
+    const response = await companyService.deleteCompany(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/delete/company', (_req, res) => {
-    res.send('Delete company from database');
-});
+router.patch('/patch/edit', asyncHanlder(async (req, res) => {
+    const response = await companyService.editCompany(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
 export default router;
