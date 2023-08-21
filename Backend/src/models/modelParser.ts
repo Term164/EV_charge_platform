@@ -1,6 +1,5 @@
-import log from "../utils/logger";
 import { UserAccount } from "./databaseModels";
-import { AssignAdminRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignEmployeeToBuildingRequest, AssignRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -110,30 +109,48 @@ function parseUserLoginRequest(request: unknown): UserLoginRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseAssignAdminRequest(request: unknown): AssignAdminRequest {
+function parseAssignRequest(request: unknown): AssignRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    log.debug(request);
-
     if ('userID' in request && 'companyID' in request) {
-        const assignAdminRequest: AssignAdminRequest = {
+        const assignRequest: AssignRequest = {
             userID: parseIntegerParameterFromString(request.userID, 'userID'),
             otherID: parseIntegerParameterFromString(request.companyID, 'companyID')
         };
 
-        return assignAdminRequest;
+        return assignRequest;
     } else if ('userID' in request && 'buildingID' in request) {
-        const assignAdminRequest: AssignAdminRequest = {
+        const assignRequest: AssignRequest = {
             userID: parseIntegerParameterFromString(request.userID, 'userID'),
             otherID: parseIntegerParameterFromString(request.buildingID, 'buildingID')
         };
 
-        return assignAdminRequest;
+        return assignRequest;
     }
 
     throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeToBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request && 'buildingID' in request && 'companyAdminID' in request) {
+        const assignRequest: AssignEmployeeToBuildingRequest = {
+            userID: parseIntegerParameterFromString(request.userID, 'userID'),
+            buildingID: parseIntegerParameterFromString(request.buildingID, 'buildingID'),
+            companyAdminID: parseIntegerParameterFromString(request.companyAdminID, 'companyAdminID'),
+            expirationDate: 'expirationDate' in request ? new Date(request.expirationDate as string) : undefined
+        };
+
+        return assignRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+
 }
 
 // ==================================== DATABASE MODEL PARSERS ==============================================
@@ -163,6 +180,7 @@ export default {
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
     parseUserLoginRequest,
-    parseAssignAdminRequest,
+    parseAssignRequest,
+    parseAssignEmployeeToBuildingRequest,
     parseUserAccountData
 };

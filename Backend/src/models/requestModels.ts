@@ -20,15 +20,23 @@ interface UserLoginRequest {
     password: string;
 }
 
-interface AssignAdminRequest {
+interface AssignRequest {
     userID: number;
     otherID: number;
+}
+
+interface AssignEmployeeToBuildingRequest {
+    userID: number;
+    buildingID: number;
+    companyAdminID: number;
+    expirationDate?: Date;
 }
 
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
     UserLoginRequest,
-    AssignAdminRequest,
+    AssignRequest,
+    AssignEmployeeToBuildingRequest,
     APIResponse
 };

@@ -130,6 +130,8 @@ The app then prepares all the routes with express and loads the necessary middle
 
 1. Error code 1: unknown foreign key constraint when assigning building admins (should not happen).
 2. Error code 2: unknown foreign key constraint when assigning company admins (should not happen).
+3. Error code 3: unknown foreign key constraint when assigning user to building (should not happen).
+4. Error code 4: unknown foreign key constraint when assigning employee to company (should not happen).
 
 ## SETUP DEV ENVIRONMENT
 

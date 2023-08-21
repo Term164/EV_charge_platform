@@ -8,7 +8,7 @@ import { DataTypeOIDs, QueryResult } from "postgresql-client";
 async function assignBadmin(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseAssignAdminRequest(body);
+        data = parser.parseAssignRequest(body);
     } catch (error) {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
@@ -45,7 +45,7 @@ async function assignBadmin(body: unknown): Promise<APIResponse> {
 async function assignCadmin(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseAssignAdminRequest(body);
+        data = parser.parseAssignRequest(body);
     } catch (error) {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }

@@ -49,6 +49,12 @@ async function clearCompaniesTable() {
     );
 }
 
+async function clearBuildingAccessesTable() {
+    await database.connection.query(
+        'DELETE FROM building_accesses'
+    );
+}
+
 // ============================== RETRIEVE SPECIFIC DATA ==============================
 
 async function getNumberOfAccounts(): Promise<number> {
@@ -69,6 +75,10 @@ async function getNumberOfBuildingAdmins(): Promise<number> {
 
 async function getNumberOfCompanyAdmins(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM company_admins`)).rows?.at(0)[0] as number;
+}
+
+async function getNumberOfBuildingAccesses(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM building_accesses`)).rows?.at(0)[0] as number;
 }
 
 
@@ -106,6 +116,14 @@ async function makeSessionExpired(sessionSecret: string) {
 //     ('Lenovo');`);
 // }
 
+async function insertDummyBuildingReturningID(): Promise<number> {
+    return (await database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('dummy', 'location') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
+async function insertDummyCompanyAdminReturningID(userID: string): Promise<number> {
+    return (await database.connection.query(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '1') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
 export default {
     clearAccountsTable,
     clearRegistrationSecretsTable,
@@ -114,15 +132,19 @@ export default {
     clearCompanyAdminsTable,
     clearBuildingsTable,
     clearCompaniesTable,
+    clearBuildingAccessesTable,
     getNumberOfAccounts,
     getNumberOfTokens,
     getNumberOfSessions,
     getNumberOfBuildingAdmins,
     getNumberOfCompanyAdmins,
+    getNumberOfBuildingAccesses,
     getValidationURL,
     getAccountValidatedParameter,
     makeSessionExpired,
     // createExampleBuildings,
     // createExampleCompanies,
-    getSessionExpirationDate
+    getSessionExpirationDate,
+    insertDummyBuildingReturningID,
+    insertDummyCompanyAdminReturningID
 };
