@@ -49,6 +49,12 @@ async function clearCompaniesTable() {
     );
 }
 
+async function clearBuildingAccessesTable() {
+    await database.connection.query(
+        'DELETE FROM building_accesses'
+    );
+}
+
 // ============================== RETRIEVE SPECIFIC DATA ==============================
 
 async function getNumberOfAccounts(): Promise<number> {
@@ -71,6 +77,10 @@ async function getNumberOfCompanyAdmins(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM company_admins`)).rows?.at(0)[0] as number;
 }
 
+async function getNumberOfBuildingAccesses(): Promise<number> {
+    return (await database.connection.query(`SELECT COUNT(*) FROM building_accesses`)).rows?.at(0)[0] as number;
+}
+
 async function getNumberOfCompanies(): Promise<number> {
     return (await database.connection.query(`SELECT COUNT(*) FROM Companies`)).rows?.at(0)[0] as number;
 }
@@ -86,6 +96,10 @@ async function getAccountValidatedParameter(username: string): Promise<string> {
 }
 async function getSessionExpirationDate(sessionSecret: string) {
     return (await database.connection.query(`SELECT expiration_time FROM sessions WHERE session_secret = '${sessionSecret}'`)).rows?.at(0)[0] as number;
+}
+
+async function getUserAssignedCompanyID(userID: string): Promise<number> {
+    return (await database.connection.query(`SELECT company_id FROM accounts WHERE id = '${userID}'`)).rows?.at(0)[0] as number;
 }
 
 // ============================ MODIFY DATA ===========================
@@ -117,6 +131,14 @@ async function getCompanyName(id: number): Promise<string> {
     return (await database.connection.query(`SELECT "company_name" FROM Companies WHERE ID = '${id}';`)).rows?.at(0)[0] as string;
 }
 
+async function insertDummyBuildingReturningID(): Promise<number> {
+    return (await database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('dummy', 'location') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
+async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
+    return (await database.connection.query(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '${companyID}') RETURNING ID;`)).rows?.at(0)[0] as number;
+}
+
 export default {
     clearAccountsTable,
     clearRegistrationSecretsTable,
@@ -125,18 +147,23 @@ export default {
     clearCompanyAdminsTable,
     clearBuildingsTable,
     clearCompaniesTable,
+    clearBuildingAccessesTable,
     getNumberOfAccounts,
     getNumberOfTokens,
     getNumberOfSessions,
     getNumberOfBuildingAdmins,
     getNumberOfCompanyAdmins,
     getNumberOfCompanies,
+    getNumberOfBuildingAccesses,
     getValidationURL,
     getAccountValidatedParameter,
+    getUserAssignedCompanyID,
     makeSessionExpired,
     createExampleBuildings,
     createExampleCompanies,
     getSessionExpirationDate,
     insertDummyCompanyReturningID,
-    getCompanyName
+    getCompanyName,
+    insertDummyBuildingReturningID,
+    insertDummyCompanyAdminReturningID
 };

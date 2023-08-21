@@ -1,6 +1,7 @@
 import express from 'express';
 import asyncHanlder from 'express-async-handler';
 import assignAdminService from '../services/assignAdminService';
+import assignEmployeeService from '../services/assignEmployeeService';
 
 const router = express.Router();
 
@@ -16,13 +17,17 @@ router.post('/post/assignCadmin', asyncHanlder( async (req, res) => {
         .send(response.data);
 }));
 
-router.post('/post/assignCompany', (_req, res) => {
-    res.send('Assign employee to company');
-});
+router.post('/post/assignCompany', asyncHanlder( async (req, res) => {
+    const response = await assignEmployeeService.assignToCompany(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/post/assignBuilding', (_req, res) => {
-    res.send('Assign employee to building');
-});
+router.post('/post/assignBuilding', asyncHanlder( async (req, res) => {
+    const response = await assignEmployeeService.assignToBuilding(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
 router.get('/get/buildingAdmins', (_req, res) => {
     res.send('Get all building admins');
