@@ -119,8 +119,8 @@ function parseAssignAdminRequest(request: unknown): AssignAdminRequest {
 
     if ('userID' in request && 'companyID' in request) {
         const assignAdminRequest: AssignAdminRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID'),
-            otherID: parseIntegerParameter(request.companyID, 'companyID')
+            userID: parseIntegerParameterFromString(request.userID, 'userID'),
+            otherID: parseIntegerParameterFromString(request.companyID, 'companyID')
         };
 
         return assignAdminRequest;

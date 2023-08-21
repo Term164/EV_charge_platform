@@ -94,6 +94,7 @@ async function makeSessionExpired(sessionSecret: string) {
     await database.connection.query(`UPDATE Sessions SET expiration_time = NOW() - interval '60 minutes' WHERE session_secret = '${sessionSecret}'`);
 }
 
+// This example data was already inserted into the database and will currently not change
 function createExampleBuildings() {
     void database.connection.query(`INSERT INTO Buildings ("building_name", "building_location") VALUES
     ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
