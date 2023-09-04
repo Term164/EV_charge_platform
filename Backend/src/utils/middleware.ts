@@ -26,6 +26,11 @@ const errorHandler = (error: Error, _request: Request, response: Response, next:
 };
 
 const sessionChecker = asyncHanlder(async (request: Request, response: Response, next: NextFunction) => {
+    if (config.NODE_ENV == 'test' && !("sessionTest" in request.body)) {
+        next();
+        return;
+    }
+
     if ('sessionID' in request.body) {
         const statement = await db.connection.prepare(
             `SELECT * FROM Sessions
@@ -68,7 +73,7 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
             {paramTypes: [DataTypeOIDs.varchar]}
         );
 
-        void updateSessionIDStatment.execute({params: [request.body.sessionID]});
+        await updateSessionIDStatment.execute({params: [request.body.sessionID]});
 
         next();
     } else {
