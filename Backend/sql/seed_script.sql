@@ -1,4 +1,7 @@
 -- Seeding the database
+--
+-- MEANT TO BE RUN ONCE
+--
 
 -- Companies
 INSERT INTO Companies ("company_name") VALUES

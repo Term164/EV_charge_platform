@@ -1,5 +1,5 @@
 import { UserAccount } from "./databaseModels";
-import { AssignEmployeeToBuildingRequest, AssignRequest, CreateCompanyRequest, DeleteCompanyRequest, EditCompanyRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateBuildingRequest, CreateCompanyRequest, DeleteBuildingRequest, DeleteCompanyRequest, EditBuildingRequest, EditCompanyRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -202,6 +202,74 @@ function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeT
 
 }
 
+function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingName' in request && 'buildingLocation' in request) {
+        const CreateBuildingRequest: CreateBuildingRequest = {
+            buildingName: parseStringParameter(request.buildingName, 'buildingName'),
+            buildingLocation: parseStringParameter(request.buildingLocation, 'buildingLocation')
+        };
+
+        return CreateBuildingRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request) {
+        const EditBuildingRequest: EditBuildingRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            newBuildingName : ('newBuildingName' in request) ? parseStringParameter(request.newBuildingName, 'newBuildingName') : null,
+            newBuildingLocation : ('newBuildingLocation' in request) ? parseStringParameter(request.newBuildingLocation, 'newBuildingLocation') : null
+        };
+
+        return EditBuildingRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request) {
+        const DeleteBuildingRequest: DeleteBuildingRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID')
+        };
+
+        return DeleteBuildingRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request && 'companyID' in request) {
+        const AssignCompanyRequest: AssignCompanyRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+        };
+
+        return AssignCompanyRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 // ==================================== DATABASE MODEL PARSERS ==============================================
 
 function parseUserAccountData(data: unknown): UserAccount {
@@ -234,5 +302,9 @@ export default {
     parseUserAccountData,
     parseCreateCompanyRequest,
     parseDeleteCompanyRequest,
-    parseEditCompanyRequest
+    parseEditCompanyRequest,
+    parseCreateBuildingRequest,
+    parseEditBuildingRequest,
+    parseDeleteBuildingRequest,
+    parseAssignCompanyRequest
 };

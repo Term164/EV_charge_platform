@@ -1,7 +1,10 @@
 -- QUERY STATEMENTS
 -- 
 -- The list of SQL commands is separated into some parts, which resemble the REST API group endpoints.
--- 
+--
+-- THIS FILE IS NOT MEANT TO BE RUN! It is only a collection of used
+-- statements in the backend. Copy+Paste
+--
 -- The statements are built like this:
 /*
 

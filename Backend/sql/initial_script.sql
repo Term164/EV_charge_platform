@@ -1,6 +1,8 @@
 -- Prepared for PostgreSQL
 -- Use the picture ER_diagram.png for reference
 --
+-- MEANT TO BE RUN ONCE
+--
 -- Version history: the last version number is the current one.
 --=============================================
 -- V 1.0
@@ -26,7 +28,9 @@
 -- V 2.4
 -- -> Adds 'regtistration_secrets' table for creating step 2 of registration urls
 --=============================================
-
+-- V 2.5
+-- -> Adds UNIQUE constraints for some tables. Possibly more in the future.
+--=============================================
 
 
 CREATE TABLE Companies
@@ -91,7 +95,7 @@ CREATE TABLE Building_admins
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE Building_admins
 ADD CONSTRAINT unique_account_building
 UNIQUE (account_id, building_id);
@@ -118,7 +122,7 @@ CREATE TABLE Company_admins
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE Company_admins
 ADD CONSTRAINT unique_account_company
 UNIQUE (account_id, company_id);
@@ -145,7 +149,7 @@ CREATE TABLE "Building-Company"
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE "Building-Company"
 ADD CONSTRAINT unique_building_company
 UNIQUE (building_id, company_id);
