@@ -47,7 +47,8 @@ async function assignToBuilding(body: unknown) {
 
     const statement = await db.connection.prepare(
         `INSERT INTO Building_accesses (account_id, building_id, company_admin_id)
-        VALUES ($1, $2, $3);`,
+        VALUES ($1, $2, $3)
+        ON CONFLICT ON CONSTRAINT unique_account_building_access DO NOTHING;;`,
         {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
     );
 

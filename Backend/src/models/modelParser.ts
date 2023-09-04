@@ -64,7 +64,6 @@ function parseUserRegistrationRequest(request: unknown): UserRegistrationRequest
 
         return userRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 

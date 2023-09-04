@@ -9,7 +9,7 @@
     "dev2": "concurrently \"npx tsc --watch\" \"nodemon -q build/index.js\"",
     "lint": "eslint --ext .ts .",
     "start": "node --enable-source-maps --experimental-specifier-resolution=node build/index.js",
-    "test": "jest --runInBand"
+    "test": "jest"
   },
   "author": "jani Bangiev",
   "license": "ISC",
