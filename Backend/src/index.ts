@@ -1,5 +1,5 @@
-import app from './app';
 import config from './utils/config';
+import app from './app';
 import log from './utils/logger';
 import db from './utils/database';
 

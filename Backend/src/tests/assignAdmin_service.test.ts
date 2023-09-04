@@ -1,46 +1,24 @@
-import { UserRegistrationRequest } from "../models/requestModels";
-import database from "../utils/database";
 import helper, { request } from "./helper";
 
 
-let currentSessionID: string;
 let currentUserID: string;
+let testCompanyID: number;
+let testBuildingID: number;
 
 describe('assign admin service', () => {
     beforeAll(async () => {
-        await database.establishDBConnection();
 
-        const req_body: UserRegistrationRequest = {
-            username: "Term",
-            email_account: "termicrafter164@gmail.com",
-            password: "idkSometing"
-        };
-
-        const loginRequestData = {
-            username: "Term",
-            password: "idkSometing"
-        };
-
-
-        await request.post('/api/v1/auth/register/step1').send(req_body);
-        const validationURL = await helper.getValidationURL(req_body.username);
-        await request.get(validationURL);
-        currentUserID = validationURL.split('/').at(-2) as  string;
-        const response = await request.post('/api/v1/auth/login').send(loginRequestData);
-        if ('sessionID' in response.body) {
-            currentSessionID = response.body.sessionID as string;
-        } else {
-            fail('Could not get sessionID from login request.');
-        }
+        currentUserID = String(await helper.insertNewUserReturningUserID("Term", "test", "test.com"));
+        testCompanyID = await helper.insertDummyCompanyReturningID();
+        testBuildingID = await helper.insertDummyBuildingReturningID();
     }, 10000);
 
     test('assign new building admin', async () => {
         const numberOfBuildingAdminsBefore = await helper.getNumberOfBuildingAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
-            buildingID: '1'
+            buildingID: String(testBuildingID)
         };
 
         await request.post('/api/v1/user/post/assignBadmin')
@@ -58,9 +36,8 @@ describe('assign admin service', () => {
         const numberOfCompanyAdminsBefore = await helper.getNumberOfCompanyAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
-            companyID: '1'
+            companyID: String(testCompanyID)
         };
 
         await request.post('/api/v1/user/post/assignCadmin')
@@ -77,9 +54,8 @@ describe('assign admin service', () => {
         const numberOfBuildingAdminsBefore = await helper.getNumberOfBuildingAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
-            buildingID: '1'
+            buildingID: String(testBuildingID)
         };
 
         await request.post('/api/v1/user/post/assignBadmin')
@@ -97,9 +73,8 @@ describe('assign admin service', () => {
         const numberOfCompanyAdminsBefore = await helper.getNumberOfCompanyAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
-            companyID: '1'
+            companyID: String(testCompanyID)
         };
 
         await request.post('/api/v1/user/post/assignCadmin')
@@ -116,9 +91,8 @@ describe('assign admin service', () => {
         const numberOfCompanyAdminsBefore = await helper.getNumberOfCompanyAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: '12312312',
-            companyID: '1'
+            companyID: String(testCompanyID)
         };
 
         const result = await request.post('/api/v1/user/post/assignCadmin')
@@ -136,9 +110,8 @@ describe('assign admin service', () => {
         const numberOfBuildingAdminsBefore = await helper.getNumberOfBuildingAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: '12312312',
-            buildingID: '1'
+            buildingID: String(testBuildingID)
         };
 
         const result = await request.post('/api/v1/user/post/assignBadmin')
@@ -156,7 +129,6 @@ describe('assign admin service', () => {
         const numberOfCompanyAdminsBefore = await helper.getNumberOfCompanyAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
             companyID: '11231231'
         };
@@ -176,7 +148,6 @@ describe('assign admin service', () => {
         const numberOfBuildingAdminsBefore = await helper.getNumberOfBuildingAdmins();
 
         const data = {
-            sessionID: currentSessionID,
             userID: currentUserID,
             buildingID: '11231231'
         };
@@ -190,16 +161,5 @@ describe('assign admin service', () => {
         expect(numberOfBuildingAdminsAfter).toEqual(numberOfBuildingAdminsBefore);
         expect(result.body).toHaveProperty('Error');
         expect(result.body.Error).toContain('buildingID');
-    });
-
-
-    afterAll(async () => {
-        // !IMPORTANT NOTE: The sequence wich the tables are cleared is important as there are foreign keys.
-        await helper.clearSessionsTable();
-        await helper.clearRegistrationSecretsTable();
-        void helper.clearBuildingAdminsTable();
-        await helper.clearCompanyAdminsTable();
-        await helper.clearAccountsTable();
-        await database.closeDBConnection();
     });
 });
