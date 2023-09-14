@@ -45,6 +45,20 @@ interface AssignEmployeeToBuildingRequest {
     expirationDate?: Date;
 }
 
+interface RevokeBuildingAccessRequest {
+    userID: number,
+    buildingID: number
+}
+
+interface EditUserProfileRequest {
+    id: number,
+    username?: string,
+    email_account?: string,
+    profile_picture?: string,
+    rfid?: number,
+    company_id?: number
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -54,5 +68,7 @@ export {
     APIResponse,
     CreateCompanyRequest,
     DeleteCompanyRequest,
-    EditCompanyRequest
+    EditCompanyRequest,
+    RevokeBuildingAccessRequest,
+    EditUserProfileRequest
 };

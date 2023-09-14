@@ -106,34 +106,42 @@ WHERE session_secret = {session_id};
 
 -- All building admins
 -- /api/v1/user/get/buildingAdmins
-SELECT ba.id, ba.account_id, ba.building_id, username, password_hash, password_salt, email_account, profile_picture
-FROM Building_admins ba JOIN Accounts a ON a.id = ba.account_id;
+SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, building_id, b.building_name, b.building_location
+FROM Building_admins 
+LEFT JOIN Accounts a ON a.id = Building_admins.account_id
+LEFT JOIN buildings b ON b.id = Building_admins.building_id;
+
 
 
 -- Building admin that has control of a selected building
 -- /api/v1/user/get/assignedBadmins (buildingID)
 -- [ Company_admin ? ]
 -- { selected_building_id }
-SELECT ba.id, ba.account_id, username, password_hash, password_salt, email_account, profile_picture
-FROM Building_admins ba JOIN Accounts a ON a.id = ba.account_id
-WHERE ba.building_id = {selected_building_id};
+SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, building_id, b.building_name, b.building_location
+FROM building_admins 
+LEFT JOIN accounts a ON a.id = building_admins.account_id
+LEFT JOIN buildings b ON b.id = building_admins.building_id
+WHERE building_admins.id = {selected_building_id};
 
 
 -- All company admins
 -- /api/v1/user/get/companyAdmins
 -- [ Building_admin ]
-SELECT ca.id, ca.account_id, ca.company_id, username, password_hash, password_salt, email_account, profile_picture
-FROM Company_admins ca JOIN Accounts a ON a.id = ca.account_id;
+SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, company_admins.company_id, c.company_name
+FROM company_admins 
+LEFT JOIN Accounts a ON a.id = company_admins.account_id
+LEFT JOIN companies c ON c.id = company_admins.company_id;
 
 
 -- Company admin that has control of a selected company
 -- /api/v1/user/get/assignedCadmins (companyID)
 -- [ Building_admin ]
 -- { selected_company_id }
-SELECT ca.id, ca.account_id, username, password_hash, password_salt, email_account, profile_picture
-FROM Company_admins ca JOIN Accounts a ON a.id = ca.account_id
-WHERE ca.company_id = {selected_company_id};
-
+SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, company_admins.company_id, c.company_name
+FROM company_admins 
+LEFT JOIN Accounts a ON a.id = company_admins.account_id
+LEFT JOIN companies c ON c.id = company_admins.company_id
+WHERE company_admins.id = $1;
 
 -- Remove a building admin
 -- /api/v1/user/delete/badmin (userID)
@@ -180,12 +188,17 @@ VALUES (
 );
 
 
--- TODO:
--- Removes an employee from a building, or from a company
--- /api/v1/user/delete/employee (userID, companyID?, buildingID?) complex
--- If a buildingID is specified, removes an employee from only that building
+-- Deletes user account from all tables in the database
+-- /api/v1/user/delete/account (account_id)
+-- { account_id }
+CALL delete_employee({account_id})
 
 
+-- Removes the building access row for a specific user and building combinartion therby revoking the users access to that building
+-- /api/v1/user/delete/building_access
+-- {account_id, building_id}
+DELETE FROM building_accesses
+WHERE account_id = {account_id} AND building_id = {building_id};
 
 
 -- Remove an account. DISCLAIMER: Deleting a company/building/platform admin should happen first!
