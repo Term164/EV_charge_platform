@@ -30,6 +30,8 @@
 --=============================================
 -- V 2.5
 -- -> Adds UNIQUE constraints for some tables. Possibly more in the future.
+-- -> Removes foreign key constraint on 'company_admin_id' from 'building_accesses'. This is to avoid losing access data in case that company admin is no more.
+-- -> Adds 'email_account' column in the same table, because of the missing 'company_admin_id' constraint. Now if it is null, it is at least possible to contact.
 --=============================================
 
 
@@ -171,11 +173,11 @@ CREATE TABLE Building_accesses
  account_id      int NOT NULL,
  building_id     int NULL,
  company_admin_id   int NULL,
+ email_account   varchar(50) NULL,
  expiration_date date NULL,
  CONSTRAINT PK_8 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_8 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" ),
  CONSTRAINT FK_9 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" ),
- CONSTRAINT FK_10 FOREIGN KEY ( company_admin_id ) REFERENCES Company_admins ( "id" )
 );
 
 CREATE INDEX FK_8 ON Building_accesses
@@ -186,11 +188,6 @@ CREATE INDEX FK_8 ON Building_accesses
 CREATE INDEX FK_9 ON Building_accesses
 (
  building_id
-);
-
-CREATE INDEX FK_10 ON Building_accesses
-(
- company_admin_id
 );
 
 
