@@ -45,6 +45,26 @@ interface AssignEmployeeToBuildingRequest {
     expirationDate?: Date;
 }
 
+interface CreateBuildingRequest {
+    buildingName: string;
+    buildingLocation: string;
+}
+
+interface EditBuildingRequest {
+    buildingID: number;
+    newBuildingName: string | null;
+    newBuildingLocation: string | null;
+}
+
+interface DeleteBuildingRequest {
+    buildingID: number;
+}
+
+interface AssignCompanyRequest {
+    companyID: number;
+    buildingID: number;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -54,5 +74,9 @@ export {
     APIResponse,
     CreateCompanyRequest,
     DeleteCompanyRequest,
-    EditCompanyRequest
+    EditCompanyRequest,
+    CreateBuildingRequest,
+    EditBuildingRequest,
+    DeleteBuildingRequest,
+    AssignCompanyRequest
 };

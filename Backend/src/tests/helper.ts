@@ -15,6 +15,7 @@ async function clearAllTables() {
         DELETE FROM building_admins;
         DELETE FROM building_accesses;
         DELETE FROM company_admins;
+        DELETE FROM "Building-Company";
         DELETE FROM buildings;
         DELETE FROM reservations;
         DELETE FROM charging_stations;
@@ -54,8 +55,20 @@ async function getNumberOfCompanies(): Promise<number> {
     return (await database.connection.execute(`SELECT COUNT(*) FROM Companies`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
+async function getNumberOfBuildings(): Promise<number> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM Buildings`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
 async function checkCompanyExists(companyName: string) {
     return (await database.connection.execute(`SELECT * FROM Companies WHERE company_name = '${companyName}'`)).results.at(0)?.rows?.length as number > 0;
+}
+
+async function checkBuildingExists(buildingName: string) {
+    return (await database.connection.execute(`SELECT * FROM Buildings WHERE building_name = '${buildingName}'`)).results.at(0)?.rows?.length as number > 0;
+}
+
+async function checkCompanyAssignedToBuildingExists(buildingID: number, companyID: number) {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM "Building-Company" WHERE building_id = '${buildingID}' AND company_id = '${companyID}'`)).results.at(0)?.rows?.length as number == 1;
 }
 
 async function checkUserExists(username: string) {
@@ -89,6 +102,10 @@ async function getCompanyName(id: number): Promise<string> {
     return (await database.connection.execute(`SELECT "company_name" FROM Companies WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0)[0] as string;
 }
 
+async function getBuildingData(id: number): Promise<string[]> {
+    return (await database.connection.execute(`SELECT "building_name","building_location" FROM Buildings WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
+}
+
 // ============================ MODIFY DATA ===========================
 
 async function makeSessionExpired(sessionSecret: string) {
@@ -96,8 +113,8 @@ async function makeSessionExpired(sessionSecret: string) {
 }
 
 // This example data was already inserted into the database and will currently not change
-function createExampleBuildings() {
-    void database.connection.execute(`INSERT INTO Buildings ("building_name", "building_location") VALUES
+async function createExampleBuildings() {
+    await database.connection.execute(`INSERT INTO Buildings ("building_name", "building_location") VALUES
     ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
     ('A1 poslovna stavba', 'Ameriška ulica 4'),
     ('A1 Maribor','Mariborska cesta');`);
@@ -110,6 +127,7 @@ async function createExampleCompanies() {
     ('Lenovo');`);
 }
 
+/** Inserts a dummy company with the name 'dummy'*/
 async function insertDummyCompanyReturningID(): Promise<number> {
     return (await database.connection.execute(`INSERT INTO Companies ("company_name") VALUES ('dummy') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
@@ -119,8 +137,21 @@ async function insertDummySession(accountID: number, sessionID: string) {
     VALUES ('${accountID}', '${sessionID}', NOW() + interval '30 minutes');`);
 }
 
+/** Inserts a dummy building with the name 'dummy' and location 'location'*/
 async function insertDummyBuildingReturningID(): Promise<number> {
     return (await database.connection.execute(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('dummy', 'location') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+/** Inserts 3 new dummy companies, assigns them to a given building */
+async function insertCompaniesAssignedToBuilding(buildingID: number) {
+    return (await database.connection.execute(`INSERT INTO "Building-Company" ("building_id", "company_id") 
+    VALUES (${buildingID}, ${await insertDummyCompanyReturningID()}), (${buildingID}, ${await insertDummyCompanyReturningID()}), (${buildingID}, ${await insertDummyCompanyReturningID()})`));
+}
+
+/** Inserts 3 new dummy buildings, assigns them to a given company */
+async function insertBuildingsOwnedByCompany(companyID: number) {
+    return (await database.connection.execute(`INSERT INTO "Building-Company" ("building_id", "company_id") 
+    VALUES (${await insertDummyBuildingReturningID()}, ${companyID}), (${await insertDummyBuildingReturningID()}, ${companyID}), (${await insertDummyBuildingReturningID()}, ${companyID})`));
 }
 
 async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
@@ -144,11 +175,14 @@ export default {
     getNumberOfBuildingAdmins,
     getNumberOfCompanyAdmins,
     getNumberOfCompanies,
+    getNumberOfBuildings,
     getNumberOfBuildingAccesses,
     getValidationURL,
     getAccountValidatedParameter,
     getUserAssignedCompanyID,
     checkCompanyExists,
+    checkBuildingExists,
+    checkCompanyAssignedToBuildingExists,
     checkUserExists,
     makeSessionExpired,
     createExampleBuildings,
@@ -156,7 +190,10 @@ export default {
     getSessionExpirationDate,
     insertDummyCompanyReturningID,
     getCompanyName,
+    getBuildingData,
     insertDummyBuildingReturningID,
+    insertCompaniesAssignedToBuilding,
+    insertBuildingsOwnedByCompany,
     insertDummyCompanyAdminReturningID,
     insertNewUserReturningNumberOfUsers,
     insertNewUserReturningUserID,

@@ -36,7 +36,7 @@ describe('company service', () => {
         expect(numberOfCompanies).toEqual(numberOfCompaniesReturned);
     });
 
-    test('delete a company', async () => {
+    test('delete a company - success', async () => {
         const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
         const numberOfCompaniesBefore = await helper.getNumberOfCompanies();
 
@@ -52,7 +52,24 @@ describe('company service', () => {
         const numberOfCompaniesAfter = await helper.getNumberOfCompanies();
 
         expect(numberOfCompaniesAfter).toEqual(numberOfCompaniesBefore-1);
+    });
 
+    test('delete a company - fail', async () => {
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const numberOfCompaniesBefore = await helper.getNumberOfCompanies();
+
+        const data = {
+            companyID: lastInsertedCompanyID+1000
+        };
+
+        await request.delete('/api/v1/company/delete/company')
+            .send(data)
+            .expect(400)
+            .expect('Content-Type', /application\/json/);
+
+        const numberOfCompaniesAfter = await helper.getNumberOfCompanies();
+
+        expect(numberOfCompaniesAfter).toEqual(numberOfCompaniesBefore);
     });
 
     test('edit a company', async () => {
@@ -74,6 +91,20 @@ describe('company service', () => {
         const companyNameAfter = await helper.getCompanyName(lastInsertedCompanyID);
 
         expect(companyNameAfter).toEqual("MICROSOFT");
+    });
+
+    test('edit a company - fail', async () => {
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+
+        const data = {
+            companyID: lastInsertedCompanyID,
+        };
+
+        const response = await request.patch('/api/v1/company/patch/edit')
+            .send(data)
+            .expect(400);
+        expect(response).toHaveProperty("body");
+        expect(response.body).toHaveProperty("Error");
     });
 });
 
