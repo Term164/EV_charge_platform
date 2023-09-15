@@ -56,7 +56,8 @@ async function deleteBuilding(body: unknown): Promise<APIResponse> {
 
     const result = await statement.execute({params: [data.buildingID]});
 
-    if (result.rowsAffected != 1) throw new Error("Something went wrong while trying to delete a building.");
+    if (result.rowsAffected != 1) // throw new Error("Something went wrong while trying to delete a building.");
+        return ({status: 400, data: {'Error': 'Failed to delete a building.'}});
 
     return ({status: 200, data: {'Result': 'Successfully deleted a building.'}});
 }
@@ -119,7 +120,7 @@ async function getAllCompaniesAssignedToBuilding(body: unknown): Promise<APIResp
         log.debug(error);
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
-    
+
     const statement = await db.connection.prepare(
         `SELECT c.id company_id, company_name
         FROM Buildings b JOIN "Building-Company" bc ON b.id = bc.building_id 

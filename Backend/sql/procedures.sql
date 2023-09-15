@@ -5,7 +5,7 @@
 -- MEANT TO BE RUN ONCE
 --
 
---=============================== BUILDING ===============================
+--=============================== PROCEDURES ===============================
 
 -- Edit building info
 -- /api/v1/building/patch/edit
