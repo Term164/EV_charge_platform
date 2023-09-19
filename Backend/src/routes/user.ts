@@ -2,6 +2,7 @@ import express from 'express';
 import asyncHanlder from 'express-async-handler';
 import assignAdminService from '../services/assignAdminService';
 import assignEmployeeService from '../services/assignEmployeeService';
+import userService from '../services/userService';
 
 const router = express.Router();
 
@@ -29,36 +30,58 @@ router.post('/post/assignBuilding', asyncHanlder( async (req, res) => {
         .send(response.data);
 }));
 
-router.get('/get/buildingAdmins', (_req, res) => {
-    res.send('Get all building admins');
-});
+router.get('/get/buildingAdmins', asyncHanlder( async (_req, res) => {
+    const response = await userService.getBuildingAdmins();
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/companyAdmins', (_req, res) => {
-    res.send('Get all company admins');
-});
+router.get('/get/companyAdmins', asyncHanlder( async (_req, res) => {
+    const response = await userService.getCompanyAdmins();
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/assignedBadmins', (_req, res) => {
-    res.send('Get all building admins for a specific building');
-});
+router.get('/get/assignedBadmins', asyncHanlder( async (req, res) => {
+    const response = await userService.getAssignedBuildingAdmins(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/assignedCadmins', (_req, res) => {
-    res.send('Get all company admins for a specific company');
-});
+router.get('/get/assignedCadmins', asyncHanlder( async (req, res) => {
+    const response = await userService.getAssignedCompanyAdmins(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/delete/employee', (_req, res) => {
-    res.send('Delete company employee');
-});
+router.delete('/delete/account', asyncHanlder( async (req, res) => {
+    const response = await userService.deleteAccount(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/delete/badmin', (_req, res) => {
-    res.send('Delete building admin account');
-});
+router.delete('/delete/building_access', asyncHanlder(async (req, res) => {
+    const response = await userService.deleteBuildingAccess(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/delete/cadmin', (_req, res) => {
-    res.send('Delete company admin account');
-});
+router.delete('/delete/badmin', asyncHanlder( async (req, res) => {
+    const response = await userService.deleteBuildingAdmin(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/patch/editProfile', (_req, res) => {
-    res.send('Edit user profile');
-});
+router.delete('/delete/cadmin', asyncHanlder( async (req, res) => {
+    const response = await userService.deleteCompanyAdmin(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
+
+router.patch('/patch/editProfile', asyncHanlder( async (req, res) => {
+    const response = await userService.editUserProfile(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
 export default router;
