@@ -41,6 +41,18 @@ describe('company service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(await helper.checkCompanyExists('companyServiceTest')).toBe(false);
+    });
+
+    test('delete a company - fail', async () => {
+
+        const data = {
+            companyID: '1231124123'
+        };
+
+        await request.delete('/api/v1/company/delete/company')
+            .send(data)
+            .expect(400)
+            .expect('Content-Type', /application\/json/);
 
     });
 
@@ -64,9 +76,18 @@ describe('company service', () => {
 
         expect(companyNameAfter).toEqual("MICROSOFT");
     });
+
+    test('edit a company - fail', async () => {
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID('CompanyServiceTest');
+
+        const data = {
+            companyID: lastInsertedCompanyID,
+        };
+
+        const response = await request.patch('/api/v1/company/patch/edit')
+            .send(data)
+            .expect(400);
+        expect(response).toHaveProperty("body");
+        expect(response.body).toHaveProperty("Error");
+    });
 });
-
-
-
-
-

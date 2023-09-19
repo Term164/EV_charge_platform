@@ -1,5 +1,5 @@
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
-import { AssignEmployeeToBuildingRequest, AssignRequest, CreateCompanyRequest, DeleteCompanyRequest, EditCompanyRequest, EditUserProfileRequest, RevokeBuildingAccessRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignEmployeeToBuildingRequest, AssignRequest, CreateCompanyRequest, DeleteCompanyRequest, EditCompanyRequest, EditUserProfileRequest, RevokeBuildingAccessRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -213,6 +213,21 @@ function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAcces
 
         return revokeRequest;
     }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+    if ('buildingName' in request && 'buildingLocation' in request) {
+        const CreateBuildingRequest: CreateBuildingRequest = {
+            buildingName: parseStringParameter(request.buildingName, 'buildingName'),
+            buildingLocation: parseStringParameter(request.buildingLocation, 'buildingLocation')
+        };
+
+        return CreateBuildingRequest;
+    }
 
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -238,6 +253,24 @@ function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request) {
+        const EditBuildingRequest: EditBuildingRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            newBuildingName : ('newBuildingName' in request) ? parseStringParameter(request.newBuildingName, 'newBuildingName') : null,
+            newBuildingLocation : ('newBuildingLocation' in request) ? parseStringParameter(request.newBuildingLocation, 'newBuildingLocation') : null
+        };
+
+        return EditBuildingRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 // ==================================== SINGLE VARIABLE PARSERS ======================================
 
 function parseUserID(dataBody: unknown): number {
@@ -252,6 +285,38 @@ function parseUserID(dataBody: unknown): number {
     }
 }
 
+function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request) {
+        const DeleteBuildingRequest: DeleteBuildingRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID')
+        };
+
+        return DeleteBuildingRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request && 'companyID' in request) {
+        const AssignCompanyRequest: AssignCompanyRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+        };
+
+        return AssignCompanyRequest;
+    }
+
+    throw new Error('Incorrect data: some fields are missing');
+}
 
 // ==================================== DATABASE MODEL PARSERS ==============================================
 
@@ -354,4 +419,8 @@ export default {
     parseBuildingAdmin,
     parseCompanyAdmin,
     parseUserID,
+    parseCreateBuildingRequest,
+    parseEditBuildingRequest,
+    parseDeleteBuildingRequest,
+    parseAssignCompanyRequest
 };

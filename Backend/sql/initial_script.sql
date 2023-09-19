@@ -1,6 +1,8 @@
 -- Prepared for PostgreSQL
 -- Use the picture ER_diagram.png for reference
 --
+-- MEANT TO BE RUN ONCE
+--
 -- Version history: the last version number is the current one.
 --=============================================
 -- V 1.0
@@ -26,7 +28,11 @@
 -- V 2.4
 -- -> Adds 'regtistration_secrets' table for creating step 2 of registration urls
 --=============================================
-
+-- V 2.5
+-- -> Adds UNIQUE constraints for some tables. Possibly more in the future.
+-- -> Removes foreign key constraint on 'company_admin_id' from 'building_accesses'. This is to avoid losing access data in case that company admin is no more.
+-- -> Adds 'email_account' column in the same table, because of the missing 'company_admin_id' constraint. Now if it is null, it is at least possible to contact.
+--=============================================
 
 
 CREATE TABLE Companies
@@ -91,7 +97,7 @@ CREATE TABLE Building_admins
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE Building_admins
 ADD CONSTRAINT unique_account_building
 UNIQUE (account_id, building_id);
@@ -118,7 +124,7 @@ CREATE TABLE Company_admins
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE Company_admins
 ADD CONSTRAINT unique_account_company
 UNIQUE (account_id, company_id);
@@ -145,7 +151,7 @@ CREATE TABLE "Building-Company"
 );
 
 -- Didn't test, should work.
--- Pameten človek bi to naredu kar v CREATE stavku. Bom ko pridem do moje dev machine.
+-- Pameten človek bi to naredu kar v CREATE stavku. Bom enkrat. Odpri jiro.
 ALTER TABLE "Building-Company"
 ADD CONSTRAINT unique_building_company
 UNIQUE (building_id, company_id);
@@ -167,11 +173,11 @@ CREATE TABLE Building_accesses
  account_id      int NOT NULL,
  building_id     int NULL,
  company_admin_id   int NULL,
+ email_account   varchar(50) NULL,
  expiration_date date NULL,
  CONSTRAINT PK_8 PRIMARY KEY ( "id" ),
  CONSTRAINT FK_8 FOREIGN KEY ( account_id ) REFERENCES Accounts ( "id" ),
  CONSTRAINT FK_9 FOREIGN KEY ( building_id ) REFERENCES Buildings ( "id" ),
- CONSTRAINT FK_10 FOREIGN KEY ( company_admin_id ) REFERENCES Company_admins ( "id" )
 );
 
 CREATE INDEX FK_8 ON Building_accesses
@@ -182,11 +188,6 @@ CREATE INDEX FK_8 ON Building_accesses
 CREATE INDEX FK_9 ON Building_accesses
 (
  building_id
-);
-
-CREATE INDEX FK_10 ON Building_accesses
-(
- company_admin_id
 );
 
 

@@ -59,6 +59,26 @@ interface EditUserProfileRequest {
     company_id?: number
 }
 
+interface CreateBuildingRequest {
+    buildingName: string;
+    buildingLocation: string;
+}
+
+interface EditBuildingRequest {
+    buildingID: number;
+    newBuildingName: string | null;
+    newBuildingLocation: string | null;
+}
+
+interface DeleteBuildingRequest {
+    buildingID: number;
+}
+
+interface AssignCompanyRequest {
+    companyID: number;
+    buildingID: number;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -70,5 +90,9 @@ export {
     DeleteCompanyRequest,
     EditCompanyRequest,
     RevokeBuildingAccessRequest,
-    EditUserProfileRequest
+    EditUserProfileRequest,
+    CreateBuildingRequest,
+    EditBuildingRequest,
+    DeleteBuildingRequest,
+    AssignCompanyRequest
 };

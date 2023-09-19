@@ -56,8 +56,8 @@ async function deleteCompany(body: unknown): Promise<APIResponse> {
 
     const result = await statement.execute({params: [data.companyID]});
 
-    if (result.rowsAffected != 1) throw new Error("Something went wrong while trying to delete a company.");
-
+    if (result.rowsAffected != 1) //throw new Error("Something went wrong while trying to delete a company.");
+        return {status: 400, data: {'Error': 'Failed to delete a company.'}};
     return ({status: 200, data: {'Result': 'Successfully deleted a company.'}});
 }
 
