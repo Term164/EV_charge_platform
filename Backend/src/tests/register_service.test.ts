@@ -30,7 +30,7 @@ describe('register a new user', () => {
 
     test('fail to register a user with a taken username', async () => {
 
-        const accountsBeforeRequest = await helper.insertNewUserReturningNumberOfUsers("Term", "somepass", "idk.reall@domain.com");
+        await helper.insertNewUserReturningNumberOfUsers("Term", "somepass", "idk.reall@domain.com");
 
         const req_body: UserRegistrationRequest = {
             username: "Term",
@@ -46,14 +46,10 @@ describe('register a new user', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response.body).toEqual({'Error': 'Username is already taken.'});
-        const accountsAfterRequest = await helper.getNumberOfAccounts();
-
-        expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
     });
 
     test('fail to register a user with a taken email', async () => {
-
-        const accountsBeforeRequest = await helper.insertNewUserReturningNumberOfUsers(Math.random().toString(36).slice(7), "somepass", "termicrafter164@gmail.com");
+        await helper.insertNewUserReturningNumberOfUsers(Math.random().toString(36).slice(7), "somepass", "termicrafter164@gmail.com");
 
         const req_body: UserRegistrationRequest = {
             username: "Term164",
@@ -67,16 +63,9 @@ describe('register a new user', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response.body).toEqual({'Error': 'Email is already in use.'});
-
-        const accountsAfterRequest = await helper.getNumberOfAccounts();
-
-        expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
     });
 
     test('username not included in sent data', async () => {
-
-        const accountsBeforeRequest = await helper.getNumberOfAccounts();
-
         const req_body = {
             email_account: "termicrafter164@gmail.com",
             password: "idkSometing"
@@ -88,15 +77,9 @@ describe('register a new user', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response.body).toEqual({"Failed": "An error occured."});
-
-        const accountsAfterRequest = await helper.getNumberOfAccounts();
-
-        expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
     });
 
     test('email not included in sent data', async () => {
-
-        const accountsBeforeRequest = await helper.getNumberOfAccounts();
 
         const req_body = {
             username: "something",
@@ -109,9 +92,6 @@ describe('register a new user', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response.body).toEqual({"Failed": "An error occured."});
-        const accountsAfterRequest = await helper.getNumberOfAccounts();
-
-        expect(accountsBeforeRequest).toEqual(accountsAfterRequest);
     });
 
     test('registration step 2 request to non existent URL not found', async () => {

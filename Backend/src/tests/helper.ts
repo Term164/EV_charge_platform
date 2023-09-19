@@ -1,6 +1,7 @@
 import { agent as _request } from "supertest";
 import database from "../utils/database";
 import app from "../app";
+import crypto from 'crypto';
 
 export const request = _request(app);
 
@@ -26,34 +27,6 @@ async function clearAllTables() {
 
 // ============================== RETRIEVE SPECIFIC DATA ==============================
 
-async function getNumberOfAccounts(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM accounts`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfTokens(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM registration_secrets`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfSessions(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM sessions`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfBuildingAdmins(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM building_admins`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfCompanyAdmins(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM company_admins`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfBuildingAccesses(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM building_accesses`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
-async function getNumberOfCompanies(): Promise<number> {
-    return (await database.connection.execute(`SELECT COUNT(*) FROM Companies`)).results.at(0)?.rows?.at(0)[0] as number;
-}
-
 async function checkCompanyExists(companyName: string) {
     return (await database.connection.execute(`SELECT * FROM Companies WHERE company_name = '${companyName}'`)).results.at(0)?.rows?.length as number > 0;
 }
@@ -63,6 +36,20 @@ async function checkUserExists(username: string) {
     return result.results.at(0)?.rows?.length as number > 0;
 }
 
+async function checkCAdminExists(companyAdminID : string) {
+    const result = await database.connection.execute(`SELECT company_id FROM company_admins WHERE account_id = '${companyAdminID}'`);
+    return result.results.at(0)?.rows?.length as number > 0;
+}
+
+async function checkBAdminExists(buildingAdminID : string) {
+    const result = await database.connection.execute(`SELECT building_id FROM building_admins WHERE account_id = '${buildingAdminID}'`);
+    return result.results.at(0)?.rows?.length as number > 0;
+}
+
+async function checkUserHasBuildingAccess(userID: string, buildingID: string) {
+    const result = await database.connection.execute(`SELECT id FROM building_accesses WHERE account_id = '${userID}' AND building_id = '${buildingID}'`);
+    return result.results.at(0)?.rows?.length as number > 0;
+}
 
 async function getValidationURL(username: string): Promise<string> {
     const result = (await database.connection.execute(`
@@ -110,8 +97,8 @@ async function createExampleCompanies() {
     ('Lenovo');`);
 }
 
-async function insertDummyCompanyReturningID(): Promise<number> {
-    return (await database.connection.execute(`INSERT INTO Companies ("company_name") VALUES ('dummy') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+async function insertDummyCompanyReturningID(companyName: string): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO Companies ("company_name") VALUES ('${companyName}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
 async function insertDummySession(accountID: number, sessionID: string) {
@@ -119,12 +106,16 @@ async function insertDummySession(accountID: number, sessionID: string) {
     VALUES ('${accountID}', '${sessionID}', NOW() + interval '30 minutes');`);
 }
 
-async function insertDummyBuildingReturningID(): Promise<number> {
-    return (await database.connection.execute(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('dummy', 'location') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+async function insertDummyBuildingReturningID(buildingName: string): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO Buildings ("building_name", "building_location") VALUES ('${buildingName}', 'location') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
 async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
     return (await database.connection.execute(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '${companyID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyBuildingAdminReturningID(userID: string, buildingID: string): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO building_admins ("account_id", "building_id") VALUES ('${userID}', '${buildingID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
 async function insertNewUserReturningUserID(username: string, password: string, email: string): Promise<string>  {
@@ -136,29 +127,57 @@ async function insertNewUserReturningNumberOfUsers(username: string, password: s
     ('${username}', '${password}','${email}'); SELECT COUNT(*) from accounts;`)).results.at(1)?.rows?.at(0)[0] as number;
 }
 
+async function createNewCompanyAdmin(): Promise<string> {
+    const username = crypto.randomBytes(20).toString('hex');
+    const password = crypto.randomBytes(20).toString('hex');
+    const email = crypto.randomBytes(20).toString('hex');
+
+    const userID = await insertNewUserReturningUserID(username,password,email);
+    const companyID = await insertDummyCompanyReturningID(crypto.randomBytes(20).toString('hex'));
+    void await insertDummyCompanyAdminReturningID(String(userID), String(companyID));
+    return userID;
+}
+
+async function createNewBuildingAdmin(): Promise<string> {
+    const username = crypto.randomBytes(20).toString('hex');
+    const password = crypto.randomBytes(20).toString('hex');
+    const email = crypto.randomBytes(20).toString('hex');
+
+    const userID = await insertNewUserReturningUserID(username,password,email);
+    const buildingID = await insertDummyBuildingReturningID(crypto.randomBytes(20).toString('hex'));
+    void await insertDummyBuildingAdminReturningID(String(userID), String(buildingID));
+    return userID;
+}
+
+
+async function insertUserBuildingAccess(userID: string, buildingID: string, companyAdminID: string) {
+    return (await database.connection.execute(`INSERT INTO building_accesses ("account_id", "building_id", "company_admin_id") VALUES ('${userID}', '${buildingID}', '${companyAdminID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+
 export default {
     clearAllTables,
-    getNumberOfAccounts,
-    getNumberOfTokens,
-    getNumberOfSessions,
-    getNumberOfBuildingAdmins,
-    getNumberOfCompanyAdmins,
-    getNumberOfCompanies,
-    getNumberOfBuildingAccesses,
     getValidationURL,
     getAccountValidatedParameter,
     getUserAssignedCompanyID,
     checkCompanyExists,
     checkUserExists,
+    checkCAdminExists,
+    checkBAdminExists,
+    checkUserHasBuildingAccess,
     makeSessionExpired,
     createExampleBuildings,
     createExampleCompanies,
     getSessionExpirationDate,
     insertDummyCompanyReturningID,
+    insertDummyBuildingAdminReturningID,
     getCompanyName,
     insertDummyBuildingReturningID,
     insertDummyCompanyAdminReturningID,
     insertNewUserReturningNumberOfUsers,
     insertNewUserReturningUserID,
-    insertDummySession
+    insertDummySession,
+    createNewCompanyAdmin,
+    createNewBuildingAdmin,
+    insertUserBuildingAccess,
 };

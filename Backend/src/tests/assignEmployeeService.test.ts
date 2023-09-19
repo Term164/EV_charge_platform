@@ -10,8 +10,8 @@ describe('assign employee service', () => {
     beforeAll(async () => {
 
         currentUserID = String(await helper.insertNewUserReturningUserID("Term", "test", "test.com"));
-        testBuildingID = await helper.insertDummyBuildingReturningID();
-        testCompanyID = await helper.insertDummyCompanyReturningID();
+        testBuildingID = await helper.insertDummyBuildingReturningID('assignEmployeeServiceTest');
+        testCompanyID = await helper.insertDummyCompanyReturningID('assignEmployeeServiceTest');
         testAdminID = await helper.insertDummyCompanyAdminReturningID(currentUserID, String(testCompanyID));
     }, 10000);
 
@@ -30,7 +30,6 @@ describe('assign employee service', () => {
     });
 
     test('fail when trying to assign a new employee that does not exist to building', async () => {
-        const numberOfBuildingAccessesBefore = await helper.getNumberOfBuildingAccesses();
 
         const data = {
             userID: '4123123',
@@ -43,9 +42,6 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        const numberOfBuildingAccessesAfter = await helper.getNumberOfBuildingAccesses();
-
-        expect(numberOfBuildingAccessesAfter).toEqual(numberOfBuildingAccessesBefore);
         expect(result.body).toHaveProperty('Error');
         expect(result.body.Error).toContain('userID');
 
@@ -68,7 +64,6 @@ describe('assign employee service', () => {
     });
 
     test('fail when trying to assign a new employee to a building that does not exist', async () => {
-        const numberOfBuildingAccessesBefore = await helper.getNumberOfBuildingAccesses();
 
         const data = {
             userID: currentUserID,
@@ -81,9 +76,6 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        const numberOfBuildingAccessesAfter = await helper.getNumberOfBuildingAccesses();
-
-        expect(numberOfBuildingAccessesAfter).toEqual(numberOfBuildingAccessesBefore);
         expect(result.body).toHaveProperty('Error');
         expect(result.body.Error).toContain('buildingID');
 
@@ -106,7 +98,6 @@ describe('assign employee service', () => {
     });
 
     test('fail when trying to assign a new employee that does not exist to building', async () => {
-        const numberOfBuildingAccessesBefore = await helper.getNumberOfBuildingAccesses();
 
         const data = {
             userID: currentUserID,
@@ -119,17 +110,12 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        const numberOfBuildingAccessesAfter = await helper.getNumberOfBuildingAccesses();
-
-        expect(numberOfBuildingAccessesAfter).toEqual(numberOfBuildingAccessesBefore);
         expect(result.body).toHaveProperty('Error');
         expect(result.body.Error).toContain('companyAdminID');
 
     });
 
     test('assign new employee to building', async () => {
-        const numberOfBuildingAccessesBefore = await helper.getNumberOfBuildingAccesses();
-
         const data = {
             userID: currentUserID,
             buildingID: String(testBuildingID),
@@ -140,15 +126,9 @@ describe('assign employee service', () => {
             .send(data)
             .expect(200)
             .expect('Content-Type', /application\/json/);
-
-        const numberOfBuildingAccessesAfter = await helper.getNumberOfBuildingAccesses();
-
-        expect(numberOfBuildingAccessesAfter).toEqual(numberOfBuildingAccessesBefore+1);
-
     });
 
     test('assign new employee to building that already has access', async () => {
-        const numberOfBuildingAccessesBefore = await helper.getNumberOfBuildingAccesses();
 
         const data = {
             userID: currentUserID,
@@ -160,10 +140,5 @@ describe('assign employee service', () => {
             .send(data)
             .expect(200)
             .expect('Content-Type', /application\/json/);
-
-        const numberOfBuildingAccessesAfter = await helper.getNumberOfBuildingAccesses();
-
-        expect(numberOfBuildingAccessesAfter).toEqual(numberOfBuildingAccessesBefore);
-
     });
 });

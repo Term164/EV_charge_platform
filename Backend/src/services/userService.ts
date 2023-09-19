@@ -31,7 +31,6 @@ async function getCompanyAdmins(): Promise<APIResponse> {
         FROM company_admins 
         LEFT JOIN Accounts a ON a.id = company_admins.account_id
         LEFT JOIN companies c ON c.id = company_admins.company_id;
-
         `
     );
 
@@ -64,7 +63,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
         FROM building_admins 
         LEFT JOIN accounts a ON a.id = building_admins.account_id
         LEFT JOIN buildings b ON b.id = building_admins.building_id
-        WHERE building_admins.id = $1;
+        WHERE building_admins.building_id = $1;
         `,
         {params: [buildingID]}
     );
@@ -99,7 +98,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
         FROM company_admins 
         LEFT JOIN Accounts a ON a.id = company_admins.account_id
         LEFT JOIN companies c ON c.id = company_admins.company_id
-        WHERE company_admins.id = $1;
+        WHERE company_admins.company_id = $1;
         `,
         {params: [companyID]}
     );
@@ -139,7 +138,8 @@ async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
     try {
         userID = modelParser.parseUserID(requestBody);
     } catch (error) {
-        return {status: 400, data: {"error":error}};
+        console.log(error);
+        return {status: 400, data: {"error": error}};
     }
 
     const result = await db.connection.query(
@@ -189,6 +189,8 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
 
     const filteredValues = Object.entries(editUserProfileData).filter((pair) => pair[1] !== undefined);
     const queryParameters = filteredValues.map((pair) => pair[1]);
+
+    if (queryParameters.length < 2) return {status: 418, data: {"error": "Must provide more details then just the userID."}};
 
     const queryBuilderArray = [];
     for (let i = 1; i < filteredValues.length; i++) {
