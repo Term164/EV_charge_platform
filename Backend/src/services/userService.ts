@@ -1,18 +1,12 @@
 import { APIResponse } from "../models/requestModels";
 import db from '.././utils/database';
 import modelParser from "../models/modelParser";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // ================================ MAIN FUNCTIONS ==============================
 
 async function getBuildingAdmins(): Promise<APIResponse> {
-    const result = await db.connection.query(
-        `
-        SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, building_id, b.building_name, b.building_location
-        FROM building_admins 
-        LEFT JOIN accounts a ON a.id = building_admins.account_id
-        LEFT JOIN buildings b ON b.id = building_admins.building_id;
-        `
-    );
+    const result = await SQLStatementManager.getBuildingAdminsStatment.execute();
 
     const parsedArray = result.rows?.map((buildingAdminData) => {
         if (Array.isArray(buildingAdminData)) {
@@ -25,14 +19,7 @@ async function getBuildingAdmins(): Promise<APIResponse> {
 }
 
 async function getCompanyAdmins(): Promise<APIResponse> {
-    const result = await db.connection.query(
-        `
-        SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, company_admins.company_id, c.company_name
-        FROM company_admins 
-        LEFT JOIN Accounts a ON a.id = company_admins.account_id
-        LEFT JOIN companies c ON c.id = company_admins.company_id;
-        `
-    );
+    const result = await SQLStatementManager.getCompanyAdminsStatement.execute();
 
     const parsedArray = result.rows?.map((companyAdminData) => {
         if (Array.isArray(companyAdminData)) {
@@ -57,17 +44,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
         return ({status: 400, data: {"Error":"parameter buildingID missing"}});
     }
 
-    const result = await db.connection.query(
-        `
-        SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, building_id, b.building_name, b.building_location
-        FROM building_admins 
-        LEFT JOIN accounts a ON a.id = building_admins.account_id
-        LEFT JOIN buildings b ON b.id = building_admins.building_id
-        WHERE building_admins.building_id = $1;
-        `,
-        {params: [buildingID]}
-    );
-
+    const result = await SQLStatementManager.getAssignedBuildingAdminsStatement.execute({params: [buildingID]});
 
     const parsedArray = result.rows?.map((buildingAdminData) => {
         if (Array.isArray(buildingAdminData)) {
@@ -92,16 +69,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
         return ({status: 400, data: {"Error":"parameter companyID missing"}});
     }
 
-    const result = await db.connection.query(
-        `
-        SELECT account_id, a.username, a.email_account, a.validated, a.profile_picture, a.rfid, a.company_id, company_admins.company_id, c.company_name
-        FROM company_admins 
-        LEFT JOIN Accounts a ON a.id = company_admins.account_id
-        LEFT JOIN companies c ON c.id = company_admins.company_id
-        WHERE company_admins.company_id = $1;
-        `,
-        {params: [companyID]}
-    );
+    const result = await SQLStatementManager.getAssignedCompanyAdminsStatement.execute({params: [companyID]});
 
     const parsedArray = result.rows?.map((companyAdminData) => {
         if (Array.isArray(companyAdminData)) {
@@ -121,13 +89,7 @@ async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
         return {status: 400, data: {"error":error}};
     }
 
-    const result = await db.connection.query(
-        `
-        DELETE FROM Building_admins
-        WHERE account_id = $1;
-        `,
-        {params: [userID]}
-    );
+    const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID]});
 
     if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${userID}' is not an admin of any building or does not exist.`}};
     else return {status: 200, data:{"result": "operation completed successfully"}};
@@ -142,13 +104,7 @@ async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
         return {status: 400, data: {"error": error}};
     }
 
-    const result = await db.connection.query(
-        `
-        DELETE FROM Company_admins
-        WHERE account_id = $1;
-        `,
-        {params: [userID]}
-    );
+    const result = await SQLStatementManager.deleteCompanyAdminStatement.execute({params: [userID]});
 
     if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${userID}' is not an admin of any company or does not exist.`}};
     else return {status: 200, data:{"result": "operation completed successfully"}};
@@ -162,10 +118,7 @@ async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
         return {status: 400, data: {"error":error}};
     }
 
-    await db.connection.query(
-        `CALL delete_employee($1)`,
-        {params: [userID]}
-    );
+    await SQLStatementManager.deleteAccountStatement.execute({params: [userID]});
 
     return {status: 200, data: {"result": "User deleted successfully"}};
 }
@@ -173,11 +126,7 @@ async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
 async function deleteBuildingAccess(requestBody: unknown): Promise<APIResponse> {
     const deleteRequestData = modelParser.parseDeleteBuildingAccessRequest(requestBody);
 
-    const result = await db.connection.query(
-        `DELETE FROM building_accesses
-        WHERE account_id = $1 AND building_id = $2;`,
-        {params: [deleteRequestData.userID, deleteRequestData.buildingID]}
-    );
+    const result = await SQLStatementManager.deleteBuildingAccessStatement.execute({params: [deleteRequestData.userID, deleteRequestData.buildingID]});
 
     if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${deleteRequestData.userID}' does not have specific access to this building or the user/building does not exist.`}};
     else return {status: 200, data:{"result": "Successfully revoked user permission for building"}};

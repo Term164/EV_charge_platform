@@ -1,32 +1,19 @@
 import parser from "../models/modelParser";
 import bcrypt from 'bcrypt';
-import db from '.././utils/database';
 import crypto from 'crypto';
-import { DataTypeOIDs} from "postgresql-client";
 import { APIResponse } from "../models/requestModels";
 import { UserAccount } from "../models/databaseModels";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // =========================================== HELPER FUNCTIONS ======================================
 
 async function saveSessionsID(accountID: number, sessionID: string) {
-    const statement = await db.connection.prepare(
-        `INSERT INTO Sessions ("account_id", "session_secret", "expiration_time")
-        VALUES ($1, $2, NOW() + interval '30 minutes');`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
-    );
-
-    return (await statement.execute({params: [accountID, sessionID]}));
+    return (await SQLStatementManager.saveSessionIDStatement.execute({params: [accountID, sessionID]}));
 }
 
 async function getUserDataFromEmail(email: string): Promise<UserAccount> {
-    const statement = await db.connection.prepare(
-        `SELECT *
-        FROM Accounts
-        WHERE email_account = $1`,
-        {paramTypes: [DataTypeOIDs.varchar]}
-    );
 
-    const response = await statement.execute({params: [email]});
+    const response = await SQLStatementManager.getUserDataFromEmailStatement.execute({params: [email]});
 
     if (response.rows === undefined) throw new Error('response is undefined.');
     if (response.rows.length === 0) throw new Error('User does not exist.');
@@ -35,14 +22,8 @@ async function getUserDataFromEmail(email: string): Promise<UserAccount> {
 }
 
 async function getUserDataFromUsername(username: string): Promise<UserAccount> {
-    const statement = await db.connection.prepare(
-        `SELECT *
-        FROM Accounts
-        WHERE username = $1`,
-        {paramTypes: [DataTypeOIDs.varchar]}
-    );
 
-    const response = await statement.execute({params: [username]});
+    const response = await SQLStatementManager.getUserDataFromUsernameStatement.execute({params: [username]});
 
     if (response.rows === undefined) throw new Error('response is undefined.');
     if (response.rows.length === 0) throw new Error('User does not exist.');
