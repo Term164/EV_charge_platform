@@ -1,7 +1,7 @@
 import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
-import db from '.././utils/database';
-import { DataTypeOIDs, QueryResult } from "postgresql-client";
+import { QueryResult } from "postgresql-client";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // ======================================== MAIN FUNCTIONS ========================================
 
@@ -13,16 +13,9 @@ async function assignBadmin(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `INSERT INTO Building_admins (account_id, building_id)
-        VALUES ($1, $2)
-        ON CONFLICT ON CONSTRAINT unique_account_building DO NOTHING;`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
-    );
-
     let result: QueryResult;
     try {
-        result = await statement.execute({params: [data.userID, data.otherID]});
+        result = await SQLStatementManager.assignBadminStatement.execute({params: [data.userID, data.otherID]});
     } catch (error) {
 
         if (error instanceof Error) {
@@ -50,16 +43,9 @@ async function assignCadmin(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `INSERT INTO company_admins (account_id, company_id)
-        VALUES ($1, $2)
-        ON CONFLICT ON CONSTRAINT unique_account_company DO NOTHING;`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
-    );
-
     let result: QueryResult;
     try {
-        result = await statement.execute({params: [data.userID, data.otherID]});
+        result = await SQLStatementManager.assignCadminStatement.execute({params: [data.userID, data.otherID]});
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {

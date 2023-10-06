@@ -1,8 +1,8 @@
 import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
-import db from '.././utils/database';
-import { DataTypeOIDs, QueryResult } from "postgresql-client";
+import { QueryResult } from "postgresql-client";
 import log from "../utils/logger";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // ======================================== MAIN FUNCTIONS ========================================
 
@@ -15,13 +15,7 @@ async function createBuilding(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `INSERT INTO Buildings (building_name, building_location)
-        VALUES ($1, $2);`,
-        {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.varchar]}
-    );
-
-    const result = await statement.execute({params: [data.buildingName, data.buildingLocation]});
+    const result = await SQLStatementManager.createBuildingStatement.execute({params: [data.buildingName, data.buildingLocation]});
 
     if (result.rowsAffected != 1) throw new Error("Something went wrong while trying to create a new building.");
 
@@ -29,12 +23,8 @@ async function createBuilding(body: unknown): Promise<APIResponse> {
 }
 
 async function getAllBuildings(): Promise<APIResponse> {
-    const statement = await db.connection.prepare(
-        `SELECT * FROM Buildings;`,
-        {paramTypes: []}
-    );
 
-    const result = await statement.execute({params: []});
+    const result = await SQLStatementManager.getAllBuildingsStatement.execute({params: []});
 
     return ({status: 200, data: {'Result': result.rows}});
 }
@@ -48,13 +38,7 @@ async function deleteBuilding(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `DELETE FROM Buildings
-        WHERE id = $1;`,
-        {paramTypes: [DataTypeOIDs.numeric]}
-    );
-
-    const result = await statement.execute({params: [data.buildingID]});
+    const result = await SQLStatementManager.deleteBuildingStatement.execute({params: [data.buildingID]});
 
     if (result.rowsAffected != 1) // throw new Error("Something went wrong while trying to delete a building.");
         return ({status: 400, data: {'Error': 'Failed to delete a building.'}});
@@ -71,14 +55,8 @@ async function editBuilding(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    // Check 'edit_building' in 'procedures.sql' for info
-    const statement = await db.connection.prepare(
-        `call edit_building($1, $2, $3);`,
-        {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.varchar, DataTypeOIDs.varchar]}
-    );
-
     try {
-        const result = await statement.execute({params: [data.buildingID, data.newBuildingName, data.newBuildingLocation]}); //data.buildingID
+        const result = await SQLStatementManager.editBuildingStatement.execute({params: [data.buildingID, data.newBuildingName, data.newBuildingLocation]}); //data.buildingID
         log.debug("result: ", result);
     } catch (error: unknown) {
         log.debug(error);
@@ -98,15 +76,7 @@ async function getAllBuildingsOwnedByCompany(body: unknown): Promise<APIResponse
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `SELECT b.id building_id, building_name, building_location
-        FROM Buildings b JOIN "Building-Company" bc ON b.id = bc.building_id 
-        JOIN Companies c ON c.id = bc.company_id
-        WHERE c.id = $1;`,
-        {paramTypes: [DataTypeOIDs.numeric]}
-    );
-
-    const result = await statement.execute({params: [data.companyID]});
+    const result = await SQLStatementManager.getAllBuildingsByCompanyStatement.execute({params: [data.companyID]});
 
     return ({status: 200, data: {'Result': result.rows}});
 }
@@ -121,15 +91,7 @@ async function getAllCompaniesAssignedToBuilding(body: unknown): Promise<APIResp
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `SELECT c.id company_id, company_name
-        FROM Buildings b JOIN "Building-Company" bc ON b.id = bc.building_id 
-        JOIN Companies c ON c.id = bc.company_id
-        WHERE b.id= $1;`,
-        {paramTypes: [DataTypeOIDs.numeric]}
-    );
-
-    const result = await statement.execute({params: [data.buildingID]});
+    const result = await SQLStatementManager.getAllCompaniesAssignedToBuildingStatement.execute({params: [data.buildingID]});
 
     return ({status: 200, data: {'Result': result.rows}});
 }
@@ -142,16 +104,9 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `INSERT INTO "Building-Company" (company_id, building_id)
-        VALUES ($1, $2)
-        ON CONFLICT ON CONSTRAINT unique_building_company DO NOTHING;`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
-    );
-
     let result: QueryResult;
     try {
-        result = await statement.execute({params: [data.companyID, data.buildingID]});
+        result = await SQLStatementManager.assignCompanyStatement.execute({params: [data.companyID, data.buildingID]});
     } catch (error) {
 
         if (error instanceof Error) {

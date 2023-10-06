@@ -1,7 +1,7 @@
-import { DataTypeOIDs, QueryResult } from "postgresql-client";
+import { QueryResult } from "postgresql-client";
 import parser from "../models/modelParser";
-import db from '.././utils/database';
 import { APIResponse } from "../models/requestModels";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 async function assignToCompany(body: unknown): Promise<APIResponse> {
     let data;
@@ -11,15 +11,9 @@ async function assignToCompany(body: unknown): Promise<APIResponse> {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `UPDATE accounts SET company_id = $1
-        WHERE id = $2;`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
-    );
-
     let result: QueryResult;
     try {
-        result = await statement.execute({params: [data.otherID, data.userID]});
+        result = await SQLStatementManager.assignToCompanyStatement.execute({params: [data.otherID, data.userID]});
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
@@ -45,16 +39,9 @@ async function assignToBuilding(body: unknown) {
         return {status: 400, data: {'Error': 'Incorrect data in request'}};
     }
 
-    const statement = await db.connection.prepare(
-        `INSERT INTO Building_accesses (account_id, building_id, company_admin_id)
-        VALUES ($1, $2, $3)
-        ON CONFLICT ON CONSTRAINT unique_account_building_access DO NOTHING;;`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
-    );
-
     let result: QueryResult;
     try {
-        result = await statement.execute({params: [data.userID, data.buildingID, data.companyAdminID]});
+        result = await SQLStatementManager.assignToBuildingStatement.execute({params: [data.userID, data.buildingID, data.companyAdminID]});
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
