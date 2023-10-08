@@ -7,25 +7,25 @@ const router = express.Router();
 router.post('/post/new', asyncHanlder(async (req, res) => {
     const response = await companyService.createCompany(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.get('/get/all', asyncHanlder(async (_req, res) => {
     const response = await companyService.getAllCompanies();
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.delete('/delete/company', asyncHanlder(async (req, res) => {
     const response = await companyService.deleteCompany(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.patch('/patch/edit', asyncHanlder(async (req, res) => {
     const response = await companyService.editCompany(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 export default router;

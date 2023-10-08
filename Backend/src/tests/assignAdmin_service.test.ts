@@ -79,8 +79,7 @@ describe('assign admin service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('userID');
+        expect(result.body.message).toContain('userID');
     });
 
     test('assign user that does not exist to building admins', async () => {
@@ -94,8 +93,7 @@ describe('assign admin service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('userID');
+        expect(result.body.message).toContain('userID');
     });
 
     test('assign user to company admins for company that does not exist', async () => {
@@ -109,8 +107,7 @@ describe('assign admin service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('companyID');
+        expect(result.body.message).toContain('companyID');
     });
 
     test('assign user to building admins for a building that does not exist', async () => {
@@ -124,7 +121,6 @@ describe('assign admin service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('buildingID');
+        expect(result.body.message).toContain('buildingID');
     });
 });

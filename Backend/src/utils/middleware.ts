@@ -2,8 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import log from './logger';
 import config from './config';
 import asyncHanlder from 'express-async-handler';
-import db from '.././utils/database';
-import { DataTypeOIDs } from 'postgresql-client';
+import { SQLStatementManager } from './SQLStatementManager';
 
 const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
     log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
@@ -18,7 +17,7 @@ const unknownEndpoints = (_request: Request, response: Response): void => {
 
 const errorHandler = (error: Error, _request: Request, response: Response, next: NextFunction): void => {
     if (config.NODE_ENV == 'production' || config.NODE_ENV == 'test' ) {
-        response.status(500).send({"Failed": "An error occured."});
+        response.status(500).send({status: 500, message: 'An error occured.', error: Error.name, data: null});
     } else {
         log.trace(error);
         next(error);
@@ -32,17 +31,14 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
     }
 
     if ('sessionID' in request.body) {
-        const statement = await db.connection.prepare(
-            `SELECT * FROM Sessions
-            WHERE session_secret = $1`,
-            {paramTypes: [DataTypeOIDs.varchar]}
-        );
-
-        const result = await statement.execute({params: [request.body.sessionID]});
+        const result = await SQLStatementManager.getSessionIDStatement.execute({params: [request.body.sessionID]});
         if (result.rows === undefined) throw new Error('result is undefined');
         if (result.rows.length === 0) {
             response.status(401).send({
-                "error": "No session with this ID exists."
+                status: 400,
+                message: "No session with this ID exists.",
+                error: "No session with this ID exists.",
+                data: null
             });
             return; // Return here so the function stops execution
         }
@@ -52,33 +48,27 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
         const sessionIDTimeLimit = new Date(result.rows.at(0)[3] as string);
 
         if (currentDate > sessionIDTimeLimit) {
-            const removeSessionIDStatement = await db.connection.prepare(
-                `DELETE FROM Sessions
-                WHERE session_secret = $1`,
-                {paramTypes: [DataTypeOIDs.varchar]}
-            );
 
-            void removeSessionIDStatement.execute({params: [request.body.sessionID]});
+            void SQLStatementManager.deleteSessionIDStatmenet.execute({params: [request.body.sessionID]});
 
             response.status(401).send({
-                error: 'This sessionID has expired.'
+                status: 401,
+                message: 'This sessionID has expired.',
+                error: 'This sessionID has expired.',
+                data: null
             });
             return; // Return here so the function stops execution
         }
 
-        const updateSessionIDStatment = await db.connection.prepare(
-            `UPDATE Sessions
-            SET expiration_time = NOW() + interval '30 minutes'
-            WHERE session_secret = $1`,
-            {paramTypes: [DataTypeOIDs.varchar]}
-        );
-
-        await updateSessionIDStatment.execute({params: [request.body.sessionID]});
+        await SQLStatementManager.updateSessionIDStatement.execute({params: [request.body.sessionID]});
 
         next();
     } else {
         response.status(400).send({
-            error: 'No sessionID provided'
+            status: 400,
+            message: 'No sessionID provided',
+            error: 'No sessionID provided',
+            data: null
         });
     }
 });

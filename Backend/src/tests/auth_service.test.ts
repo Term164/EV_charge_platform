@@ -27,8 +27,8 @@ describe('user login', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('sessionID');
-        expect(response.body.sessionID).toHaveLength(32);
+        expect(response.body.data).toHaveProperty('sessionID');
+        expect(response.body.data.sessionID).toHaveLength(32);
     });
 
     test('login user with email',async () => {
@@ -44,8 +44,8 @@ describe('user login', () => {
             .expect('Content-Type', /application\/json/);
 
 
-        expect(response.body).toHaveProperty('sessionID');
-        expect(response.body.sessionID).toHaveLength(32);
+        expect(response.body.data).toHaveProperty('sessionID');
+        expect(response.body.data.sessionID).toHaveLength(32);
     });
 
     test('fail login user with username and wrong password', async () => {
@@ -60,8 +60,7 @@ describe('user login', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('Error');
-        expect(response.body.Error).toEqual('The username/email or password is incorrect');
+        expect(response.body.message).toEqual('The username/email or password is incorrect');
     });
 
     test('fail login user with email and wrong password', async () => {
@@ -76,8 +75,7 @@ describe('user login', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('Error');
-        expect(response.body.Error).toEqual('The username/email or password is incorrect');
+        expect(response.body.message).toEqual('The username/email or password is incorrect');
     });
 
     test('fail login user with username that does not exist', async () => {
@@ -92,8 +90,7 @@ describe('user login', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('Error');
-        expect(response.body.Error).toEqual('The username/email or password is incorrect');
+        expect(response.body.message).toEqual('The username/email or password is incorrect');
     });
 
     test('fail login when password not supplied.', async () => {
@@ -108,7 +105,6 @@ describe('user login', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('Error');
-        expect(response.body.Error).toEqual('Incorrect data: some fields are missing');
+        expect(response.body.message).toEqual('Incorrect data: some fields are missing');
     });
 });

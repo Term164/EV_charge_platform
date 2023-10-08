@@ -1,6 +1,8 @@
 interface APIResponse {
     status: number,
-    data: object
+    message: string,
+    error: string | null,
+    data: object | null
 }
 
 interface UserRegistrationRequest {
