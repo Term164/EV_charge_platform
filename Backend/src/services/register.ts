@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import parser from '../models/modelParser';
 import crypto from 'crypto';
 import log from '../utils/logger';
+import db from '../utils/database';
 import { APIResponse, UserVerificationRequest } from '../models/requestModels';
 import { SQLStatementManager } from '../utils/SQLStatementManager';
 
@@ -49,20 +50,24 @@ async function firstStep(body: unknown): Promise<APIResponse> {
 
     const passwordHash = await bcrypt.hash(userData.password, 10);
 
+    // START TRANSACTION HERE
+    await db.connection.startTransaction();
     const result = await SQLStatementManager.insertNewAccountStatement.execute({params: [userData.username, passwordHash, userData.email_account]});
 
     if (result.rowsAffected != 1) {
+        await db.connection.rollback(); // If there is an error we rollback the current transaction
         throw new Error(`An error occured while trying to create a new user in the database.`);
     }
 
     const check = await generateVerificationTokenAndSave(result.rows?.at(0)[0] as number);
 
     if (check.rowsAffected != 1) {
+        await db.connection.rollback(); // If there is an error we rollback the current transaction
         throw new Error(`Could not generate a user verification token`);
     }
 
-    //TODO: cleanup if any error is thrown the user should be removed from the DB.
     //TODO Send email to user, this is to be implemented once we figure out what kind of platform will host our application.
+    await db.connection.commit(); // END TRANSACTION
     log.info(`User '${userData.username}' has successfully created a new account.`);
     return {status: 200, message: "Registration succesfull", error: null, data: null};
 }
@@ -90,16 +95,22 @@ async function secondStep(params: unknown): Promise<APIResponse> {
         return {status: 400, message: "User could not be validated", error: null, data: null};
     }
 
+    // START TRANSACTION HERE
+    await db.connection.startTransaction();
+
     const validationResult = await validateUserAccount(info.id);
     if (validationResult.rowsAffected !== 1) {
+        await db.connection.rollback(); // If there is an error we rollback the current transaction
         throw new Error(`User could not be validated`);
     }
 
     const removalResult = await removeUserValidationToken(info.id);
     if (removalResult.rowsAffected !== 1) {
+        await db.connection.rollback(); // If there is an error we rollback the current transaction
         log.error(`Could not remove validation token of user with id ${info.id}`);
     }
 
+    await db.connection.commit(); // END TRANSACTION
     log.info(`User with id '${info.id}' is now succesfully registered.`);
     return {status: 200, message: "User successfuly verified" , error: null, data: null};
 }
