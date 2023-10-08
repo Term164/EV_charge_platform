@@ -53,7 +53,6 @@ class StatmentManager {
     editUserProfileStatement: PreparedStatement;
 
     // Middleware
-
     getSessionIDStatement: PreparedStatement;
     deleteSessionIDStatmenet: PreparedStatement;
     updateSessionIDStatement: PreparedStatement;
