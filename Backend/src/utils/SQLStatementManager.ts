@@ -52,6 +52,12 @@ class StatmentManager {
     deleteBuildingAccessStatement: PreparedStatement;
     editUserProfileStatement: PreparedStatement;
 
+    // Middleware
+
+    getSessionIDStatement: PreparedStatement;
+    deleteSessionIDStatmenet: PreparedStatement;
+    updateSessionIDStatement: PreparedStatement;
+
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
             `INSERT INTO Building_admins (account_id, building_id)
@@ -292,6 +298,27 @@ class StatmentManager {
         );
     }
 
+    private async prepareMiddlewareStatements() {
+        this.getSessionIDStatement = await db.connection.prepare(
+            `SELECT * FROM Sessions
+            WHERE session_secret = $1`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.deleteSessionIDStatmenet = await db.connection.prepare(
+            `DELETE FROM Sessions
+            WHERE session_secret = $1`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.updateSessionIDStatement = await db.connection.prepare(
+            `UPDATE Sessions
+            SET expiration_time = NOW() + interval '30 minutes'
+            WHERE session_secret = $1`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+    }
+
     public async init() {
         await this.prepareAdminServiceStatements();
         await this.prepareAssignEmployeeServiceStatements();
@@ -300,6 +327,7 @@ class StatmentManager {
         await this.prepareCompanyServiceStatements();
         await this.prepareRegisterServiceStatements();
         await this.prepareUserServiceStatements();
+        await this.prepareMiddlewareStatements();
     }
 }
 

@@ -2,8 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import log from './logger';
 import config from './config';
 import asyncHanlder from 'express-async-handler';
-import db from '.././utils/database';
-import { DataTypeOIDs } from 'postgresql-client';
+import { SQLStatementManager } from './SQLStatementManager';
 
 const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
     log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
@@ -32,13 +31,7 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
     }
 
     if ('sessionID' in request.body) {
-        const statement = await db.connection.prepare(
-            `SELECT * FROM Sessions
-            WHERE session_secret = $1`,
-            {paramTypes: [DataTypeOIDs.varchar]}
-        );
-
-        const result = await statement.execute({params: [request.body.sessionID]});
+        const result = await SQLStatementManager.getSessionIDStatement.execute({params: [request.body.sessionID]});
         if (result.rows === undefined) throw new Error('result is undefined');
         if (result.rows.length === 0) {
             response.status(401).send({
@@ -55,13 +48,8 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
         const sessionIDTimeLimit = new Date(result.rows.at(0)[3] as string);
 
         if (currentDate > sessionIDTimeLimit) {
-            const removeSessionIDStatement = await db.connection.prepare(
-                `DELETE FROM Sessions
-                WHERE session_secret = $1`,
-                {paramTypes: [DataTypeOIDs.varchar]}
-            );
 
-            void removeSessionIDStatement.execute({params: [request.body.sessionID]});
+            void SQLStatementManager.deleteSessionIDStatmenet.execute({params: [request.body.sessionID]});
 
             response.status(401).send({
                 status: 401,
@@ -72,14 +60,7 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
             return; // Return here so the function stops execution
         }
 
-        const updateSessionIDStatment = await db.connection.prepare(
-            `UPDATE Sessions
-            SET expiration_time = NOW() + interval '30 minutes'
-            WHERE session_secret = $1`,
-            {paramTypes: [DataTypeOIDs.varchar]}
-        );
-
-        await updateSessionIDStatment.execute({params: [request.body.sessionID]});
+        await SQLStatementManager.updateSessionIDStatement.execute({params: [request.body.sessionID]});
 
         next();
     } else {
