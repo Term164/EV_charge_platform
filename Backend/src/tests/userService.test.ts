@@ -21,9 +21,8 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(Array.isArray(result.body.result)).toBe(true);
-        expect(result.body.result[0]['account']['username']).toBe('Term');
+        expect(Array.isArray(result.body.data.result)).toBe(true);
+        expect(result.body.data.result[0]['account']['username']).toBe('Term');
     });
 
     test('get all building admins', async () => {
@@ -33,9 +32,8 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(Array.isArray(result.body.result)).toBe(true);
-        expect(result.body.result[0]['account']['username']).toBe('Term');
+        expect(Array.isArray(result.body.data.result)).toBe(true);
+        expect(result.body.data.result[0]['account']['username']).toBe('Term');
     });
 
     test('get assigned building admins', async () => {
@@ -44,9 +42,8 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(Array.isArray(result.body.result)).toBe(true);
-        expect(result.body.result[0]['account']['username']).toBe('Term');
+        expect(Array.isArray(result.body.data.result)).toBe(true);
+        expect(result.body.data.result[0]['account']['username']).toBe('Term');
     });
 
 
@@ -56,9 +53,9 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(Array.isArray(result.body.result)).toBe(true);
-        expect(result.body.result[0]['account']['username']).toBe('Term');
+        expect(result.body.data).toHaveProperty('result');
+        expect(Array.isArray(result.body.data.result)).toBe(true);
+        expect(result.body.data.result[0]['account']['username']).toBe('Term');
     });
 
     test('fail assignedBadmins with missing buildingID', async () => {
@@ -67,8 +64,7 @@ describe('get all admins', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body['Error']).toBe('parameter buildingID missing');
+        expect(result.body.message).toBe('parameter buildingID missing');
     });
 
     test('fail assignedCadmins with missing companyID', async () => {
@@ -77,8 +73,7 @@ describe('get all admins', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body['Error']).toBe('parameter companyID missing');
+        expect(result.body.message).toBe('parameter companyID missing');
     });
 
     test('delete user account', async () => {
@@ -88,8 +83,7 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(result.body['result']).toBe('User deleted successfully');
+        expect(result.body.message).toBe('User deleted successfully');
         expect(await helper.checkUserExists("random")).toBe(false);
     });
 
@@ -101,8 +95,7 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(result.body['result']).toContain('Successfully');
+        expect(result.body.message).toContain('Successfully');
         expect(await helper.checkUserHasBuildingAccess(String(currentUserID), String(testBuildingID))).toEqual(false);
     });
 
@@ -112,8 +105,7 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(result.body['result']).toContain('Successfully');
+        expect(result.body.message).toContain('Successfully');
         expect(await helper.getUserAssignedCompanyID(String(currentUserID))).toEqual(testCompanyID);
     });
 
@@ -125,8 +117,7 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(result.body['result']).toContain('operation completed successfully');
+        expect(result.body.message).toContain('operation completed successfully');
         expect(await helper.checkCAdminExists(companyAdminID)).toBe(false);
     });
 
@@ -138,8 +129,7 @@ describe('get all admins', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('result');
-        expect(result.body['result']).toContain('operation completed successfully');
+        expect(result.body.message).toContain('operation completed successfully');
         expect(await helper.checkBAdminExists(buildingAdminID)).toBe(false);
     });
 

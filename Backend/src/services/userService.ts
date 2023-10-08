@@ -15,7 +15,7 @@ async function getBuildingAdmins(): Promise<APIResponse> {
         } else throw new Error('building admin data is not in array format.');
     });
 
-    return ({status: 200, data: {"result": parsedArray}});
+    return ({status: 200, message: `Returned ${result.rows?.length} building admins `, error: null , data: {"result": parsedArray}});
 }
 
 async function getCompanyAdmins(): Promise<APIResponse> {
@@ -28,20 +28,20 @@ async function getCompanyAdmins(): Promise<APIResponse> {
         } else throw new Error('company admin data is not in array format.');
     });
 
-    return ({status: 200, data: {"result": parsedArray}});
+    return ({status: 200, message: `Returned ${result.rows?.length} building admins`, error: null , data: {"result": parsedArray}});
 }
 
 async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIResponse> {
 
     if (!requestBody || typeof requestBody !== 'object') {
-        return ({status: 400, data: {"Error":"Incorrect or missing data"}});
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     let buildingID: number;
     if ('buildingID' in requestBody) {
         buildingID = modelParser.parseIntegerParameterFromString(requestBody.buildingID, 'buildingID');
     } else {
-        return ({status: 400, data: {"Error":"parameter buildingID missing"}});
+        return ({status: 400, message: "parameter buildingID missing",  error: null , data: null});
     }
 
     const result = await SQLStatementManager.getAssignedBuildingAdminsStatement.execute({params: [buildingID]});
@@ -53,20 +53,20 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
         } else throw new Error('building admin data is not in array format.');
     });
 
-    return ({status: 200, data: {"result": parsedArray}});
+    return ({status: 200, message: `Returned ${result.rows?.length} building admins`, error: null , data: {"result": parsedArray}});
 }
 
 async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIResponse> {
 
     if (!requestBody || typeof requestBody !== 'object') {
-        return ({status: 400, data: {"Error":"Incorrect or missing data"}});
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     let companyID: number;
     if ('companyID' in requestBody) {
         companyID = modelParser.parseIntegerParameterFromString(requestBody.companyID, 'companyID');
     } else {
-        return ({status: 400, data: {"Error":"parameter companyID missing"}});
+        return ({status: 400, message: "parameter companyID missing", error: null, data: null});
     }
 
     const result = await SQLStatementManager.getAssignedCompanyAdminsStatement.execute({params: [companyID]});
@@ -78,7 +78,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
         } else throw new Error('company admin data is not in array format.');
     });
 
-    return ({status: 200, data: {"result": parsedArray}});
+    return ({status: 200, message: `Returned ${result.rows?.length} company admins`, error: null, data: {"result": parsedArray}});
 }
 
 async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
@@ -86,13 +86,13 @@ async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
     try {
         userID = modelParser.parseUserID(requestBody);
     } catch (error) {
-        return {status: 400, data: {"error":error}};
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID]});
 
-    if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${userID}' is not an admin of any building or does not exist.`}};
-    else return {status: 200, data:{"result": "operation completed successfully"}};
+    if (result.rowsAffected != 1) return {status: 400, message: `User with id '${userID}' is not an admin of any building or does not exist.`, error: null, data: null};
+    else return {status: 200, message: "operation completed successfully", error: null , data: null};
 }
 
 async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
@@ -101,13 +101,13 @@ async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
         userID = modelParser.parseUserID(requestBody);
     } catch (error) {
         console.log(error);
-        return {status: 400, data: {"error": error}};
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     const result = await SQLStatementManager.deleteCompanyAdminStatement.execute({params: [userID]});
 
-    if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${userID}' is not an admin of any company or does not exist.`}};
-    else return {status: 200, data:{"result": "operation completed successfully"}};
+    if (result.rowsAffected != 1) return {status: 400, message: `User with id '${userID}' is not an admin of any company or does not exist.` , error: null, data: null};
+    else return {status: 200, message: "operation completed successfully", error: null, data: null};
 }
 
 async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
@@ -115,12 +115,12 @@ async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
     try {
         userID = modelParser.parseUserID(requestBody);
     } catch (error) {
-        return {status: 400, data: {"error":error}};
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     await SQLStatementManager.deleteAccountStatement.execute({params: [userID]});
 
-    return {status: 200, data: {"result": "User deleted successfully"}};
+    return {status: 200, message: "User deleted successfully", error: null, data: null};
 }
 
 async function deleteBuildingAccess(requestBody: unknown): Promise<APIResponse> {
@@ -128,8 +128,8 @@ async function deleteBuildingAccess(requestBody: unknown): Promise<APIResponse> 
 
     const result = await SQLStatementManager.deleteBuildingAccessStatement.execute({params: [deleteRequestData.userID, deleteRequestData.buildingID]});
 
-    if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${deleteRequestData.userID}' does not have specific access to this building or the user/building does not exist.`}};
-    else return {status: 200, data:{"result": "Successfully revoked user permission for building"}};
+    if (result.rowsAffected != 1) return {status: 400, message: `User with id '${deleteRequestData.userID}' does not have specific access to this building or the user/building does not exist.`,  error: null, data: null};
+    else return {status: 200, message: "Successfully revoked user permission for building" , error: null, data:null};
 
 }
 
@@ -139,7 +139,7 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
     const filteredValues = Object.entries(editUserProfileData).filter((pair) => pair[1] !== undefined);
     const queryParameters = filteredValues.map((pair) => pair[1]);
 
-    if (queryParameters.length < 2) return {status: 418, data: {"error": "Must provide more details then just the userID."}};
+    if (queryParameters.length < 2) return {status: 418, message:"Must provide more details then just the userID.", error: 'Not enough parameters provided', data: null};
 
     const queryBuilderArray = [];
     for (let i = 1; i < filteredValues.length; i++) {
@@ -155,8 +155,8 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
         {params: queryParameters}
     );
 
-    if (result.rowsAffected != 1) return {status: 400, data: {"error": `User with id '${editUserProfileData.id}' does not exist.`}};
-    else return {status: 200, data:{"result": `Successfully updated the following values: ${filteredValues.map((pair) => pair[0]).slice(1,filteredValues.length).join(' , ')} for user with id ${editUserProfileData.id}`}};
+    if (result.rowsAffected != 1) return {status: 400, message: `User with id '${editUserProfileData.id}' does not exist.` , error: null , data: null};
+    else return {status: 200, message: `Successfully updated the following values: ${filteredValues.map((pair) => pair[0]).slice(1,filteredValues.length).join(' , ')} for user with id ${editUserProfileData.id}` , error: null, data: null};
 }
 
 export default {

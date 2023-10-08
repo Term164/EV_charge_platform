@@ -28,7 +28,7 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body['Result'].length).toBeGreaterThan(2);
+        expect(response.body.data['Result'].length).toBeGreaterThan(2);
     });
 
     test('delete a building - success', async () => {
@@ -55,8 +55,7 @@ describe('building service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Error");
+        expect(response.body).toHaveProperty("error");
     });
 
     test('edit a building - all params', async () => {
@@ -180,9 +179,8 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(0);
     });
@@ -200,9 +198,8 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(3);
     });
@@ -219,9 +216,8 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(0);
     });
@@ -239,9 +235,8 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(3);
     });

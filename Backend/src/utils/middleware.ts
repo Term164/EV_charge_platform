@@ -18,7 +18,7 @@ const unknownEndpoints = (_request: Request, response: Response): void => {
 
 const errorHandler = (error: Error, _request: Request, response: Response, next: NextFunction): void => {
     if (config.NODE_ENV == 'production' || config.NODE_ENV == 'test' ) {
-        response.status(500).send({"Failed": "An error occured."});
+        response.status(500).send({status: 500, message: 'An error occured.', error: Error.name, data: null});
     } else {
         log.trace(error);
         next(error);
@@ -42,7 +42,10 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
         if (result.rows === undefined) throw new Error('result is undefined');
         if (result.rows.length === 0) {
             response.status(401).send({
-                "error": "No session with this ID exists."
+                status: 400,
+                message: "No session with this ID exists.",
+                error: "No session with this ID exists.",
+                data: null
             });
             return; // Return here so the function stops execution
         }
@@ -61,7 +64,10 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
             void removeSessionIDStatement.execute({params: [request.body.sessionID]});
 
             response.status(401).send({
-                error: 'This sessionID has expired.'
+                status: 401,
+                message: 'This sessionID has expired.',
+                error: 'This sessionID has expired.',
+                data: null
             });
             return; // Return here so the function stops execution
         }
@@ -78,7 +84,10 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
         next();
     } else {
         response.status(400).send({
-            error: 'No sessionID provided'
+            status: 400,
+            message: 'No sessionID provided',
+            error: 'No sessionID provided',
+            data: null
         });
     }
 });

@@ -8,7 +8,7 @@ async function assignToCompany(body: unknown): Promise<APIResponse> {
     try {
         data = parser.parseAssignRequest(body);
     } catch (error) {
-        return {status: 400, data: {'Error': 'Incorrect data in request'}};
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     let result: QueryResult;
@@ -20,23 +20,23 @@ async function assignToCompany(body: unknown): Promise<APIResponse> {
                 let errorMessage: string;
                 if (error.message.includes('fk_18')) errorMessage = 'This companyID does not exist';
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 2';
-                return {status: 400, data: {'Error': errorMessage}};
+                return {status: 400, message: errorMessage,error: error.message, data: null};
             }
         }
         throw new Error("Unexpected error occured: " + error);
     }
 
-    if (result.rowsAffected as number != 1) return {status: 400, data: {'Error': "Could not assign company to user, check if the userID is correct."}};
+    if (result.rowsAffected as number != 1) return {status: 400, message: 'Could not assign company to user, check if the userID is correct.', error: `Number of rows affected was ${result.rowsAffected}.`, data: null};
 
-    return ({status: 200, data: {'Result:': 'Successfully added new employee to company.'}});
+    return ({status: 200, message: 'Successfully added new employee to company.', error: null , data: null});
 }
 
-async function assignToBuilding(body: unknown) {
+async function assignToBuilding(body: unknown): Promise<APIResponse> {
     let data;
     try {
         data = parser.parseAssignEmployeeToBuildingRequest(body);
     } catch (error) {
-        return {status: 400, data: {'Error': 'Incorrect data in request'}};
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
     let result: QueryResult;
@@ -50,7 +50,7 @@ async function assignToBuilding(body: unknown) {
                 else if (error.message.includes('fk_9')) errorMessage = 'This buildingID does not exist';
                 else if (error.message.includes('fk_10')) errorMessage = 'This companyAdminID does not exist';
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 3';
-                return {status: 400, data: {'Error': errorMessage}};
+                return {status: 400, message: errorMessage, error: error.message, data: null};
             }
         }
         throw new Error("Unexpected error occured: " + error);
@@ -58,7 +58,7 @@ async function assignToBuilding(body: unknown) {
 
     if (result.rowsAffected as number > 1) throw new Error("Something went wrong while trying to assign user to building.");
 
-    return ({status: 200, data: {'Result:': 'Successfully added new user to building.'}});
+    return ({status: 200, message: 'Successfully added new user to building.', error: null, data: null});
 }
 
 export default {

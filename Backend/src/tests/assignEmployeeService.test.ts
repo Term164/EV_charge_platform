@@ -42,8 +42,7 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('userID');
+        expect(result.body.message).toContain('userID');
 
     });
 
@@ -59,8 +58,7 @@ describe('assign employee service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(await helper.getUserAssignedCompanyID(currentUserID)).toEqual(testCompanyID);
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('userID');
+        expect(result.body.message).toContain('userID');
     });
 
     test('fail when trying to assign a new employee to a building that does not exist', async () => {
@@ -76,8 +74,7 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('buildingID');
+        expect(result.body.message).toContain('buildingID');
 
     });
 
@@ -93,8 +90,7 @@ describe('assign employee service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(await helper.getUserAssignedCompanyID(currentUserID)).toEqual(testCompanyID);
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('companyID');
+        expect(result.body.message).toContain('companyID');
     });
 
     test('fail when trying to assign a new employee that does not exist to building', async () => {
@@ -110,8 +106,7 @@ describe('assign employee service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(result.body).toHaveProperty('Error');
-        expect(result.body.Error).toContain('companyAdminID');
+        expect(result.body.message).toContain('companyAdminID');
 
     });
 

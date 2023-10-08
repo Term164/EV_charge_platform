@@ -42,9 +42,9 @@ async function firstStep(body: unknown): Promise<APIResponse> {
     const userData = parser.parseUserRegistrationRequest(body);
 
     if (!(await checkUsernameUnique(userData.username))) {
-        return { status: 400, data: {'Error': 'Username is already taken.'}};
+        return { status: 400, message: 'Username is already taken.', error: null , data: null};
     } else if (!(await checkEmailUnique(userData.email_account))) {
-        return { status: 400, data: {'Error': 'Email is already in use.'}};
+        return { status: 400, message: 'Email is already in use.', error: null , data: null};
     }
 
     const passwordHash = await bcrypt.hash(userData.password, 10);
@@ -64,7 +64,7 @@ async function firstStep(body: unknown): Promise<APIResponse> {
     //TODO: cleanup if any error is thrown the user should be removed from the DB.
     //TODO Send email to user, this is to be implemented once we figure out what kind of platform will host our application.
     log.info(`User '${userData.username}' has successfully created a new account.`);
-    return {status: 200, data: {"Success": "Registration succesfull"}};
+    return {status: 200, message: "Registration succesfull", error: null, data: null};
 }
 
 async function secondStep(params: unknown): Promise<APIResponse> {
@@ -74,7 +74,7 @@ async function secondStep(params: unknown): Promise<APIResponse> {
     const result = await getUserVerificationToken(info);
 
     if (result.rows?.length === 0) {
-        return {status: 404, data: {'Error': 'This address does not exist'}};
+        return {status: 404, message: 'This address does not exist' , error: null, data: null};
     }
 
     const currentDate = new Date();
@@ -83,11 +83,11 @@ async function secondStep(params: unknown): Promise<APIResponse> {
     const tokenTimeLimit = new Date(result.rows?.at(0)[1] as string);
 
     if (currentDate > tokenTimeLimit) {
-        return {status: 400, data: {"Error": "Validation token has expired"}};
+        return {status: 400, message: "Validation token has expired", error: null, data: null};
     }
 
     if (result.rows?.at(0)[0] !== info.token) {
-        return {status: 400, data: {"Error": "User could not be validated"}};
+        return {status: 400, message: "User could not be validated", error: null, data: null};
     }
 
     const validationResult = await validateUserAccount(info.id);
@@ -101,7 +101,7 @@ async function secondStep(params: unknown): Promise<APIResponse> {
     }
 
     log.info(`User with id '${info.id}' is now succesfully registered.`);
-    return {status: 200, data: {"Success": "User successfuly verified"}};
+    return {status: 200, message: "User successfuly verified" , error: null, data: null};
 }
 
 export default { firstStep, secondStep, checkEmailUnique, checkUsernameUnique };

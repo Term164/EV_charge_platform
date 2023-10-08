@@ -25,7 +25,7 @@ describe('company service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body['Result'].length).toBeGreaterThan(2);
+        expect(response.body.data['Result'].length).toBeGreaterThan(2);
     });
 
     test('delete a company', async () => {
@@ -87,7 +87,6 @@ describe('company service', () => {
         const response = await request.patch('/api/v1/company/patch/edit')
             .send(data)
             .expect(400);
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Error");
+        expect(response.body).toHaveProperty("error");
     });
 });

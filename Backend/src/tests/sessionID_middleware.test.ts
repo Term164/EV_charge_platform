@@ -23,11 +23,9 @@ describe('sessionID middleware checker', () => {
         await request.post('/api/v1/auth/register/step1').send(req_body);
         await request.get(await helper.getValidationURL(req_body.username));
         const response = await request.post('/api/v1/auth/login').send(loginRequestData);
-        if ('sessionID' in response.body) {
-            currentSessionID = response.body.sessionID as string;
-        } else {
-            fail('Could not get sessionID from login request.');
-        }
+
+        expect(response.body.data).toHaveProperty('sessionID');
+        currentSessionID = response.body.data.sessionID as string;
     });
 
     test('request granted with proper sessionID', async () => {
@@ -46,8 +44,7 @@ describe('sessionID middleware checker', () => {
             .expect(401)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toHaveProperty('error');
-        expect(response.body.error).toEqual("No session with this ID exists.");
+        expect(response.body.message).toEqual("No session with this ID exists.");
     });
 
 
@@ -76,7 +73,6 @@ describe('sessionID middleware checker', () => {
             .expect('Content-Type', /application\/json/);
 
 
-        expect(response.body).toHaveProperty('error');
-        expect(response.body.error).toEqual('This sessionID has expired.');
+        expect(response.body.message).toEqual('This sessionID has expired.');
     });
 });

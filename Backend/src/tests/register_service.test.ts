@@ -45,7 +45,7 @@ describe('register a new user', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({'Error': 'Username is already taken.'});
+        expect(response.body.message).toEqual('Username is already taken.');
     });
 
     test('fail to register a user with a taken email', async () => {
@@ -62,7 +62,7 @@ describe('register a new user', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({'Error': 'Email is already in use.'});
+        expect(response.body.message).toEqual('Email is already in use.');
     });
 
     test('username not included in sent data', async () => {
@@ -76,7 +76,7 @@ describe('register a new user', () => {
             .expect(500)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({"Failed": "An error occured."});
+        expect(response.body.message).toEqual("An error occured.");
     });
 
     test('email not included in sent data', async () => {
@@ -91,7 +91,7 @@ describe('register a new user', () => {
             .expect(500)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({"Failed": "An error occured."});
+        expect(response.body.message).toEqual("An error occured.");
     });
 
     test('registration step 2 request to non existent URL not found', async () => {
@@ -99,7 +99,7 @@ describe('register a new user', () => {
             .expect(404)
             .expect('Content-Type', /application\/json/);
 
-        expect(response.body).toEqual({'Error': 'This address does not exist'});
+        expect(response.body.message).toEqual('This address does not exist');
     });
 
 });
