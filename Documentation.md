@@ -191,6 +191,12 @@ Vsi admini stavb določene stavbe
 `/api/v1/user/get/assignedCadmins (companyID)`<br>
 Vsi admini podjetij določenega podjetja
 
+`/api/v1/user/delete/account (userID)`
+Izbris uporabnika iz vseh tabel v sistemu.
+
+`/api/v1/user/delete/building_access (userID, buildingID)`
+Odstranitev dostopa uporabnika do neke stavbe
+
 `/api/v1/user/delete/employee (userID, companyID?, buildingID?)`<br>
 Izbris uporabnika, največkrat zaposlenega (če podan companyID), lahko tudi le izbris zaposlenega iz neke stavbe od podjetja, lahko splošen izbris uporabnika
 

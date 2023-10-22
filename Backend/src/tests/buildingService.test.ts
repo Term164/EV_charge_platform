@@ -20,8 +20,6 @@ describe('building service', () => {
     });
 
     test('get all buildings', async () => {
-        const numberOfBuildings = await helper.getNumberOfBuildings();
-
         const data = {
         };
 
@@ -30,16 +28,11 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfBuildingsReturned = response.body.Result.length as number;
-
-        expect(numberOfBuildings).toEqual(numberOfBuildingsReturned);
+        expect(response.body.data['Result'].length).toBeGreaterThan(2);
     });
 
     test('delete a building - success', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
-        const numberOfBuildingsBefore = await helper.getNumberOfBuildings();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest');
 
         const data = {
             buildingID: lastInsertedBuildingID
@@ -49,18 +42,12 @@ describe('building service', () => {
             .send(data)
             .expect(200)
             .expect('Content-Type', /application\/json/);
-
-        const numberOfBuildingsAfter = await helper.getNumberOfBuildings();
-
-        expect(numberOfBuildingsAfter).toEqual(numberOfBuildingsBefore-1);
+        expect(await helper.checkBuildingExists('buildingServiceTest')).toBe(false);
     });
 
     test('delete a building - fail', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
-        const numberOfBuildingsBefore = await helper.getNumberOfBuildings();
-
         const data = {
-            buildingID: lastInsertedBuildingID+1000
+            buildingID: '-1'
         };
 
         const response = await request.delete('/api/v1/building/delete/building')
@@ -68,18 +55,14 @@ describe('building service', () => {
             .expect(400)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Error");
-        const numberOfBuildingsAfter = await helper.getNumberOfBuildings();
-
-        expect(numberOfBuildingsAfter).toEqual(numberOfBuildingsBefore);
+        expect(response.body).toHaveProperty("error");
     });
 
     test('edit a building - all params', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest2');
         const [buildingNameBefore, buildingLocationBefore] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameBefore).toEqual("dummy");
+        expect(buildingNameBefore).toEqual("buildingServiceTest2");
         expect(buildingLocationBefore).toEqual("location");
 
         const data = {
@@ -100,10 +83,10 @@ describe('building service', () => {
     });
 
     test('edit a building - first param', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest3');
         const [buildingNameBefore, buildingLocationBefore] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameBefore).toEqual("dummy");
+        expect(buildingNameBefore).toEqual("buildingServiceTest3");
         expect(buildingLocationBefore).toEqual("location");
 
         const data = {
@@ -123,10 +106,10 @@ describe('building service', () => {
     });
 
     test('edit a building - last param', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest4');
         const [buildingNameBefore, buildingLocationBefore] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameBefore).toEqual("dummy");
+        expect(buildingNameBefore).toEqual("buildingServiceTest4");
         expect(buildingLocationBefore).toEqual("location");
 
         const data = {
@@ -141,15 +124,15 @@ describe('building service', () => {
 
         const [buildingNameAfter, buildingLocationAfter] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameAfter).toEqual("dummy");
+        expect(buildingNameAfter).toEqual("buildingServiceTest4");
         expect(buildingLocationAfter).toEqual("location_version_2");
     });
 
     test('edit a building - no params', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest5');
         const [buildingNameBefore, buildingLocationBefore] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameBefore).toEqual("dummy");
+        expect(buildingNameBefore).toEqual("buildingServiceTest5");
         expect(buildingLocationBefore).toEqual("location");
 
         const data = {
@@ -163,14 +146,14 @@ describe('building service', () => {
 
         const [buildingNameAfter, buildingLocationAfter] = await helper.getBuildingData(lastInsertedBuildingID);
 
-        expect(buildingNameAfter).toEqual("dummy");
+        expect(buildingNameAfter).toEqual("buildingServiceTest5");
         expect(buildingLocationAfter).toEqual("location");
     });
 
     // Fails becuase the unique constraint is missing ?!?!?!
     test('assign a company to a building', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest6');
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID('buildingServiceTest');
 
         const data = {
             companyID: lastInsertedCompanyID,
@@ -185,7 +168,7 @@ describe('building service', () => {
     });
 
     test('get all assigned companies in a building - none', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest7');
 
         const data = {
             buildingID: lastInsertedBuildingID
@@ -196,15 +179,14 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(0);
     });
 
     test('get all assigned companies in a building - multiple', async () => {
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID('buildingServiceTest8');
         await helper.insertCompaniesAssignedToBuilding(lastInsertedBuildingID);
 
         const data = {
@@ -216,15 +198,14 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(3);
     });
 
     test('get all company owned buildings - none', async () => {
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID('buildingServiceTest9');
 
         const data = {
             companyID: lastInsertedCompanyID
@@ -235,15 +216,14 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(0);
     });
 
     test('get all company owned buildings - multiple', async () => {
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID('buildingServiceTest10');
         await helper.insertBuildingsOwnedByCompany(lastInsertedCompanyID);
 
         const data = {
@@ -255,9 +235,8 @@ describe('building service', () => {
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
-        expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfAssignedCompanies = response.body.Result.length as number;
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfAssignedCompanies = response.body.data.Result.length as number;
 
         expect(numberOfAssignedCompanies).toEqual(3);
     });

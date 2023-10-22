@@ -1,5 +1,5 @@
-import { UserAccount } from "./databaseModels";
-import { AssignCompanyRequest, AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateBuildingRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteBuildingRequest, DeleteChargingTypeRequest, DeleteCompanyRequest, DeleteStationRequest, EditBuildingRequest, EditChargingTypeRequest, EditCompanyRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -196,11 +196,26 @@ function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeT
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
+function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAccessRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
+    if ('userID' in request && 'buildingID' in request) {
+        const revokeRequest: RevokeBuildingAccessRequest = {
+            userID: parseIntegerParameterFromString(request.userID, 'userID'),
+            buildingID: parseIntegerParameterFromString(request.buildingID, 'buildingID'),
+        };
+
+        return revokeRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
     if ('buildingName' in request && 'buildingLocation' in request) {
         const CreateBuildingRequest: CreateBuildingRequest = {
             buildingName: parseStringParameter(request.buildingName, 'buildingName'),
@@ -209,6 +224,27 @@ function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
 
         return CreateBuildingRequest;
     }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request) {
+        const userEditData: EditUserProfileRequest = {
+            id: parseIntegerParameterFromString(request.userID, 'userID'),
+            username: 'username' in request ? parseStringParameter(request.username, 'username') : undefined,
+            email_account: 'email_account' in request ? parseStringParameter(request.email_account, 'email_account') : undefined,
+            profile_picture: 'profile_picture' in request ? undefined : undefined, //TODO: find out how to parse pfp
+            rfid: 'rfid' in request ? parseIntegerParameterFromString(request.rfid,'rfid') : undefined,
+            company_id: 'companyID' in request ? parseIntegerParameterFromString(request.companyID, 'companyID') : undefined
+        };
+
+        return userEditData;
+    }
+
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -227,6 +263,20 @@ function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
         return EditBuildingRequest;
     }
     throw new Error('Incorrect data: some fields are missing');
+}
+
+// ==================================== SINGLE VARIABLE PARSERS ======================================
+
+function parseUserID(dataBody: unknown): number {
+    if (!dataBody || typeof dataBody !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in dataBody) {
+        return parseIntegerParameterFromString(dataBody.userID, 'userID');
+    } else {
+        throw new Error('Incorrect data: some fields are missing');
+    }
 }
 
 function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
@@ -416,7 +466,7 @@ function parseUserAccountData(data: unknown): UserAccount {
         password_hash: parseStringParameter(data[2], 'password_hash'),
         email_account: parseStringParameter(data[3], 'email_account'),
         validated: parseBooleanParameter(data[4], 'validated'),
-        profile_picture: data[5] === null ? undefined : parseStringParameter(data[5], 'profile_picture'),
+        profile_picture: data[5] === null ? undefined : parseStringParameter('TODO', 'profile_picture'),
         rfid: data[6] === null ? undefined : parseIntegerParameter(data[6], 'rfid'),
         company_id: data[7] === null ? undefined : parseIntegerParameter(data[7], 'company_id')
     };
@@ -424,16 +474,84 @@ function parseUserAccountData(data: unknown): UserAccount {
     return userAccount;
 }
 
+function parseBuildingData(data: unknown): building {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
+
+    const buildingData: building = {
+        id: parseIntegerParameter(data[0], 'id'),
+        building_name: parseStringParameter(data[1], 'building_name'),
+        building_location: parseStringParameter(data[2], 'building_location')
+    };
+
+    return buildingData;
+}
+
+function parseCompanyData(data: unknown): company {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
+
+    const companyData: company = {
+        id: parseIntegerParameter(data[0], 'id'),
+        company_name: parseStringParameter(data[1], 'company_name'),
+    };
+
+    return companyData;
+}
+
+function parseBuildingAdmin(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
+
+    const buildingAdminData: buildingAdmin = {
+        account: parseUserAccountData(data.slice(0, 8)),
+        building: parseBuildingData(data.slice(8,data.length))
+    };
+
+    return buildingAdminData;
+}
+
+function parseCompanyAdmin(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
+
+    const companyAdminData: companyAdmin = {
+        account: parseUserAccountData(data.slice(0, 8)),
+        company: parseCompanyData(data.slice(8,data.length))
+    };
+
+    return companyAdminData;
+}
+
+
 export default {
+    parseIntegerParameterFromString,
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
     parseUserLoginRequest,
     parseAssignRequest,
     parseAssignEmployeeToBuildingRequest,
+    parseDeleteBuildingAccessRequest,
+    parseEditUserProfileRequest,
     parseUserAccountData,
     parseCreateCompanyRequest,
     parseDeleteCompanyRequest,
     parseEditCompanyRequest,
+    parseBuildingAdmin,
+    parseCompanyAdmin,
+    parseUserID,
     parseCreateBuildingRequest,
     parseEditBuildingRequest,
     parseDeleteBuildingRequest,

@@ -7,43 +7,43 @@ const router = express.Router();
 router.get('/get/all', asyncHanlder(async (_req, res) => {
     const response = await buildingService.getAllBuildings();
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.get('/get/companyOwned', asyncHanlder(async (req, res) => {
     const response = await buildingService.getAllBuildingsOwnedByCompany(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.post('/post/new', asyncHanlder(async (req, res) => {
     const response = await buildingService.createBuilding(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.patch('/patch/edit', asyncHanlder(async (req, res) => {
     const response = await buildingService.editBuilding(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.delete('/delete/building', asyncHanlder(async (req, res) => {
     const response = await buildingService.deleteBuilding(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.post('/post/assignCompany', asyncHanlder(async (req, res) => {
     const response = await buildingService.assignCompany(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.get('/get/assignedCompanies', asyncHanlder(async (req, res) => {
     const response = await buildingService.getAllCompaniesAssignedToBuilding(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 

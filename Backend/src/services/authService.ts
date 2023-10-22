@@ -1,32 +1,19 @@
 import parser from "../models/modelParser";
 import bcrypt from 'bcrypt';
-import db from '.././utils/database';
 import crypto from 'crypto';
-import { DataTypeOIDs} from "postgresql-client";
 import { APIResponse } from "../models/requestModels";
 import { UserAccount } from "../models/databaseModels";
+import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // =========================================== HELPER FUNCTIONS ======================================
 
 async function saveSessionsID(accountID: number, sessionID: string) {
-    const statement = await db.connection.prepare(
-        `INSERT INTO Sessions ("account_id", "session_secret", "expiration_time")
-        VALUES ($1, $2, NOW() + interval '30 minutes');`,
-        {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
-    );
-
-    return (await statement.execute({params: [accountID, sessionID]}));
+    return (await SQLStatementManager.saveSessionIDStatement.execute({params: [accountID, sessionID]}));
 }
 
 async function getUserDataFromEmail(email: string): Promise<UserAccount> {
-    const statement = await db.connection.prepare(
-        `SELECT *
-        FROM Accounts
-        WHERE email_account = $1`,
-        {paramTypes: [DataTypeOIDs.varchar]}
-    );
 
-    const response = await statement.execute({params: [email]});
+    const response = await SQLStatementManager.getUserDataFromEmailStatement.execute({params: [email]});
 
     if (response.rows === undefined) throw new Error('response is undefined.');
     if (response.rows.length === 0) throw new Error('User does not exist.');
@@ -35,14 +22,8 @@ async function getUserDataFromEmail(email: string): Promise<UserAccount> {
 }
 
 async function getUserDataFromUsername(username: string): Promise<UserAccount> {
-    const statement = await db.connection.prepare(
-        `SELECT *
-        FROM Accounts
-        WHERE username = $1`,
-        {paramTypes: [DataTypeOIDs.varchar]}
-    );
 
-    const response = await statement.execute({params: [username]});
+    const response = await SQLStatementManager.getUserDataFromUsernameStatement.execute({params: [username]});
 
     if (response.rows === undefined) throw new Error('response is undefined.');
     if (response.rows.length === 0) throw new Error('User does not exist.');
@@ -59,7 +40,7 @@ async function login (body: unknown): Promise<APIResponse> {
         userLoginInfo = parser.parseUserLoginRequest(body);
     } catch (error) {
         if (error instanceof Error) {
-            if (error.message === 'Incorrect data: some fields are missing') return {status: 400, data: {'Error': error.message}};
+            if (error.message === 'Incorrect data: some fields are missing') return {status: 400, message: error.message, error: error.message ,data: null};
             else throw new Error("An error occured while processing user login request data.");
         }
         throw new Error('Secret error 42.');
@@ -73,7 +54,7 @@ async function login (body: unknown): Promise<APIResponse> {
         else throw new Error("Both username and password are null, which should not be possible");
     } catch (error) {
         if (error instanceof Error) {
-            if (error.message === 'User does not exist.') return {status: 400, data: {'Error': 'The username/email or password is incorrect'}};
+            if (error.message === 'User does not exist.') return {status: 400, message: 'The username/email or password is incorrect', error: error.message, data: null};
             else throw error;
         }
 
@@ -82,7 +63,7 @@ async function login (body: unknown): Promise<APIResponse> {
 
 
     if (!(await bcrypt.compare(userLoginInfo.password, userData.password_hash))) {
-        return {status: 400, data: {'Error': 'The username/email or password is incorrect'}};
+        return {status: 400, message: 'The username/email or password is incorrect', error: null, data: null};
     }
 
     const sessionID = crypto.randomBytes(16).toString('hex');
@@ -94,6 +75,8 @@ async function login (body: unknown): Promise<APIResponse> {
 
     return {
         status: 200,
+        message: "Login Successful",
+        error: null,
         data: {'sessionID': sessionID}
     };
 

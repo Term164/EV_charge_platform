@@ -9,6 +9,31 @@ interface UserAccount {
     company_id?: number
 }
 
+interface building {
+    id: number,
+    building_name: string,
+    building_location: string
+}
+
+interface company {
+    id: number,
+    company_name: string
+}
+
+interface buildingAdmin {
+    account: UserAccount,
+    building: building
+}
+
+interface companyAdmin {
+    account: UserAccount,
+    company: company
+}
+
 export {
-    UserAccount
+    UserAccount,
+    building,
+    company,
+    buildingAdmin,
+    companyAdmin
 };

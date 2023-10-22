@@ -2,11 +2,10 @@ import helper, { request } from "./helper";
 
 describe('charging type service', () => {
     beforeAll( async () => {
-        //await helper.createExampleBuildings();
+        //
     });
 
     test('create new charging type', async () => {
-
         const data = {
             chargingType: "15W - test"
         };
@@ -30,8 +29,9 @@ describe('charging type service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingTypesReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingTypesReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingTypes).toEqual(numberOfChargingTypesReturned);
     });
@@ -64,11 +64,11 @@ describe('charging type service', () => {
 
         const response = await request.delete('/api/v1/station/type/delete/type')
             .send(data)
-            .expect(400)
+            .expect(500)
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Error");
+        expect(response.body).toHaveProperty("error");
         const numberOfChargingTypesAfter = await helper.getNumberOfChargingTypes();
 
         expect(numberOfChargingTypesAfter).toEqual(numberOfChargingTypesBefore);

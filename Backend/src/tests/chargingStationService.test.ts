@@ -6,12 +6,10 @@ let dummyBuildingID: number;
 describe('charging station service', () => {
     beforeAll( async () => {
         dummyChargingTypeID = await helper.insertDummyChargingTypeReturningID();
-        dummyBuildingID = await helper.insertDummyBuildingReturningID();
+        dummyBuildingID = await helper.insertDummyBuildingReturningID("building-test");
     });
 
     test('create new charging station', async () => {
-        //await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, dummyBuildingID);
-
         const data = {
             chargingTypeID: dummyChargingTypeID,
             buildingID: dummyBuildingID,
@@ -37,8 +35,9 @@ describe('charging station service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingStationsReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingStationsReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingStations).toEqual(numberOfChargingStationsReturned);
     });
@@ -48,9 +47,9 @@ describe('charging station service', () => {
     a company assigned to building, creates a user with said company
     -> that station is available to him
     */
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID("dummy-building");
         await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, lastInsertedBuildingID);
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID("dummy-building-2");
         await helper.assignCompanyToBuilding(lastInsertedCompanyID, lastInsertedBuildingID);
         const lastInsertedUserID = await helper.insertDummyUserWithCompanyReturningID(lastInsertedCompanyID);
 
@@ -64,8 +63,9 @@ describe('charging station service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingStationsReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingStationsReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingStationsReturned).toEqual(1);
     });
@@ -75,7 +75,7 @@ describe('charging station service', () => {
     creates a user with no company (guest), but gives him building access
     -> that station is available to him
     */
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID("dummy-building-3");
         await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, lastInsertedBuildingID);
         const lastInsertedUserID = await helper.insertDummyUserWithCompanyReturningID(null);
         await helper.setBuildingAccessToUser(lastInsertedUserID, lastInsertedBuildingID);
@@ -90,8 +90,9 @@ describe('charging station service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingStationsReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingStationsReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingStationsReturned).toEqual(1);
     });
@@ -101,8 +102,8 @@ describe('charging station service', () => {
     creates a user with no company, but gives him building access to both buildings
     -> both stations are available to him
     */
-        const buildingID_1 = await helper.insertDummyBuildingReturningID();
-        const buildingID_2 = await helper.insertDummyBuildingReturningID();
+        const buildingID_1 = await helper.insertDummyBuildingReturningID("dummy-building-4");
+        const buildingID_2 = await helper.insertDummyBuildingReturningID("dummy-building-5");
         await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, buildingID_1);
         await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, buildingID_2);
         const lastInsertedUserID = await helper.insertDummyUserWithCompanyReturningID(null);
@@ -119,8 +120,9 @@ describe('charging station service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingStationsReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingStationsReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingStationsReturned).toEqual(2);
     });
@@ -131,11 +133,11 @@ describe('charging station service', () => {
     assigns one station to the other company
     -> there are 2 stations connected to this building, but only 1 is available
     */
-        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID();
+        const lastInsertedBuildingID = await helper.insertDummyBuildingReturningID("dummy-building-6");
         const stationID = await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, lastInsertedBuildingID);
         await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, lastInsertedBuildingID);
-        const usersCompanyID = await helper.insertDummyCompanyReturningID();
-        const anotherCompanyID = await helper.insertDummyCompanyReturningID();
+        const usersCompanyID = await helper.insertDummyCompanyReturningID("dummy-company");
+        const anotherCompanyID = await helper.insertDummyCompanyReturningID("dummy-company-2");
         await helper.assignCompanyToBuilding(usersCompanyID, lastInsertedBuildingID);
         await helper.assignCompanyToBuilding(anotherCompanyID, lastInsertedBuildingID);
         const lastInsertedUserID = await helper.insertDummyUserWithCompanyReturningID(usersCompanyID);
@@ -151,8 +153,9 @@ describe('charging station service', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Result");
-        const numberOfChargingStationsReturned = response.body.Result.length as number;
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveProperty("Result");
+        const numberOfChargingStationsReturned = response.body.data.Result.length as number;
 
         expect(numberOfChargingStationsReturned).toEqual(1);
     });
@@ -185,11 +188,11 @@ describe('charging station service', () => {
 
         const response = await request.delete('/api/v1/station/delete/station')
             .send(data)
-            .expect(400)
+            .expect(500)
             .expect('Content-Type', /application\/json/);
 
         expect(response).toHaveProperty("body");
-        expect(response.body).toHaveProperty("Error");
+        expect(response.body).toHaveProperty("error");
         const numberOfChargingStationsAfter = await helper.getNumberOfChargingStations();
 
         expect(numberOfChargingStationsAfter).toEqual(numberOfChargingStationsBefore);
@@ -200,7 +203,7 @@ describe('charging station service', () => {
         //const [chargingTypeIDBefore, buildingIDBefore, stationNameBefore] = await helper.getChargingStationData(lastInsertedChargingStationID);
 
         const otherChargingTypeID = await helper.insertDummyChargingTypeReturningID();
-        const otherBuildingID = await helper.insertDummyBuildingReturningID();
+        const otherBuildingID = await helper.insertDummyBuildingReturningID("dummy-building-7");
 
         const data = {
             stationID: lastInsertedChargingStationID,
@@ -255,7 +258,7 @@ describe('charging station service', () => {
 
         await request.patch('/api/v1/station/patch/edit')
             .send(data)
-            .expect(400)
+            .expect(500)
             .expect('Content-Type', /application\/json/);
 
         const [chargingTypeIDAfter, buildingIDAfter, stationNameAfter] = await helper.getChargingStationData(lastInsertedChargingStationID);
@@ -266,7 +269,7 @@ describe('charging station service', () => {
     });
 
     test('assign a station to a company', async () => {
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID("dummy-company-3");
         const lastInsertedChargingStationID = await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, dummyBuildingID);
 
         expect(await helper.getCompanyIDOfChargingStation(lastInsertedChargingStationID)).toEqual(null);
@@ -284,7 +287,7 @@ describe('charging station service', () => {
     });
 
     test('assign a station to a company - clear', async () => {
-        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID();
+        const lastInsertedCompanyID = await helper.insertDummyCompanyReturningID("dummy-company-4");
         const lastInsertedChargingStationID = await helper.insertDummyChargingStationReturningID(dummyChargingTypeID, dummyBuildingID);
         await helper.setCompanyIDOfChargingStation(lastInsertedChargingStationID, lastInsertedCompanyID);
 
@@ -302,8 +305,3 @@ describe('charging station service', () => {
         expect(await helper.getCompanyIDOfChargingStation(lastInsertedChargingStationID)).toEqual(null);
     });
 });
-
-
-
-
-

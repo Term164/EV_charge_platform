@@ -1,6 +1,8 @@
 interface APIResponse {
     status: number,
-    data: object
+    message: string,
+    error: string | null,
+    data: object | null
 }
 
 interface UserRegistrationRequest {
@@ -43,6 +45,20 @@ interface AssignEmployeeToBuildingRequest {
     buildingID: number;
     companyAdminID: number;
     expirationDate?: Date;
+}
+
+interface RevokeBuildingAccessRequest {
+    userID: number,
+    buildingID: number
+}
+
+interface EditUserProfileRequest {
+    id: number,
+    username?: string,
+    email_account?: string,
+    profile_picture?: string,
+    rfid?: number,
+    company_id?: number
 }
 
 interface CreateBuildingRequest {
@@ -120,6 +136,8 @@ export {
     CreateCompanyRequest,
     DeleteCompanyRequest,
     EditCompanyRequest,
+    RevokeBuildingAccessRequest,
+    EditUserProfileRequest,
     CreateBuildingRequest,
     EditBuildingRequest,
     DeleteBuildingRequest,

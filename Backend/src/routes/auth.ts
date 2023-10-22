@@ -8,19 +8,19 @@ const router = express.Router();
 router.post('/login', asyncHanlder( async (req, res) => {
     const response = await authService.login(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.post('/register/step1', asyncHanlder(async (req, res) => {
     const response = await register.firstStep(req.body);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.get('/register/step2/:id/:token', asyncHanlder(async (req, res) => {
     const response = await register.secondStep(req.params);
     res.status(response.status)
-        .send(response.data);
+        .send(response);
 }));
 
 router.post('/logout', (_req, res) => {
