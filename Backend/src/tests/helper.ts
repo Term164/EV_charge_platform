@@ -14,6 +14,8 @@ async function clearAllTables() {
         DELETE FROM registration_secrets;
         DELETE FROM building_admins;
         DELETE FROM building_accesses;
+        DELETE FROM charging_stations;
+        DELETE FROM charging_types;
         DELETE FROM company_admins;
         DELETE FROM "Building-Company";
         DELETE FROM buildings;
@@ -106,6 +108,38 @@ async function getBuildingData(id: number): Promise<string[]> {
     return (await database.connection.execute(`SELECT "building_name","building_location" FROM Buildings WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
 }
 
+async function checkChargingTypeExists(chargingType: string) {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_types WHERE type = '${chargingType}';`)).results.at(0)?.rows?.length as number > 0;
+}
+
+async function getNumberOfChargingTypes(): Promise<number> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_types;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function getChargingType(id: number): Promise<string> {
+    return (await database.connection.execute(`SELECT "type" FROM charging_types WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0)[0] as string;
+}
+
+async function checkChargingStationExists(chargingStationName: string): Promise<boolean> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_stations WHERE name = '${chargingStationName}';`)).results.at(0)?.rows?.length as number > 0;
+}
+
+async function getNumberOfChargingStations(): Promise<number> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_stations`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function getChargingStationData(id: number): Promise<string[]> {
+    return (await database.connection.execute(`SELECT "charging_type_id","building_id","name" FROM charging_stations WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
+}
+
+async function getCompanyIDOfChargingStation(id: number): Promise<number|null> {
+    // Result is either a number or an intentional null, which this can't handle??
+    const result = (await database.connection.execute(`SELECT "company_id" FROM charging_stations WHERE ID = ${id};`)).results.at(0)?.rows?.at(0) as number[] | undefined;
+    if (result == undefined)
+        return null;
+    return result[0];
+}
+
 // ============================ MODIFY DATA ===========================
 
 async function makeSessionExpired(sessionSecret: string) {
@@ -154,6 +188,10 @@ async function insertBuildingsOwnedByCompany(companyID: number) {
     VALUES (${await insertDummyBuildingReturningID()}, ${companyID}), (${await insertDummyBuildingReturningID()}, ${companyID}), (${await insertDummyBuildingReturningID()}, ${companyID})`));
 }
 
+async function assignCompanyToBuilding(companyID: number, buildingID: number) {
+    return (await database.connection.execute( `INSERT INTO "Building-Company" ("building_id", "company_id") VALUES (${buildingID}, ${companyID});`));
+}
+
 async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
     return (await database.connection.execute(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '${companyID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
@@ -165,6 +203,27 @@ async function insertNewUserReturningUserID(username: string, password: string, 
 async function insertNewUserReturningNumberOfUsers(username: string, password: string, email: string): Promise<number>  {
     return (await database.connection.execute(`INSERT INTO Accounts ("username","password_hash","email_account") VALUES
     ('${username}', '${password}','${email}'); SELECT COUNT(*) from accounts;`)).results.at(1)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyUserWithCompanyReturningID(companyID: number | null): Promise<number>  {
+    return (await database.connection.execute(`INSERT INTO Accounts ("username","password_hash","email_account","company_id") VALUES
+    ('dummy-test', 'dummy-test','dummy-test', ${companyID}) RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyChargingTypeReturningID(): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO charging_types ("type") VALUES ('dummy-test') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyChargingStationReturningID(chargingTypeID: number, buildingID: number): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO charging_stations ("charging_type_id", "building_id", "name") VALUES ('${chargingTypeID}', '${buildingID}', 'station-test') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function setCompanyIDOfChargingStation(id: number, companyID: number) {
+    await database.connection.execute(`UPDATE charging_stations SET "company_id" = ${companyID} WHERE ID = ${id};`);
+}
+
+async function setBuildingAccessToUser(userID: number, buildingID: number) {
+    return (await database.connection.execute(`INSERT INTO building_accesses ("account_id", "building_id") VALUES ('${userID}', '${buildingID}');`));
 }
 
 export default {
@@ -197,5 +256,18 @@ export default {
     insertDummyCompanyAdminReturningID,
     insertNewUserReturningNumberOfUsers,
     insertNewUserReturningUserID,
-    insertDummySession
+    insertDummyUserWithCompanyReturningID,
+    insertDummySession,
+    checkChargingTypeExists,
+    getNumberOfChargingTypes,
+    insertDummyChargingTypeReturningID,
+    getChargingType,
+    checkChargingStationExists,
+    getNumberOfChargingStations,
+    insertDummyChargingStationReturningID,
+    getChargingStationData,
+    getCompanyIDOfChargingStation,
+    setCompanyIDOfChargingStation,
+    assignCompanyToBuilding,
+    setBuildingAccessToUser,
 };

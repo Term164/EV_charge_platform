@@ -1,30 +1,70 @@
 import express from 'express';
+import asyncHanlder from 'express-async-handler';
+import stationService from '../services/chargingStationService';
+import chargingTypeService from '../services/chargingTypeService';
 
 const router = express.Router();
 
-router.post('/post/new', (_req, res) => {
-    res.send('Adding a new charging station and the building it resides in');
-});
+router.post('/post/new', asyncHanlder(async (req, res) => {
+    const response = await stationService.createStation(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/patch/edit', (_req, res) => {
-    res.send('Editing a charging station details');
-});
+router.patch('/patch/edit', asyncHanlder(async (req, res) => {
+    const response = await stationService.editStation(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/all', (_req, res) => {
-    res.send('Get all charging stations');
-});
+router.get('/get/all', asyncHanlder(async (req, res) => {
+    const response = await stationService.getAllStations(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.get('/get/allAvailalbe', (_req, res) => {
-    res.send('Get all charging stations that are available for a certain user');
-});
+router.get('/get/allAvailable', asyncHanlder(async (req, res) => {
+    const response = await stationService.getAllAvailableStations(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/post/assignCompany', (_req, res) => {
-    res.send('Assign a station to a company');
-});
+router.post('/post/assignCompany', asyncHanlder(async (req, res) => {
+    const response = await stationService.assignCompany(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
-router.post('/delete/station', (_req, res) => {
-    res.send('Delete station from the database');
-});
+router.delete('/delete/station', asyncHanlder(async (req, res) => {
+    const response = await stationService.deleteStation(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
+// ==================== SUB GROUP "CHARGING TYPE" ====================
+
+router.post('/type/post/new', asyncHanlder(async (req, res) => {
+    const response = await chargingTypeService.createChargingType(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
+
+router.get('/type/get/all', asyncHanlder(async (_req, res) => {
+    const response = await chargingTypeService.getAllChargingTypes();
+    res.status(response.status)
+        .send(response.data);
+}));
+
+router.delete('/type/delete/type', asyncHanlder(async (req, res) => {
+    const response = await chargingTypeService.deleteChargingType(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
+
+router.patch('/type/patch/edit', asyncHanlder(async (req, res) => {
+    const response = await chargingTypeService.editChargingType(req.body);
+    res.status(response.status)
+        .send(response.data);
+}));
 
 export default router;

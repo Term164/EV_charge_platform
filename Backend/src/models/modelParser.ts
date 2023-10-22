@@ -1,5 +1,5 @@
 import { UserAccount } from "./databaseModels";
-import { AssignCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateBuildingRequest, CreateCompanyRequest, DeleteBuildingRequest, DeleteCompanyRequest, EditBuildingRequest, EditCompanyRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
+import { AssignCompanyRequest, AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateBuildingRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteBuildingRequest, DeleteChargingTypeRequest, DeleteCompanyRequest, DeleteStationRequest, EditBuildingRequest, EditChargingTypeRequest, EditCompanyRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest } from "./requestModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -144,7 +144,6 @@ function parseCreateCompanyRequest(request: unknown): CreateCompanyRequest {
 
         return CreateCompanyRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -160,7 +159,6 @@ function parseDeleteCompanyRequest(request: unknown): DeleteCompanyRequest {
 
         return DeleteCompanyRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -177,7 +175,6 @@ function parseEditCompanyRequest(request: unknown): EditCompanyRequest {
 
         return EditCompanyRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -196,9 +193,7 @@ function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeT
 
         return assignRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
-
 }
 
 function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
@@ -214,7 +209,6 @@ function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
 
         return CreateBuildingRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -232,7 +226,6 @@ function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
 
         return EditBuildingRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -248,7 +241,6 @@ function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
 
         return DeleteBuildingRequest;
     }
-
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -265,7 +257,147 @@ function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
 
         return AssignCompanyRequest;
     }
+    throw new Error('Incorrect data: some fields are missing');
+}
 
+function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    const GetAllStationsRequest: GetAllStationsRequest = {
+        buildingID : ('buildingID' in request) ? parseIntegerParameter(request.buildingID, 'buildingID') : null
+    };
+    return GetAllStationsRequest;
+}
+
+function parseCreateStationRequest(request: unknown): CreateStationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request && 'chargingTypeID' in request && 'stationName' in request) {
+        const CreateStationRequest: CreateStationRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
+            stationName: parseStringParameter(request.stationName, 'stationName')
+        };
+
+        return CreateStationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseDeleteStationRequest(request: unknown): DeleteStationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request) {
+        const DeleteStationRequest: DeleteStationRequest = {
+            stationID: parseIntegerParameter(request.stationID, 'stationID')
+        };
+
+        return DeleteStationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAssignStationToCompanyRequest(request: unknown): AssignStationToCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request && 'companyID' in request) {
+        const AssignStationToCompanyRequest: AssignStationToCompanyRequest = {
+            stationID: parseIntegerParameter(request.stationID, 'stationID'),
+            companyID: request.companyID != null ? parseIntegerParameter(request.companyID, 'companyID') : null
+        };
+
+        return AssignStationToCompanyRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditStationRequest(request: unknown): EditStationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request) {
+        const EditStationRequest: EditStationRequest = {
+            stationID: parseIntegerParameter(request.stationID, 'stationID'),
+            newTypeID : ('newTypeID' in request) ? parseIntegerParameter(request.newTypeID, 'newTypeID') : null,
+            newBuildingID : ('newBuildingID' in request) ? parseIntegerParameter(request.newBuildingID, 'newBuildingID') : null,
+            newStationName : ('newStationName' in request) ? parseStringParameter(request.newStationName, 'newStationName') : null
+        };
+
+        return EditStationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+// Spot for 'get all available for user'
+//
+
+function parseCreateChargingTypeRequest(request: unknown): CreateChargingTypeRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingType' in request) {
+        const CreateChargingTypeRequest: CreateChargingTypeRequest = {
+            chargingType: parseStringParameter(request.chargingType, 'chargingType')
+        };
+
+        return CreateChargingTypeRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseDeleteChargingTypeRequest(request: unknown): DeleteChargingTypeRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingTypeID' in request) {
+        const DeleteChargingTypeRequest: DeleteChargingTypeRequest = {
+            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID')
+        };
+
+        return DeleteChargingTypeRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditChargingTypeRequest(request: unknown): EditChargingTypeRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingTypeID' in request && 'newChargingType' in request) {
+        const EditChargingTypeRequest: EditChargingTypeRequest = {
+            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
+            newChargingType: parseStringParameter(request.newChargingType, 'newChargingType')
+        };
+
+        return EditChargingTypeRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseGetAllAvailableStationsRequest(request: unknown): GetAllAvailableStationsRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request) {
+        const GetAllAvailableStationsRequest: GetAllAvailableStationsRequest = {
+            userID: parseIntegerParameter(request.userID, 'userID')
+        };
+
+        return GetAllAvailableStationsRequest;
+    }
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -305,5 +437,14 @@ export default {
     parseCreateBuildingRequest,
     parseEditBuildingRequest,
     parseDeleteBuildingRequest,
-    parseAssignCompanyRequest
+    parseAssignCompanyRequest,
+    parseGetAllStationsRequest,
+    parseCreateStationRequest,
+    parseDeleteStationRequest,
+    parseAssignStationToCompanyRequest,
+    parseEditStationRequest,
+    parseCreateChargingTypeRequest,
+    parseDeleteChargingTypeRequest,
+    parseEditChargingTypeRequest,
+    parseGetAllAvailableStationsRequest
 };

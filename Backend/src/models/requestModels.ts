@@ -65,6 +65,51 @@ interface AssignCompanyRequest {
     buildingID: number;
 }
 
+interface GetAllStationsRequest {
+    buildingID: number | null;
+}
+
+interface CreateStationRequest {
+    buildingID: number;
+    chargingTypeID: number;
+    stationName: string;
+}
+
+interface DeleteStationRequest {
+    stationID: number;
+}
+
+interface AssignStationToCompanyRequest {
+    stationID: number;
+    companyID: number | null;
+}
+
+// Does not include companyID, since that is meant to be changed via the other
+// API call -> station/assignCompany
+interface EditStationRequest {
+    stationID: number;
+    newTypeID: number | null;
+    newBuildingID: number | null;
+    newStationName: string | null;
+}
+
+interface CreateChargingTypeRequest {
+    chargingType: string;
+}
+
+interface DeleteChargingTypeRequest {
+    chargingTypeID: number;
+}
+
+interface EditChargingTypeRequest {
+    chargingTypeID: number;
+    newChargingType: string;
+}
+
+interface GetAllAvailableStationsRequest {
+    userID: number;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -78,5 +123,14 @@ export {
     CreateBuildingRequest,
     EditBuildingRequest,
     DeleteBuildingRequest,
-    AssignCompanyRequest
+    AssignCompanyRequest,
+    GetAllStationsRequest,
+    CreateStationRequest,
+    DeleteStationRequest,
+    AssignStationToCompanyRequest,
+    EditStationRequest,
+    CreateChargingTypeRequest,
+    DeleteChargingTypeRequest,
+    EditChargingTypeRequest,
+    GetAllAvailableStationsRequest
 };
