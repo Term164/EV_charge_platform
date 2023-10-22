@@ -57,6 +57,21 @@ class StatmentManager {
     deleteSessionIDStatmenet: PreparedStatement;
     updateSessionIDStatement: PreparedStatement;
 
+    // Charging Station Service statements;
+    createChargingStationStatement: PreparedStatement;
+    getAllChargingStationsSpecificStatement: PreparedStatement;
+    getAllChargingStationsFullStatement: PreparedStatement;
+    deleteChargingStationStatement: PreparedStatement;
+    editChargingStationStatement: PreparedStatement;
+    assignChargingStationToCompanyStatement: PreparedStatement;
+    getAllAvailableChargingStationsStatement: PreparedStatement;
+
+    // Charging Type Service statements;
+    createChargingTypeStatement: PreparedStatement;
+    getAllChargingTypesStatement: PreparedStatement;
+    deleteChargingTypeStatement: PreparedStatement;
+    editChargingTypeStatement: PreparedStatement;
+
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
             `INSERT INTO Building_admins (account_id, building_id)
@@ -318,6 +333,76 @@ class StatmentManager {
         );
     }
 
+    private async prepareChargingStationServiceStatements() {
+        this.createChargingStationStatement = await db.connection.prepare(
+            `INSERT INTO Charging_stations ("charging_type_id", "building_id", "name")
+            VALUES ($1, $2, $3);`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
+        );
+
+        this.getAllChargingStationsSpecificStatement = await db.connection.prepare(
+            `SELECT cs.id, name, ct.id type_id, type
+            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id
+            WHERE b.id = $1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
+        this.getAllChargingStationsFullStatement = await db.connection.prepare(
+            `SELECT cs.id, name, ct.id type_id, type, b.id building_id, building_name, building_location
+            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id;`,
+            {paramTypes: []}
+        );
+
+        this.deleteChargingStationStatement = await db.connection.prepare(
+            `DELETE FROM Charging_stations
+            WHERE id = $1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
+        this.editChargingStationStatement = await db.connection.prepare(
+            `call edit_station($1, $2, $3, $4);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.varchar]}
+        );
+
+        this.assignChargingStationToCompanyStatement = await db.connection.prepare(
+            `UPDATE Charging_stations
+            SET company_id = $1
+            WHERE id = $2;`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
+        );
+
+        this.getAllAvailableChargingStationsStatement = await db.connection.prepare(
+            `SELECT * FROM get_all_available($1);`,
+            {paramTypes: [DataTypeOIDs.int4]}
+        );
+    }
+
+    private async prepareChargingTypeServiceStatements() {
+        this.createChargingTypeStatement = await db.connection.prepare(
+            `INSERT INTO charging_types (type)
+            VALUES ($1);`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.getAllChargingTypesStatement = await db.connection.prepare(
+            `SELECT * FROM charging_types;`,
+            {paramTypes: []}
+        );
+
+        this.deleteChargingTypeStatement = await db.connection.prepare(
+            `DELETE FROM charging_types
+            WHERE id = $1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
+        this.editChargingTypeStatement = await db.connection.prepare(
+            `UPDATE charging_types
+            SET type = $1
+            WHERE id = $2;`,
+            {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.numeric]}
+        );
+    }
+
     public async init() {
         await this.prepareAdminServiceStatements();
         await this.prepareAssignEmployeeServiceStatements();
@@ -327,6 +412,8 @@ class StatmentManager {
         await this.prepareRegisterServiceStatements();
         await this.prepareUserServiceStatements();
         await this.prepareMiddlewareStatements();
+        await this.prepareChargingStationServiceStatements();
+        await this.prepareChargingTypeServiceStatements();
     }
 }
 

@@ -17,8 +17,8 @@ async function createBuilding(body: unknown): Promise<APIResponse> {
 
     const result = await SQLStatementManager.createBuildingStatement.execute({params: [data.buildingName, data.buildingLocation]});
 
-    if (result.rowsAffected != 1) throw new Error("Something went wrong while trying to create a new building.");
-
+    if (result.rowsAffected != 1)
+        return {status: 500, message: "Something went wrong while trying to create a new building.", error: "Something went wrong while trying to create a new building", data: result};
     return ({status: 200, message: 'Successfully added new building.', error: null, data: null});
 }
 
