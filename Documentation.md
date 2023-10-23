@@ -298,6 +298,11 @@ Ustvarjanje rezervacije - tu pride ogromno parametrov, od stavbe, posebnega tipa
 `/api/v1/reservation/get/stationType (buildingID)`<br>
 Posebna pomožna metoda, izpis vseh tipov polnilnic pri stavbi
 
+## RESERVATION ALGO PSEUDOCODE
+
+(User creates reservation and sends the request to the server)
+1. Save user reservation to database
+2. (Function) Querry database to get all building charging station timetables (and or charging type)
 
 
 
