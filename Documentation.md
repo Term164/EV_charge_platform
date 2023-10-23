@@ -303,9 +303,21 @@ Posebna pomožna metoda, izpis vseh tipov polnilnic pri stavbi
 (User creates reservation and sends the request to the server)
 1. Save user reservation to database
 2. (Function) Querry database to get all building charging station timetables (and or charging type)
+3. Find free slot for new reservation otherwise put it on queue (loop through all stations and find first)
+4. If free slot is found save the allocated time back to the database along with charging station id
+5. else 
 
+(User Cancle request, before charging starts)
+1. Delete reservation from database
+2. Querry database for station timeslots
+3. Querry for reservations that have not been allocated yet and fit in the time slot that has been deleted sorted by creation time (oldest first)
+4. Allocate timeslot to new user for specific station
 
-
+(User Cancle request, mid charging)
+1. Delete reservation from database
+2. Querry database for station timeslots
+3. Querry for reservations that have not been allocated yet and fit in the time slot that has been deleted sorted by creation time (oldest first)
+4. Allocate timeslot to new user for specific station
 
 
 
