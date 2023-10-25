@@ -300,24 +300,41 @@ Posebna pomožna metoda, izpis vseh tipov polnilnic pri stavbi
 
 ## RESERVATION ALGO PSEUDOCODE
 
+IDEA: When displaying buildings where to make reservation there should be a capacity percentage. (How much of the available time is already reserved, and number of people in queue)
+
+IDEA: If user wants continuous charging, check for spot if no spot is found ask the user if they would like to switch to other mode (informing them that if they stay with continuous mode they might not get a spot)
+
+QUESTION: When is the reservation request actually sent to the station ? Since the station has only two states... reserved or not reserved.
+
 (User creates reservation and sends the request to the server)
 1. Save user reservation to database
 2. (Function) Querry database to get all building charging station timetables (and or charging type)
-3. Find free slot for new reservation otherwise put it on queue (loop through all stations and find first)
-4. If free slot is found save the allocated time back to the database along with charging station id
-5. else 
+3. Find free slot for new reservation otherwise put it on queue (loop through all stations and find first, Save the longest possible continuous session and if no sessions are found with the desired duration use that one.)
+4. If free slot is found save the allocated time back to the database along with charging station id and return to user confirmation
+5. else just return to user message saying that no reservation could be made and he is now in queue
 
 (User Cancle request, before charging starts)
 1. Delete reservation from database
 2. Querry database for station timeslots
 3. Querry for reservations that have not been allocated yet and fit in the time slot that has been deleted sorted by creation time (oldest first)
-4. Allocate timeslot to new user for specific station
+4. While the timeslot is not full or the whole queue has been checked (bascially loop through all reservations in queue allocating them until the timeslot is full or you came to the end of the queue)
+5. Allocate timeslot to new user for specific station
 
 (User Cancle request, mid charging)
 1. Delete reservation from database
 2. Querry database for station timeslots
 3. Querry for reservations that have not been allocated yet and fit in the time slot that has been deleted sorted by creation time (oldest first)
-4. Allocate timeslot to new user for specific station
+4. Try to extend the next reservation
+5. Otherwise allocate timeslot to new user for specific station
+
+(User edits reservation, when already allocated) (User could loose allocated spot)
+1. Update user reservation in database
+2. Remove allocated time for that reservation
+3. run deletion algo to allocate timeslot to user (If user change the duration and made it shorter he should still get the same spot only shorter)
+
+(User edits reservation, when not allocated)
+1. Update user reservation in database
+2. run algo to allocate timeslot to user (look at first example)
 
 
 
