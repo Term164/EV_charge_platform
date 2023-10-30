@@ -112,8 +112,8 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
-                if (error.message.includes('fk_6')) errorMessage = 'This building does not exist';
-                else if (error.message.includes('fk_7')) errorMessage = 'This company does not exist';
+                if (error.message.includes('frn_building_company_building_id')) errorMessage = 'This building does not exist';
+                else if (error.message.includes('frn_building_company_company_id')) errorMessage = 'This company does not exist';
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 1';
                 return {status: 400, message: errorMessage, error: error.message , data: null};
             }
