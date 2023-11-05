@@ -2,6 +2,7 @@ import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
 import log from "../utils/logger";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
+import { CompanyResponse } from "../models/responseModels";
 
 // ======================================== MAIN FUNCTIONS ========================================
 
@@ -25,7 +26,10 @@ async function getAllCompanies(): Promise<APIResponse> {
 
     const result = await SQLStatementManager.getAllCompaniesStatment.execute({params: []});
 
-    return ({status: 200, message: `Returned ${result.rows?.length} companies`, error: null, data: {'Result': result.rows}});
+    if (result.rows == undefined)
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+    const returnedCompanies: CompanyResponse[] =  parser.parseCompanyResponse(result.rows);
+    return {status: 200, message: `Returned ${result.rows.length} companies`, error: null, data: {'Result': returnedCompanies}};
 }
 
 async function deleteCompany(body: unknown): Promise<APIResponse> {

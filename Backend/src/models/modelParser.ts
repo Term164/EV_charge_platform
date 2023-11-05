@@ -1,5 +1,6 @@
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, ChargingConnectorForCreateStationRequest } from "./requestModels";
+import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse } from "./responseModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -321,17 +322,34 @@ function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
     return GetAllStationsRequest;
 }
 
+function IsChargingConnectorsForCreateStationRequestCorrectlyFormatted(arrayOfConnectors: unknown): boolean{
+    if (!arrayOfConnectors || Array.isArray(arrayOfConnectors))
+        return false;
+
+    for (let i = 0; i < (arrayOfConnectors as any[]).length; i++) {
+        if (!('chargingTypeID' in (arrayOfConnectors as any[])[i]))
+            return false;
+        if (!isInt((arrayOfConnectors as any[])[i].chargingTypeID) )
+            return false;
+    }
+    return true;
+}
+
 function parseCreateStationRequest(request: unknown): CreateStationRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('buildingID' in request && 'chargingTypeID' in request && 'stationName' in request) {
-        const CreateStationRequest: CreateStationRequest = {
+    if ('buildingID' in request && 'stationName' in request && 'chargingConnectors' in request) {
+        let CreateStationRequest: CreateStationRequest = {
             buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
-            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
-            stationName: parseStringParameter(request.stationName, 'stationName')
+            stationName: parseStringParameter(request.stationName, 'stationName'),
+            chargingConnectors: []
         };
+        if (!IsChargingConnectorsForCreateStationRequestCorrectlyFormatted(request.chargingConnectors))
+            throw new Error('Incorrect data in chargingConnectors: must be array of numbers');
+        
+        CreateStationRequest.chargingConnectors = request.chargingConnectors as ChargingConnectorForCreateStationRequest[];
 
         return CreateStationRequest;
     }
@@ -535,6 +553,98 @@ function parseCompanyAdmin(data: unknown) {
     return companyAdminData;
 }
 
+// ==================================== RESPONSE MODEL PARSERS ==============================================
+function parseBuildingResponse(rows: any[]): BuildingResponse[] {
+    let returningArray: BuildingResponse[] = new Array(rows.length);
+    let building: BuildingResponse;
+    for (let i = 0; i < rows.length; i++) {
+        building = new BuildingResponse();
+        building.buildingID = rows[i][0];
+        building.buildingName = rows[i][1];
+        building.buildingLocation = rows[i][2];
+        returningArray[i] = building;
+    }
+    return returningArray;
+}
+
+function parseCompanyResponse(rows: any[]): CompanyResponse[] {
+    let returningArray: CompanyResponse[] = new Array(rows.length);
+    let company: CompanyResponse;
+    for (let i = 0; i < rows.length; i++) {
+        company = new CompanyResponse();
+        company.companyID = rows[i][0];
+        company.companyName = rows[i][1];
+        returningArray[i] = company;
+    }
+    return returningArray;
+}
+
+function parseChargingTypeResponse(rows: any[]): ChargingTypeResponse[] {
+    let returningArray: ChargingTypeResponse[] = new Array(rows.length);
+    let chargingType: ChargingTypeResponse;
+    for (let i = 0; i < rows.length; i++) {
+        chargingType = new ChargingTypeResponse();
+        chargingType.chargingTypeID = rows[i][0];
+        chargingType.chargingType = rows[i][1];
+        returningArray[i] = chargingType;
+    }
+    return returningArray;
+}
+
+function parseChargingStationResponse(rows: any[], specific: boolean): ChargingStationResponse[] {
+    let processedStations = new Map;
+    let returningArray: ChargingStationResponse[] = [];
+    for (let i = 0; i < rows.length; i++) {
+        // Get station ID and Connector ID first for comparing
+        let station = new ChargingStationResponse;
+        station.chargingStationID = rows[i][1];
+
+        let connector = new ChargingConnectorResponse;
+        connector.chargingConnectorID = rows[i][0];
+
+        let type = new ChargingTypeResponse;
+        type.chargingTypeID = rows[i][3];
+        type.chargingType = rows[i][4];
+        
+        connector.chargingType = type;
+
+        // If it has been processed, then simply add the connector to the 
+        // original station, using the value from map as index
+        if (processedStations.has(station.chargingStationID)) {
+            let index = processedStations.get(station.chargingStationID);
+            returningArray[index].chargingConnectors.push(connector);
+            continue;
+        }
+        
+        // If station ID hasn't been processed yet, add it along with its
+        // index in the returning array
+        processedStations.set(station.chargingStationID, returningArray.length);
+
+        station.chargingStationName = rows[i][2];    
+        station.chargingConnectors = [];
+        station.chargingConnectors.push(connector);
+
+        if (specific){
+            station.building = null;
+        } else {
+            station.building = {} as BuildingResponse;
+            station.building.buildingID = rows[i][5];
+            station.building.buildingName = rows[i][6];
+            station.building.buildingLocation = rows[i][7];
+        }
+        if (rows[i][8] == null){
+            station.company = null;
+        } else {
+            station.company = {} as CompanyResponse;
+            station.company.companyID = rows[i][8];
+            station.company.companyName = rows[i][9];
+        }
+        
+        returningArray.push(station);
+    }
+    return returningArray;
+}
+
 
 export default {
     parseIntegerParameterFromString,
@@ -564,5 +674,11 @@ export default {
     parseCreateChargingTypeRequest,
     parseDeleteChargingTypeRequest,
     parseEditChargingTypeRequest,
-    parseGetAllAvailableStationsRequest
+    parseGetAllAvailableStationsRequest,
+    // -----------------------
+    parseBuildingResponse,
+    parseCompanyResponse,
+    parseChargingTypeResponse,
+    parseChargingStationResponse,
+    
 };

@@ -143,7 +143,8 @@ CREATE TABLE Building_accesses
  expiration_date date NULL,
  CONSTRAINT prm_building_accesses_id PRIMARY KEY ("id"),
  CONSTRAINT frn_building_accesses_account_id FOREIGN KEY (account_id) REFERENCES Accounts ("id"),
- CONSTRAINT frn_building_accesses_building_id FOREIGN KEY (building_id) REFERENCES Buildings ("id")
+ CONSTRAINT frn_building_accesses_building_id FOREIGN KEY (building_id) REFERENCES Buildings ("id"),
+ CONSTRAINT uni_building_accesses_account_id_building_id UNIQUE (account_id, building_id)
 );
 
 CREATE INDEX ind_building_accesses_account_id ON Building_accesses

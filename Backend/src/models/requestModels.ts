@@ -85,10 +85,14 @@ interface GetAllStationsRequest {
     buildingID: number | null;
 }
 
+interface ChargingConnectorForCreateStationRequest {
+    chargingTypeID: number;
+}
+
 interface CreateStationRequest {
     buildingID: number;
-    chargingTypeID: number;
     stationName: string;
+    chargingConnectors: ChargingConnectorForCreateStationRequest[];
 }
 
 interface DeleteStationRequest {
@@ -144,6 +148,7 @@ export {
     AssignCompanyRequest,
     GetAllStationsRequest,
     CreateStationRequest,
+    ChargingConnectorForCreateStationRequest,
     DeleteStationRequest,
     AssignStationToCompanyRequest,
     EditStationRequest,

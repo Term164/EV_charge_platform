@@ -2,7 +2,8 @@ import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
 import log from "../utils/logger";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
-import { QueryResult } from "postgresql-client";
+import { PreparedStatement, QueryResult } from "postgresql-client";
+import { ChargingStationResponse } from "../models/responseModels";
 
 // ======================================== MAIN FUNCTIONS ========================================
 
@@ -32,17 +33,20 @@ async function getAllStations(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error:'Incorrect data in request', data: {data}};
     }
 
-    let statement, args: unknown[];
+    let statement: PreparedStatement, args: any[];
     if (data.buildingID) {
         statement = SQLStatementManager.getAllChargingStationsSpecificStatement;
-        args = [data.buildingID];
+        args = [data.buildingID];    
     } else {
         statement = SQLStatementManager.getAllChargingStationsFullStatement;
-        args = [];
+        args = []    
     }
-
     const result = await statement.execute({params: args});
-    return {status: 200, message: `Returned ${result.rows?.length} stations`, error:null, data: {'Result': result.rows}};
+    if (result.rows == undefined)
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+    
+    const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, data.buildingID != null );    
+    return {status: 200, message: `Returned ${result.rows.length} stations`, error: null, data: {'Result': returnedStations}};
 }
 
 async function deleteStation(body: unknown): Promise<APIResponse> {

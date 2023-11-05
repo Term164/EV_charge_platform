@@ -76,14 +76,14 @@ class StatmentManager {
         this.assignBadminStatement = await db.connection.prepare(
             `INSERT INTO Building_admins (account_id, building_id)
             VALUES ($1, $2)
-            ON CONFLICT ON CONSTRAINT unique_account_building DO NOTHING;`,
+            ON CONFLICT ON CONSTRAINT uni_building_admins_account_id_building_id DO NOTHING;`, //unique_account_building
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
 
         this.assignCadminStatement = await db.connection.prepare(
             `INSERT INTO company_admins (account_id, company_id)
             VALUES ($1, $2)
-            ON CONFLICT ON CONSTRAINT unique_account_company DO NOTHING;`,
+            ON CONFLICT ON CONSTRAINT uni_company_admins_account_id_company_id DO NOTHING;`, //unique_account_company
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
     }
@@ -98,7 +98,7 @@ class StatmentManager {
         this.assignToBuildingStatement = await db.connection.prepare(
             `INSERT INTO Building_accesses (account_id, building_id, company_admin_id)
             VALUES ($1, $2, $3)
-            ON CONFLICT ON CONSTRAINT unique_account_building_access DO NOTHING;;`,
+            ON CONFLICT ON CONSTRAINT uni_building_accesses_account_id_building_id DO NOTHING;;`, //unique_account_building_access
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
     }
@@ -144,7 +144,7 @@ class StatmentManager {
         );
 
         this.editBuildingStatement = await db.connection.prepare(
-            `call edit_building($1, $2, $3);`, // Check 'edit_building' in 'procedures.sql' for info
+            `call edit_building($1, $2, $3);`,
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.varchar, DataTypeOIDs.varchar]}
         );
 
@@ -167,7 +167,7 @@ class StatmentManager {
         this.assignCompanyStatement = await db.connection.prepare(
             `INSERT INTO "Building-Company" (company_id, building_id)
             VALUES ($1, $2)
-            ON CONFLICT ON CONSTRAINT unique_building_company DO NOTHING;`,
+            ON CONFLICT ON CONSTRAINT uni_building_company_building_id_company_id DO NOTHING;`, //unique_building_company
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
     }
@@ -335,21 +335,30 @@ class StatmentManager {
 
     private async prepareChargingStationServiceStatements() {
         this.createChargingStationStatement = await db.connection.prepare(
-            `INSERT INTO Charging_stations ("charging_type_id", "building_id", "name")
-            VALUES ($1, $2, $3);`,
+            /*`INSERT INTO Charging_stations ("charging_type_id", "building_id", "name")
+            VALUES ($1, $2, $3);`,*/
+            `select * from charging_Stations`,
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
         );
 
         this.getAllChargingStationsSpecificStatement = await db.connection.prepare(
-            `SELECT cs.id, name, ct.id type_id, type
-            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id
+            `SELECT cc.id, cc.charging_station_id, cs.name as charging_station_name,
+                cc.charging_type_id, ct.type as charging_type,
+                cs.building_id, building_name, building_location, company_id 
+            FROM charging_connectors cc JOIN charging_stations cs ON cc.charging_station_id = cs.id 
+                JOIN charging_types ct ON cc.charging_type_id = ct.id JOIN buildings b ON b.id = cs.building_id
             WHERE b.id = $1;`,
             {paramTypes: [DataTypeOIDs.numeric]}
         );
 
         this.getAllChargingStationsFullStatement = await db.connection.prepare(
-            `SELECT cs.id, name, ct.id type_id, type, b.id building_id, building_name, building_location
-            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id;`,
+            /*`SELECT cs.id, name, ct.id type_id, type, b.id building_id, building_name, building_location
+            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id;`,*/
+            `SELECT cc.id, cc.charging_station_id, cs.name as charging_station_name,
+                cc.charging_type_id, ct.type as charging_type,
+                cs.building_id, building_name, building_location, company_id 
+            FROM charging_connectors cc JOIN charging_stations cs ON cc.charging_station_id = cs.id 
+                JOIN charging_types ct ON cc.charging_type_id = ct.id JOIN buildings b ON b.id = cs.building_id;`,
             {paramTypes: []}
         );
 
