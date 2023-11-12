@@ -59,10 +59,14 @@ class StatmentManager {
 
     // Charging Station Service statements;
     createChargingStationStatement: PreparedStatement;
+    createChargingConnectorStatement: PreparedStatement;
     getAllChargingStationsSpecificStatement: PreparedStatement;
     getAllChargingStationsFullStatement: PreparedStatement;
     deleteChargingStationStatement: PreparedStatement;
+    deleteChargingConnectorByStationIDStatement: PreparedStatement;
+    deleteChargingConnectorStatement: PreparedStatement;
     editChargingStationStatement: PreparedStatement;
+    eidtChargingConnectorStatement: PreparedStatement;
     assignChargingStationToCompanyStatement: PreparedStatement;
     getAllAvailableChargingStationsStatement: PreparedStatement;
 
@@ -335,30 +339,36 @@ class StatmentManager {
 
     private async prepareChargingStationServiceStatements() {
         this.createChargingStationStatement = await db.connection.prepare(
-            /*`INSERT INTO Charging_stations ("charging_type_id", "building_id", "name")
-            VALUES ($1, $2, $3);`,*/
-            `select * from charging_Stations`,
-            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
+            `INSERT INTO Charging_stations ("building_id", "name")
+            VALUES ($1, $2) RETURNING id;`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.varchar]}
+        );
+
+        this.createChargingConnectorStatement = await db.connection.prepare(
+            `INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number")
+            VALUES ($1, $2, $3);`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
 
         this.getAllChargingStationsSpecificStatement = await db.connection.prepare(
             `SELECT cc.id, cc.charging_station_id, cs.name as charging_station_name,
                 cc.charging_type_id, ct.type as charging_type,
-                cs.building_id, building_name, building_location, company_id 
+                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number
             FROM charging_connectors cc JOIN charging_stations cs ON cc.charging_station_id = cs.id 
                 JOIN charging_types ct ON cc.charging_type_id = ct.id JOIN buildings b ON b.id = cs.building_id
+                LEFT JOIN companies c ON cs.company_id = c.id
             WHERE b.id = $1;`,
             {paramTypes: [DataTypeOIDs.numeric]}
         );
 
         this.getAllChargingStationsFullStatement = await db.connection.prepare(
-            /*`SELECT cs.id, name, ct.id type_id, type, b.id building_id, building_name, building_location
-            FROM Charging_stations cs JOIN Charging_types ct ON cs.charging_type_id = ct.id JOIN Buildings b ON cs.building_id = b.id;`,*/
-            `SELECT cc.id, cc.charging_station_id, cs.name as charging_station_name,
+            `SELECT cc.id, cs.id, cs.name as charging_station_name,
                 cc.charging_type_id, ct.type as charging_type,
-                cs.building_id, building_name, building_location, company_id 
-            FROM charging_connectors cc JOIN charging_stations cs ON cc.charging_station_id = cs.id 
-                JOIN charging_types ct ON cc.charging_type_id = ct.id JOIN buildings b ON b.id = cs.building_id;`,
+                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number
+            FROM charging_stations cs LEFT JOIN charging_connectors cc ON cc.charging_station_id = cs.id
+                LEFT JOIN charging_types ct ON cc.charging_type_id = ct.id 
+                LEFT JOIN buildings b ON b.id = cs.building_id
+                LEFT JOIN companies c ON cs.company_id = c.id;`,
             {paramTypes: []}
         );
 
@@ -368,9 +378,26 @@ class StatmentManager {
             {paramTypes: [DataTypeOIDs.numeric]}
         );
 
+        this.deleteChargingConnectorByStationIDStatement = await db.connection.prepare(
+            `DELETE FROM Charging_connectors
+            WHERE charging_station_id = $1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
+        this.deleteChargingConnectorStatement = await db.connection.prepare(
+            `DELETE FROM Charging_connectors
+            WHERE id = $1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
         this.editChargingStationStatement = await db.connection.prepare(
-            `call edit_station($1, $2, $3, $4);`,
-            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.varchar]}
+            `call edit_station($1, $2, $3);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.varchar]}
+        );
+
+        this.eidtChargingConnectorStatement = await db.connection.prepare(
+            `call edit_connector($1, $2, $3);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4]}
         );
 
         this.assignChargingStationToCompanyStatement = await db.connection.prepare(

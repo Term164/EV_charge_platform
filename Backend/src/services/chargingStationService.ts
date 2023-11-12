@@ -1,6 +1,7 @@
 import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
 import log from "../utils/logger";
+import db from '../utils/database';
 import { SQLStatementManager } from "../utils/SQLStatementManager";
 import { PreparedStatement, QueryResult } from "postgresql-client";
 import { ChargingStationResponse } from "../models/responseModels";
@@ -13,14 +14,57 @@ async function createStation(body: unknown): Promise<APIResponse> {
         data = parser.parseCreateStationRequest(body);
     } catch (error) {
         log.debug(error);
-        return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
+        return {status: 400, message: 'Incorrect data in request', error: (error as Error).message, data: {data}};
     }
 
-    const result = await SQLStatementManager.createChargingStationStatement.execute({params: [data.chargingTypeID, data.buildingID, data.stationName]});
+    await db.connection.startTransaction();
 
-    if (result.rowsAffected != 1)
-        return {status: 500, message: 'Something went wrong while trying to create a new station', error: 'Something went wrong while trying to create a new station', data: result};
-    return {status: 200, message: 'Successfully added new charging station.', error: null, data: null};
+    let stationResult;
+    try {
+        stationResult = await SQLStatementManager.createChargingStationStatement.execute({params: [data.buildingID, data.stationName]});
+    } catch (error) {
+        await db.connection.rollback();
+        if (error instanceof Error) {
+            if (error.message.includes("constraint")) {
+                let errorMessage: string;
+                if (error.message.includes('uni_charging_stations_name')) errorMessage = 'This station name already exists';
+                else if (error.message.includes('frn_charging_stations_building_id')) errorMessage = 'This building does not exist';
+                else errorMessage = 'Something went wrong please contact the site administrators, error code: 5';
+                return {status: 400, message: errorMessage,error: error.message, data: null};
+            }
+        }
+        throw new Error("Unexpected error occured: " + error);
+    }
+    if (stationResult.rowsAffected != 1) {
+        await db.connection.rollback();
+        return {status: 500, message: 'Something went wrong while trying to create a connector', error: 'Something went wrong while trying to create a connector', data: stationResult};
+    }
+    const stationID = stationResult.rows?.at(0)[0] as number;
+
+    for (let i = 0; i < data.chargingConnectors.length; i++) {
+        let connectorResult;
+        try {
+            connectorResult = await SQLStatementManager.createChargingConnectorStatement.execute({params: [stationID, data.chargingConnectors[i].chargingTypeID, data.chargingConnectors[i].serialNumber]});
+        } catch (error) {
+            await db.connection.rollback();
+            if (error instanceof Error) {
+                if (error.message.includes("constraint")) {
+                    let errorMessage: string;
+                    if (error.message.includes('frn_charging_connectors_charging_type_id')) errorMessage = 'This charging type does not exist';
+                    else errorMessage = 'Something went wrong please contact the site administrators, error code: 5';
+                    return {status: 400, message: errorMessage,error: error.message, data: null};
+                }
+            }
+            throw new Error("Unexpected error occured: " + error);
+        }
+        if (connectorResult.rowsAffected != 1) {
+            await db.connection.rollback();
+            return {status: 500, message: 'Something went wrong while trying to create a connector', error: 'Something went wrong while trying to create a connector', data: {}};
+        }
+    }
+
+    await db.connection.commit();
+    return {status: 200, message: 'Successfully added new charging station with connectors.', error: null, data: null};
 }
 
 async function getAllStations(body: unknown): Promise<APIResponse> {
@@ -36,17 +80,17 @@ async function getAllStations(body: unknown): Promise<APIResponse> {
     let statement: PreparedStatement, args: any[];
     if (data.buildingID) {
         statement = SQLStatementManager.getAllChargingStationsSpecificStatement;
-        args = [data.buildingID];    
+        args = [data.buildingID];
     } else {
         statement = SQLStatementManager.getAllChargingStationsFullStatement;
-        args = []    
+        args = [];
     }
     const result = await statement.execute({params: args});
     if (result.rows == undefined)
-        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
-    
-    const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, data.buildingID != null );    
-    return {status: 200, message: `Returned ${result.rows.length} stations`, error: null, data: {'Result': returnedStations}};
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
+
+    const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, data.buildingID != null );
+    return {status: 200, message: `Returned ${result.rows.length} connectors in total`, error: null, data: {'Result': returnedStations}};
 }
 
 async function deleteStation(body: unknown): Promise<APIResponse> {
@@ -58,13 +102,25 @@ async function deleteStation(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
-    const result = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data.stationID]});
+    await db.connection.startTransaction();
+    const connectorResult = await SQLStatementManager.deleteChargingConnectorByStationIDStatement.execute({params: [data.stationID]});
+    if (connectorResult.rowsAffected == 0) {
+        await db.connection.rollback();
+        return {status: 500, message: 'Failed to delete some connectors', error: 'Failed to delete some connectors, possibly the station doesn\'t exist', data: connectorResult};
+    }
+    const stationResult = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data.stationID]});
+    if (stationResult.rowsAffected != 1) {
+        await db.connection.rollback();
+        return {status: 500, message: 'Failed to delete a station', error: 'Failed to delete a station.', data: stationResult};
+    }
 
-    if (result.rowsAffected != 1)
-        return {status: 500, message: 'Failed to delete a station', error: 'Failed to delete a station.', data: result};
-    return {status: 200, message: 'Successfully deleted a station', error: null, data: {'Result': 'Successfully deleted a station.'}};
+    await db.connection.commit();
+    return {status: 200, message: 'Successfully deleted a station and its connectors', error: null, data: {}};
 }
 
+/** Only for station name or building id
+
+*  Changing connectors has different request */
 async function editStation(body: unknown): Promise<APIResponse> {
     let data;
     try {
@@ -75,12 +131,19 @@ async function editStation(body: unknown): Promise<APIResponse> {
     }
 
     try {
-        await SQLStatementManager.editChargingStationStatement.execute({params: [data.stationID, data.newTypeID, data.newBuildingID, data.newStationName]});
+        await SQLStatementManager.editChargingStationStatement.execute({params: [data.stationID, data.newBuildingID, data.newStationName]});
     } catch (error: unknown) {
-        log.debug(error);
-        return {status: 500, message: 'Something went wrong while editing a station.', error: 'Something went wrong. Check your IDs.', data: {error}};
+        if (error instanceof Error) {
+            if (error.message.includes("constraint")) {
+                let errorMessage: string;
+                if (error.message.includes('frn_charging_stations_building_id')) errorMessage = 'This building does not exist';
+                else errorMessage = 'Something went wrong please contact the site administrators, error code: 7';
+                return {status: 400, message: errorMessage,error: error.message, data: error};
+            }
+        }
+        throw new Error("Unexpected error occured: " + error);
     }
-    return {status: 200, message: 'Successfully edited a station', error: null, data: {'Result': 'Successfully edited a station.'}};
+    return {status: 200, message: 'Successfully edited a station', error: null, data: {}};
 }
 
 /** Can also be used to free a station -> companyID=null */
@@ -97,21 +160,20 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
         result = await SQLStatementManager.assignChargingStationToCompanyStatement.execute({params: [data.companyID, data.stationID]});
     } catch (error) {
         if (error instanceof Error) {
-            if (error.message.includes("violates foreign key constraint")) {
+            if (error.message.includes("constraint")) {
                 let errorMessage: string;
                 if (error.message.includes('frn_charging_stations_company_id')) errorMessage = 'This company does not exist';
-                else if (error.message.includes('frn_charging_stations_building_id')) errorMessage = 'This building does not exist';
                 else errorMessage = 'Something went wrong, please contact the site administrators, error code: 1';
-                return {status: 500, message: "Something went wrong.", error: errorMessage, data: error};
+                return {status: 400, message: "Something went wrong.", error: errorMessage, data: error};
             }
         }
         throw new Error("Unexpected error occured: " + error);
     }
 
-    if (result.rowsAffected as number > 1)
-        return {status: 500, message: "Something went wrong while trying to assign station to a company", error: "Something went wrong while trying to assign station to a company.", data: result};
+    if (result.rowsAffected as number != 1)
+        return {status: 500, message: "Something went wrong while trying to assign station to a company", error: "Possibly the station does not exist.", data: result};
     return {status: 200, message: (data.companyID != null) ? 'Successfully assigned station to a company.'
-        : 'Successfully cleared a company reservation for a station.', error:null, data:result};
+        : 'Successfully cleared a company reservation for a station.', error:null, data:{}};
 }
 
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
@@ -124,7 +186,11 @@ async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
     }
 
     const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data.userID]});
-    return {status: 200, message: `Returned ${result.rows?.length} stations`, error:null, data:{'Result': result.rows}};
+    if (result.rows == undefined)
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
+
+    const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, false);
+    return {status: 200, message: `Returned ${result.rows.length} connectors in total`, error: null, data: {'Result': returnedStations}};
 }
 
 export default {

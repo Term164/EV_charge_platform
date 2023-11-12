@@ -32,7 +32,7 @@ CREATE TABLE Accounts
  email_account   varchar(50) NOT NULL,
  validated       boolean DEFAULT FALSE,
  profile_picture bytea NULL,
- rfid            int NULL,
+ rfid            varchar(50) NULL,
  company_id      int NULL,
  CONSTRAINT prm_accounts_id PRIMARY KEY ("id"),
  CONSTRAINT frn_accounts_company_id FOREIGN KEY (company_id) REFERENCES Companies ("id")
@@ -174,7 +174,8 @@ CREATE TABLE Charging_stations
  name             varchar(50) NULL,
  CONSTRAINT prm_charging_stations_id PRIMARY KEY ("id"),
  CONSTRAINT frn_charging_stations_building_id FOREIGN KEY (building_id) REFERENCES Buildings ("id"),
- CONSTRAINT frn_charging_stations_company_id FOREIGN KEY (company_id) REFERENCES Companies ("id")
+ CONSTRAINT frn_charging_stations_company_id FOREIGN KEY (company_id) REFERENCES Companies ("id"),
+ CONSTRAINT uni_charging_stations_name UNIQUE (name)
 );
 
 CREATE INDEX ind_charging_stations_building_id ON Charging_stations
@@ -192,10 +193,12 @@ CREATE TABLE Charging_connectors
 (
   "id"          SERIAL,
   charging_station_id int NOT NULL,
-  charging_type_id int NOT NULL,
+  charging_type_id    int NOT NULL,
+  serial_number       int NOT NULL,
   CONSTRAINT prm_charging_connectors_id PRIMARY KEY ("id"),
   CONSTRAINT frn_charging_connectors_charging_station_id FOREIGN KEY (charging_station_id) REFERENCES Charging_stations ("id"),
-  CONSTRAINT frn_charging_connectors_charging_type_id FOREIGN KEY (charging_type_id) REFERENCES Charging_types ("id")
+  CONSTRAINT frn_charging_connectors_charging_type_id FOREIGN KEY (charging_type_id) REFERENCES Charging_types ("id"),
+  CONSTRAINT uni_charging_connectors_charging_station_id_serial_number UNIQUE (charging_station_id, serial_number)
 );
 
 CREATE INDEX ind_charging_connectors_charging_station_id ON Charging_connectors
@@ -215,12 +218,12 @@ CREATE TABLE Reservations
  account_id          int NOT NULL,
  charging_connector_id int NULL,
  charging_type_id    int NULL,
- creation_time       date NOT NULL,
+ creation_time       timestamptz NOT NULL,
  charging_time       int NOT NULL,
- desired_from        date NOT NULL,
- desired_to          date NOT NULL,
- allocated_from      date NULL,
- allocated_to        date NULL,
+ desired_from        timestamptz NOT NULL,
+ desired_to          timestamptz NOT NULL,
+ allocated_from      timestamptz NULL,
+ allocated_to        timestamptz NULL,
  CONSTRAINT prm_reservations_id PRIMARY KEY ("id"),
  CONSTRAINT frn_reservations_charging_connector_id FOREIGN KEY (charging_connector_id) REFERENCES Charging_connectors ("id"),
  CONSTRAINT frn_reservations_charging_type_id FOREIGN KEY (charging_type_id) REFERENCES Charging_types ("id"),

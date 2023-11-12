@@ -1,5 +1,5 @@
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, ChargingConnectorForCreateStationRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumber, AddChargingConnectorRequest, ChargingConnectorID, EditChargingConnectorRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse } from "./responseModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
@@ -266,6 +266,138 @@ function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request && 'companyID' in request) {
+        const AssignCompanyRequest: AssignCompanyRequest = {
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+        };
+
+        return AssignCompanyRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseCreateStationRequest(request: unknown): CreateStationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request && 'stationName' in request && 'chargingConnectors' in request) {
+        const CreateStationRequest: CreateStationRequest = {} as CreateStationRequest ;
+        CreateStationRequest.buildingID = parseIntegerParameter(request.buildingID, 'buildingID');
+        CreateStationRequest.stationName = parseStringParameter(request.stationName, 'stationName');
+
+        if (Array.isArray(request.chargingConnectors)) {
+            if (request.chargingConnectors.length == 0)
+                throw new Error('Incorrect data in connectors array: at least one element must be supplied');
+            request.chargingConnectors.forEach(element => {
+                if ('chargingTypeID' in element && 'serialNumber' in element) {
+                    if (!isInt((element as connectorTypeIDAndSerialNumber).chargingTypeID) ||
+                        !isInt((element as connectorTypeIDAndSerialNumber).serialNumber))
+                        throw new Error('Incorrect data in connectors array: both elements must be numbers');
+                } else
+                    throw new Error('Incorrect data in connectors array: must have chargingTypeID and serialNumber');
+            });
+            CreateStationRequest.chargingConnectors = request.chargingConnectors as connectorTypeIDAndSerialNumber[];
+            return CreateStationRequest;
+        }
+        throw new Error('Incorrect data: chargingConnectors must be an array');
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAssignStationToCompanyRequest(request: unknown): AssignStationToCompanyRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request && 'companyID' in request) {
+        const AssignStationToCompanyRequest: AssignStationToCompanyRequest = {
+            stationID: parseIntegerParameter(request.stationID, 'stationID'),
+            companyID: request.companyID != null ? parseIntegerParameter(request.companyID, 'companyID') : null
+        };
+
+        return AssignStationToCompanyRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditStationRequest(request: unknown): EditStationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request) {
+        const EditStationRequest: EditStationRequest = {
+            stationID: parseIntegerParameter(request.stationID, 'stationID'),
+            newBuildingID : ('newBuildingID' in request) ? parseIntegerParameter(request.newBuildingID, 'newBuildingID') : null,
+            newStationName : ('newStationName' in request) ? parseStringParameter(request.newStationName, 'newStationName') : null
+        };
+
+        return EditStationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditChargingTypeRequest(request: unknown): EditChargingTypeRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingTypeID' in request && 'newChargingType' in request) {
+        const EditChargingTypeRequest: EditChargingTypeRequest = {
+            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
+            newChargingType: parseStringParameter(request.newChargingType, 'newChargingType')
+        };
+
+        return EditChargingTypeRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseAddChargingConnectorRequest(request: unknown): AddChargingConnectorRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('stationID' in request && 'chargingConnector' in request) {
+        const AddChargingConnectorRequest = {} as AddChargingConnectorRequest;
+        AddChargingConnectorRequest.stationID = parseIntegerParameter(request.stationID, 'stationID');
+        if (!request.chargingConnector || typeof request.chargingConnector !== 'object')
+            throw new Error('Incorrect data in chargingConnector');
+        if ('chargingTypeID' in request.chargingConnector && 'serialNumber' in request.chargingConnector) {
+            const connector = {} as connectorTypeIDAndSerialNumber;
+            connector.chargingTypeID = parseIntegerParameter(request.chargingConnector.chargingTypeID, 'chargingTypeID');
+            connector.serialNumber = parseIntegerParameter(request.chargingConnector.serialNumber, 'serialNumber');
+            AddChargingConnectorRequest.chargingConnector = connector;
+        }
+        return AddChargingConnectorRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditChargingConnectorRequest(request: unknown): EditChargingConnectorRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingConnectorID' in request) {
+        const EditChargingConnectorRequest: EditChargingConnectorRequest = {
+            chargingConnectorID: parseIntegerParameter(request.chargingConnectorID, 'chargingConnectorID'),
+            chargingTypeID : ('chargingTypeID' in request) ? parseIntegerParameter(request.chargingTypeID, 'chargingTypeID') : null,
+            serialNumber : ('serialNumber' in request) ? parseIntegerParameter(request.serialNumber, 'serialNumber') : null
+        };
+
+        return EditChargingConnectorRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 // ==================================== SINGLE VARIABLE PARSERS ======================================
 
 function parseUserID(dataBody: unknown): number {
@@ -295,22 +427,6 @@ function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('buildingID' in request && 'companyID' in request) {
-        const AssignCompanyRequest: AssignCompanyRequest = {
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
-            companyID: parseIntegerParameter(request.companyID, 'companyID'),
-        };
-
-        return AssignCompanyRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
 function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
@@ -320,40 +436,6 @@ function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
         buildingID : ('buildingID' in request) ? parseIntegerParameter(request.buildingID, 'buildingID') : null
     };
     return GetAllStationsRequest;
-}
-
-function IsChargingConnectorsForCreateStationRequestCorrectlyFormatted(arrayOfConnectors: unknown): boolean{
-    if (!arrayOfConnectors || Array.isArray(arrayOfConnectors))
-        return false;
-
-    for (let i = 0; i < (arrayOfConnectors as any[]).length; i++) {
-        if (!('chargingTypeID' in (arrayOfConnectors as any[])[i]))
-            return false;
-        if (!isInt((arrayOfConnectors as any[])[i].chargingTypeID) )
-            return false;
-    }
-    return true;
-}
-
-function parseCreateStationRequest(request: unknown): CreateStationRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('buildingID' in request && 'stationName' in request && 'chargingConnectors' in request) {
-        let CreateStationRequest: CreateStationRequest = {
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
-            stationName: parseStringParameter(request.stationName, 'stationName'),
-            chargingConnectors: []
-        };
-        if (!IsChargingConnectorsForCreateStationRequestCorrectlyFormatted(request.chargingConnectors))
-            throw new Error('Incorrect data in chargingConnectors: must be array of numbers');
-        
-        CreateStationRequest.chargingConnectors = request.chargingConnectors as ChargingConnectorForCreateStationRequest[];
-
-        return CreateStationRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
 }
 
 function parseDeleteStationRequest(request: unknown): DeleteStationRequest {
@@ -370,43 +452,6 @@ function parseDeleteStationRequest(request: unknown): DeleteStationRequest {
     }
     throw new Error('Incorrect data: some fields are missing');
 }
-
-function parseAssignStationToCompanyRequest(request: unknown): AssignStationToCompanyRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('stationID' in request && 'companyID' in request) {
-        const AssignStationToCompanyRequest: AssignStationToCompanyRequest = {
-            stationID: parseIntegerParameter(request.stationID, 'stationID'),
-            companyID: request.companyID != null ? parseIntegerParameter(request.companyID, 'companyID') : null
-        };
-
-        return AssignStationToCompanyRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
-function parseEditStationRequest(request: unknown): EditStationRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('stationID' in request) {
-        const EditStationRequest: EditStationRequest = {
-            stationID: parseIntegerParameter(request.stationID, 'stationID'),
-            newTypeID : ('newTypeID' in request) ? parseIntegerParameter(request.newTypeID, 'newTypeID') : null,
-            newBuildingID : ('newBuildingID' in request) ? parseIntegerParameter(request.newBuildingID, 'newBuildingID') : null,
-            newStationName : ('newStationName' in request) ? parseStringParameter(request.newStationName, 'newStationName') : null
-        };
-
-        return EditStationRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
-// Spot for 'get all available for user'
-//
 
 function parseCreateChargingTypeRequest(request: unknown): CreateChargingTypeRequest {
     if (!request || typeof request !== 'object') {
@@ -438,22 +483,6 @@ function parseDeleteChargingTypeRequest(request: unknown): DeleteChargingTypeReq
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseEditChargingTypeRequest(request: unknown): EditChargingTypeRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('chargingTypeID' in request && 'newChargingType' in request) {
-        const EditChargingTypeRequest: EditChargingTypeRequest = {
-            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
-            newChargingType: parseStringParameter(request.newChargingType, 'newChargingType')
-        };
-
-        return EditChargingTypeRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
 function parseGetAllAvailableStationsRequest(request: unknown): GetAllAvailableStationsRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
@@ -465,6 +494,21 @@ function parseGetAllAvailableStationsRequest(request: unknown): GetAllAvailableS
         };
 
         return GetAllAvailableStationsRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseDeleteChargingConnectorRequest(request: unknown): ChargingConnectorID {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('chargingConnectorID' in request) {
+        const ChargingConnectorID: ChargingConnectorID = {
+            chargingConnectorID: parseIntegerParameter(request.chargingConnectorID, 'chargingConnectorID')
+        };
+
+        return ChargingConnectorID;
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -555,91 +599,93 @@ function parseCompanyAdmin(data: unknown) {
 
 // ==================================== RESPONSE MODEL PARSERS ==============================================
 function parseBuildingResponse(rows: any[]): BuildingResponse[] {
-    let returningArray: BuildingResponse[] = new Array(rows.length);
+    const returningArray: BuildingResponse[] = new Array<BuildingResponse>(rows.length);
     let building: BuildingResponse;
     for (let i = 0; i < rows.length; i++) {
         building = new BuildingResponse();
-        building.buildingID = rows[i][0];
-        building.buildingName = rows[i][1];
-        building.buildingLocation = rows[i][2];
+        building.buildingID = rows[i][0] as number; // from sql
+        building.buildingName = rows[i][1] as string; // from sql
+        building.buildingLocation = rows[i][2] as string; // from sql
         returningArray[i] = building;
     }
     return returningArray;
 }
 
 function parseCompanyResponse(rows: any[]): CompanyResponse[] {
-    let returningArray: CompanyResponse[] = new Array(rows.length);
+    const returningArray: CompanyResponse[] = new Array<CompanyResponse>(rows.length);
     let company: CompanyResponse;
     for (let i = 0; i < rows.length; i++) {
         company = new CompanyResponse();
-        company.companyID = rows[i][0];
-        company.companyName = rows[i][1];
+        company.companyID = rows[i][0] as number; // from sql
+        company.companyName = rows[i][1] as string; // from sql
         returningArray[i] = company;
     }
     return returningArray;
 }
 
 function parseChargingTypeResponse(rows: any[]): ChargingTypeResponse[] {
-    let returningArray: ChargingTypeResponse[] = new Array(rows.length);
+    const returningArray: ChargingTypeResponse[] = new Array<ChargingTypeResponse>(rows.length);
     let chargingType: ChargingTypeResponse;
     for (let i = 0; i < rows.length; i++) {
         chargingType = new ChargingTypeResponse();
-        chargingType.chargingTypeID = rows[i][0];
-        chargingType.chargingType = rows[i][1];
+        chargingType.chargingTypeID = rows[i][0] as number; // from sql
+        chargingType.chargingType = rows[i][1] as string; // from sql
         returningArray[i] = chargingType;
     }
     return returningArray;
 }
 
 function parseChargingStationResponse(rows: any[], specific: boolean): ChargingStationResponse[] {
-    let processedStations = new Map;
-    let returningArray: ChargingStationResponse[] = [];
+    const processedStations = new Map<number, number>;
+    const returningArray: ChargingStationResponse[] = [];
     for (let i = 0; i < rows.length; i++) {
         // Get station ID and Connector ID first for comparing
-        let station = new ChargingStationResponse;
-        station.chargingStationID = rows[i][1];
+        const station = new ChargingStationResponse;
+        station.chargingStationID = rows[i][1] as number; // from sql
 
-        let connector = new ChargingConnectorResponse;
-        connector.chargingConnectorID = rows[i][0];
+        const connector = new ChargingConnectorResponse;
+        connector.chargingConnectorID = rows[i][0] as number;
+        connector.chargingConnectorSerialNumber = rows[i][10] as number;
 
-        let type = new ChargingTypeResponse;
-        type.chargingTypeID = rows[i][3];
-        type.chargingType = rows[i][4];
-        
+        const type = new ChargingTypeResponse;
+        type.chargingTypeID = rows[i][3] as number;
+        type.chargingType = rows[i][4] as string;
+
         connector.chargingType = type;
 
-        // If it has been processed, then simply add the connector to the 
+        // If it has been processed, then simply add the connector to the
         // original station, using the value from map as index
         if (processedStations.has(station.chargingStationID)) {
-            let index = processedStations.get(station.chargingStationID);
+            const index = processedStations.get(station.chargingStationID) as number;
             returningArray[index].chargingConnectors.push(connector);
             continue;
         }
-        
+
         // If station ID hasn't been processed yet, add it along with its
         // index in the returning array
         processedStations.set(station.chargingStationID, returningArray.length);
 
-        station.chargingStationName = rows[i][2];    
+        station.chargingStationName = rows[i][2] as string;
         station.chargingConnectors = [];
-        station.chargingConnectors.push(connector);
+        if (rows[i][0] != null)
+            station.chargingConnectors.push(connector);
 
-        if (specific){
+        if (specific) {
             station.building = null;
         } else {
             station.building = {} as BuildingResponse;
-            station.building.buildingID = rows[i][5];
-            station.building.buildingName = rows[i][6];
-            station.building.buildingLocation = rows[i][7];
+            station.building.buildingID = rows[i][5] as number;
+            station.building.buildingName = rows[i][6] as string;
+            station.building.buildingLocation = rows[i][7] as string;
         }
-        if (rows[i][8] == null){
+        if (rows[i][8] == null) {
             station.company = null;
         } else {
             station.company = {} as CompanyResponse;
-            station.company.companyID = rows[i][8];
-            station.company.companyName = rows[i][9];
+            station.company.companyID = rows[i][8] as number;
+            station.company.companyName = rows[i][9] as string;
         }
-        
+
         returningArray.push(station);
     }
     return returningArray;
@@ -675,10 +721,12 @@ export default {
     parseDeleteChargingTypeRequest,
     parseEditChargingTypeRequest,
     parseGetAllAvailableStationsRequest,
+    parseAddChargingConnectorRequest,
+    parseDeleteChargingConnectorRequest,
+    parseEditChargingConnectorRequest,
     // -----------------------
     parseBuildingResponse,
     parseCompanyResponse,
     parseChargingTypeResponse,
     parseChargingStationResponse,
-    
 };

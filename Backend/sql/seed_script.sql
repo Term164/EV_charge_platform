@@ -43,16 +43,16 @@ INSERT INTO Charging_stations ("building_id", "name") VALUES
     (2, 'Srednja A1');
 
 -- Charging connectors
-INSERT INTO Charging_connectors ("charging_type_id", "charging_station_id") VALUES
-    (1, 1),
-    (1, 2),
-    (1, 3),
-    (3, 4),
-    (3, 4),
-    (3, 5),
-    (3, 5),
-    (1, 6),
-    (2, 7);
+INSERT INTO Charging_connectors ("charging_type_id", "charging_station_id", "serial_number") VALUES
+    (1, 1, 1),
+    (1, 2, 1),
+    (1, 3, 1),
+    (3, 4, 1),
+    (3, 4, 2),
+    (3, 5, 1),
+    (3, 5, 2),
+    (1, 6, 1),
+    (2, 7, 1);
 
 -- Platform admins
 INSERT INTO Platform_admins ("account_id") VALUES (4);

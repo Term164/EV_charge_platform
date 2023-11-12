@@ -16,6 +16,7 @@ class ChargingTypeResponse {
 
 class ChargingConnectorResponse {
     chargingConnectorID: number;
+    chargingConnectorSerialNumber: number;
     chargingType: ChargingTypeResponse;
 }
 
@@ -33,4 +34,4 @@ export {
     ChargingTypeResponse,
     ChargingConnectorResponse,
     ChargingStationResponse,
-}
+};

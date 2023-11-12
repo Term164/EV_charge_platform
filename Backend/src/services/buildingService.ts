@@ -28,7 +28,7 @@ async function getAllBuildings(): Promise<APIResponse> {
     const result = await SQLStatementManager.getAllBuildingsStatement.execute({params: []});
 
     if (result.rows == undefined)
-        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
     const returnedBuildings: BuildingResponse[] =  parser.parseBuildingResponse(result.rows);
     return {status: 200, message: `Returned ${result.rows?.length} buildings`, error: null, data: {'Result': returnedBuildings}};
 }
@@ -83,7 +83,7 @@ async function getAllBuildingsOwnedByCompany(body: unknown): Promise<APIResponse
     const result = await SQLStatementManager.getAllBuildingsByCompanyStatement.execute({params: [data.companyID]});
 
     if (result.rows == undefined)
-        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
     const returnedBuildings: BuildingResponse[] =  parser.parseBuildingResponse(result.rows);
     return {status: 200, message: `Returned ${result.rows?.length} buildings`, error: null, data: {'Result': returnedBuildings}};
 }
@@ -101,7 +101,7 @@ async function getAllCompaniesAssignedToBuilding(body: unknown): Promise<APIResp
     const result = await SQLStatementManager.getAllCompaniesAssignedToBuildingStatement.execute({params: [data.buildingID]});
 
     if (result.rows == undefined)
-        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
     const returnedCompanies: CompanyResponse[] =  parser.parseCompanyResponse(result.rows);
     return {status: 200, message: `Returned ${result.rows.length} companies`, error: null, data: {'Result': returnedCompanies}};
 }
