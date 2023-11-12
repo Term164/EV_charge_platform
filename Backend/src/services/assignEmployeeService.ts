@@ -18,7 +18,7 @@ async function assignToCompany(body: unknown): Promise<APIResponse> {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
-                if (error.message.includes('fk_18')) errorMessage = 'This companyID does not exist';
+                if (error.message.includes('fk_18')) errorMessage = 'This companyID does not exist'; //frn_accounts_company_id
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 2';
                 return {status: 400, message: errorMessage,error: error.message, data: null};
             }
@@ -46,9 +46,10 @@ async function assignToBuilding(body: unknown): Promise<APIResponse> {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
-                if (error.message.includes('fk_8')) errorMessage = 'This userID does not exist';
-                else if (error.message.includes('fk_9')) errorMessage = 'This buildingID does not exist';
-                else if (error.message.includes('fk_10')) errorMessage = 'This companyAdminID does not exist';
+                if (error.message.includes('fk_8')) errorMessage = 'This userID does not exist'; //frn_building_accesses_account_id
+                else if (error.message.includes('fk_9')) errorMessage = 'This buildingID does not exist'; //frn_building_accesses_building_id
+                //else if (error.message.includes('fk_10')) errorMessage = 'This companyAdminID does not exist';
+                //^^This was discussed and foreign key got removed, to allow deletion of company admins without deleting accesses
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 3';
                 return {status: 400, message: errorMessage, error: error.message, data: null};
             }
