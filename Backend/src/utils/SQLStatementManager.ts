@@ -1,5 +1,6 @@
 import db from './database';
 import { DataTypeOIDs, PreparedStatement } from "postgresql-client";
+import log from './logger';
 
 
 class StatmentManager {
@@ -71,6 +72,10 @@ class StatmentManager {
     getAllChargingTypesStatement: PreparedStatement;
     deleteChargingTypeStatement: PreparedStatement;
     editChargingTypeStatement: PreparedStatement;
+
+    // OCPP statements
+    getAllConnectorIDStatement: PreparedStatement;
+    getAllNextReservationsStatement: PreparedStatement;
 
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
@@ -403,6 +408,27 @@ class StatmentManager {
         );
     }
 
+    private async prepareOCPPStatements() {
+        this.getAllConnectorIDStatement = await db.connection.prepare(
+            `SELECT station.name, connector.serial_number FROM 
+            charging_connectors as connector
+            LEFT JOIN charging_stations as station ON station.id = connector.charging_station_id;`,
+            {paramTypes: []}
+        );
+
+        this.getAllNextReservationsStatement = await db.connection.prepare(
+            `SELECT name, charging_connector_id, allocated_to, rfid
+            FROM Reservations as reservation
+            LEFT JOIN charging_connectors connector ON connector.id = reservation.charging_connector_id
+            LEFT JOIN charging_stations station ON station.id = connector.charging_station_id
+            LEFT JOIN accounts ON accounts.id = reservation.account_id
+            WHERE reservation.allocated_from BETWEEN now()::timestamp - interval '10 minutes' AND now()::timestamp + interval '10 minutes'
+            `,
+            {paramTypes: []}
+        );
+    }
+
+
     public async init() {
         await this.prepareAdminServiceStatements();
         await this.prepareAssignEmployeeServiceStatements();
@@ -414,6 +440,8 @@ class StatmentManager {
         await this.prepareMiddlewareStatements();
         await this.prepareChargingStationServiceStatements();
         await this.prepareChargingTypeServiceStatements();
+        await this.prepareOCPPStatements();
+        log.info("All SQL statements have been prepared.");
     }
 }
 

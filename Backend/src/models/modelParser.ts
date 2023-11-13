@@ -1,3 +1,4 @@
+import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
 import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest } from "./requestModels";
 
@@ -13,6 +14,10 @@ function isInt(number: unknown): number is number {
 
 function isBool (booleanValue: unknown): booleanValue is boolean {
     return typeof booleanValue === 'boolean' || booleanValue instanceof Boolean;
+}
+
+function isDate (dateObject: unknown): dateObject is Date {
+    return dateObject instanceof Date;
 }
 
 function parseIntegerParameter(param: unknown, paramName: string): number {
@@ -41,6 +46,14 @@ function parseStringParameter(param: unknown, paramName: string): string {
 
 function parseBooleanParameter(param: unknown, paramName: string): boolean {
     if (param === null || !isBool(param)) {
+        throw new Error(`Incorrect or missing ${paramName}`);
+    }
+
+    return param;
+}
+
+function parseDateParameter(param: unknown, paramName: string): Date {
+    if (param === null || !isDate(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
     }
 
@@ -535,6 +548,44 @@ function parseCompanyAdmin(data: unknown) {
     return companyAdminData;
 }
 
+function parseConnectorIDs(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Connector data should be passed as an array');
+
+    const connectorIDs: string[] = [];
+
+    for (let i = 0; i < data.length; i++) {
+        connectorIDs.push(`${data[i][0]}/${data[i][1]}`);
+    }
+
+    return connectorIDs;
+}
+
+function parseReservationInfo(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
+    const reservationData: ReservationData[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const reservation: ReservationData = {
+            stationID: parseStringParameter(data[i][0], 'stationID'),
+            connectorID: parseIntegerParameter(data[i][1], 'connectorID'),
+            expiryDate: parseDateParameter(data[i][2], 'expiryDate'),
+            idTag: parseStringParameter(data[i][3], 'idTag')
+        };
+
+        reservationData.push(reservation);
+    }
+
+    return reservationData;
+}
+
 
 export default {
     parseIntegerParameterFromString,
@@ -564,5 +615,7 @@ export default {
     parseCreateChargingTypeRequest,
     parseDeleteChargingTypeRequest,
     parseEditChargingTypeRequest,
-    parseGetAllAvailableStationsRequest
+    parseGetAllAvailableStationsRequest,
+    parseConnectorIDs,
+    parseReservationInfo
 };
