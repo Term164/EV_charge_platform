@@ -2,18 +2,17 @@
 -- 
 -- The list of SQL commands is separated into some parts, which resemble the REST API group endpoints.
 --
--- THIS FILE IS NOT MEANT TO BE RUN! It is only a collection of used
--- statements in the backend. Copy+Paste
+-- THIS FILE IS NOT MEANT TO BE RUN! 
+--
+-- It is only a collection of used statements in the backend. Copy+Paste
 --
 -- The statements are built like this:
 /*
-
 -- DESCRIPTION
 -- ENDPOINT
 -- [ ROLES ]
 -- { PARAMETERS }
 QUERY_STATEMENT;
-
 */
 -- DESCRIPTION:
 -- Loose description of what the statement does. Some other descriptions are in the Documentaion file.

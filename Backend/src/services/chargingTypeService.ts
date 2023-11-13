@@ -2,7 +2,7 @@ import { APIResponse } from "../models/requestModels";
 import parser from "../models/modelParser";
 import log from "../utils/logger";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
-
+import { ChargingTypeResponse } from "../models/responseModels";
 // ======================================== MAIN FUNCTIONS ========================================
 
 async function createChargingType(body: unknown): Promise<APIResponse> {
@@ -23,7 +23,10 @@ async function createChargingType(body: unknown): Promise<APIResponse> {
 
 async function getAllChargingTypes(): Promise<APIResponse> {
     const result = await SQLStatementManager.getAllChargingTypesStatement.execute({params: []});
-    return {status: 200, message: `Returned ${result.rows?.length} charging types`, error: null, data: {'Result': result.rows}};
+    if (result.rows == undefined)
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+    const returnedChargingTypes: ChargingTypeResponse[] =  parser.parseChargingTypeResponse(result.rows);
+    return {status: 200, message: `Returned ${result.rows.length} charging types`, error: null, data: {'Result': returnedChargingTypes}};
 }
 
 async function deleteChargingType(body: unknown): Promise<APIResponse> {

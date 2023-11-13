@@ -93,6 +93,7 @@ describe('assign employee service', () => {
         expect(result.body.message).toContain('companyID');
     });
 
+    /* This tests if companyAdminID exists, but we removed that frn key for ease of deletion
     test('fail when trying to assign a new employee that does not exist to building', async () => {
 
         const data = {
@@ -109,6 +110,7 @@ describe('assign employee service', () => {
         expect(result.body.message).toContain('companyAdminID');
 
     });
+    */
 
     test('assign new employee to building', async () => {
         const data = {

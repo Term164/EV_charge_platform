@@ -1,6 +1,6 @@
 import { APIResponse } from "../models/requestModels";
 import db from '.././utils/database';
-import modelParser from "../models/modelParser";
+import parser from "../models/modelParser";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
 
 // ================================ MAIN FUNCTIONS ==============================
@@ -11,7 +11,7 @@ async function getBuildingAdmins(): Promise<APIResponse> {
     const parsedArray = result.rows?.map((buildingAdminData) => {
         if (Array.isArray(buildingAdminData)) {
             buildingAdminData.splice(2,0,'***');
-            return modelParser.parseBuildingAdmin(buildingAdminData);
+            return parser.parseBuildingAdmin(buildingAdminData);
         } else throw new Error('building admin data is not in array format.');
     });
 
@@ -24,7 +24,7 @@ async function getCompanyAdmins(): Promise<APIResponse> {
     const parsedArray = result.rows?.map((companyAdminData) => {
         if (Array.isArray(companyAdminData)) {
             companyAdminData.splice(2,0,'***');
-            return modelParser.parseCompanyAdmin(companyAdminData);
+            return parser.parseCompanyAdmin(companyAdminData);
         } else throw new Error('company admin data is not in array format.');
     });
 
@@ -39,7 +39,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
 
     let buildingID: number;
     if ('buildingID' in requestBody) {
-        buildingID = modelParser.parseIntegerParameterFromString(requestBody.buildingID, 'buildingID');
+        buildingID = parser.parseIntegerParameterFromString(requestBody.buildingID, 'buildingID');
     } else {
         return ({status: 400, message: "parameter buildingID missing",  error: null , data: null});
     }
@@ -49,7 +49,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
     const parsedArray = result.rows?.map((buildingAdminData) => {
         if (Array.isArray(buildingAdminData)) {
             buildingAdminData.splice(2,0,'***');
-            return modelParser.parseBuildingAdmin(buildingAdminData);
+            return parser.parseBuildingAdmin(buildingAdminData);
         } else throw new Error('building admin data is not in array format.');
     });
 
@@ -64,7 +64,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 
     let companyID: number;
     if ('companyID' in requestBody) {
-        companyID = modelParser.parseIntegerParameterFromString(requestBody.companyID, 'companyID');
+        companyID = parser.parseIntegerParameterFromString(requestBody.companyID, 'companyID');
     } else {
         return ({status: 400, message: "parameter companyID missing", error: null, data: null});
     }
@@ -74,7 +74,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
     const parsedArray = result.rows?.map((companyAdminData) => {
         if (Array.isArray(companyAdminData)) {
             companyAdminData.splice(2,0,'***');
-            return modelParser.parseCompanyAdmin(companyAdminData);
+            return parser.parseCompanyAdmin(companyAdminData);
         } else throw new Error('company admin data is not in array format.');
     });
 
@@ -84,7 +84,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
     let userID: number;
     try {
-        userID = modelParser.parseUserID(requestBody);
+        userID = parser.parseUserID(requestBody);
     } catch (error) {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
@@ -98,7 +98,7 @@ async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
 async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
     let userID: number;
     try {
-        userID = modelParser.parseUserID(requestBody);
+        userID = parser.parseUserID(requestBody);
     } catch (error) {
         console.log(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
@@ -113,7 +113,7 @@ async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
 async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
     let userID: number;
     try {
-        userID = modelParser.parseUserID(requestBody);
+        userID = parser.parseUserID(requestBody);
     } catch (error) {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
@@ -124,7 +124,7 @@ async function deleteAccount(requestBody: unknown): Promise<APIResponse> {
 }
 
 async function deleteBuildingAccess(requestBody: unknown): Promise<APIResponse> {
-    const deleteRequestData = modelParser.parseDeleteBuildingAccessRequest(requestBody);
+    const deleteRequestData = parser.parseDeleteBuildingAccessRequest(requestBody);
 
     const result = await SQLStatementManager.deleteBuildingAccessStatement.execute({params: [deleteRequestData.userID, deleteRequestData.buildingID]});
 
@@ -134,7 +134,7 @@ async function deleteBuildingAccess(requestBody: unknown): Promise<APIResponse> 
 }
 
 async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
-    const editUserProfileData = modelParser.parseEditUserProfileRequest(requestBody);
+    const editUserProfileData = parser.parseEditUserProfileRequest(requestBody);
 
     const filteredValues = Object.entries(editUserProfileData).filter((pair) => pair[1] !== undefined);
     const queryParameters = filteredValues.map((pair) => pair[1]);

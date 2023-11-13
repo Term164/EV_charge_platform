@@ -1,6 +1,7 @@
 # EV Charge Platform
 
-Platforma za rezervacijo električnih polnilnic za poslovne stavbe. Omogoča urejanje in bolj organizirano uporabljanje električnih polnilnic za bodisi službene avtomobile, osebne avtomobile zaposlenih ali kakih gostov.
+Platforma za rezervacijo električnih polnilnic za poslovne stavbe. 
+Omogoča urejanje in bolj organizirano uporabljanje električnih polnilnic za bodisi službene avtomobile, osebne avtomobile zaposlenih ali kakih gostov.
 
 Osnovna dejavnost platforma je upravljanje rezervacij končih uporabnikov na neke polnilnice.
 
@@ -11,15 +12,28 @@ V nadaljevanju so pomembne definicije, ki gradijo celotno platformo.
 # KONCEPTUALNI NIVO
 
 ### Polnilnica
-Polnilnica je lahko navadna ali pametna (vsebuje protokole za komunikacijo). Polnilnice pripadajo neki stavbi/zgradbi. Polnilnice lahko uporabljajo vsi, ki so registrirani v stavbi, razen če polnilnice pripadajo določenemu podjetju v teji stavbi - te lahko uporabljajo le zaposleni tega podjetja.
+Polnilnica je lahko navadna ali pametna (vsebuje protokole za komunikacijo).
+Polnilnice pripadajo neki stavbi/zgradbi.
+Polnilnice lahko uporabljajo vsi, ki so registrirani v stavbi, razen če polnilnice pripadajo določenemu podjetju v teji stavbi - te lahko uporabljajo le zaposleni tega podjetja.
+
+Polnilnica ima konektorje, kateri se dejansko priklopijo v avtomobil in polnijo.
+Polnilnica ima lahko enega ali več konektorjev.
 
 ### Podjetje
-Podjetje ima (enega ali več) administratorja podjetja, ki dodaja (in ureja) svoje zaposlene kot končne uporabnike platforme. Če podjetje posluje v več stavbah, je administratorju omogočeno dodeljevanje zaposlenega v določene stavbe podjetja - ali pa pusti prosto, kar pomeni da nek zaposlen v podjetju lahko uporablja vse polnilnice vseh stavb podjetja.
+Podjetje ima (enega ali več) administratorja podjetja, ki dodaja (in ureja) svoje zaposlene kot končne uporabnike platforme.
+Če podjetje posluje v več stavbah, je administratorju omogočeno dodeljevanje zaposlenega v določene stavbe podjetja - ali pa pusti prosto, kar pomeni da nek zaposlen v podjetju lahko uporablja vse polnilnice vseh stavb podjetja.
 
-Podjetje ima lahko svojo stavbo ali pa najema. V tem smislu se razlikuje le "vloga za platformo". Če ima podjetje svojo stavbo, bo imelo svojega Administratorja podjetja in bo lahko urejalo svoje polnilnice. Več o administratorjih kasneje.
+Podjetje ima lahko svojo stavbo ali pa najema. 
+V tem smislu se razlikuje le "vloga za platformo". 
+Če ima podjetje svojo stavbo, bo imelo svojega Administratorja podjetja in bo lahko urejalo svoje polnilnice. 
+Več o administratorjih kasneje.
 
 ### Stavba
-Stavba je objekt, na katero so vezane polnilnice. V stavbi je lahko eno ali več podjetij. Stavba ima (enega ali več) Administratorja stavbe, kateri lahko doda podjetje v stavbo (tako omogoči novemu podjetju uporabo polnilnic). Predvsem pa dodaja in ureja polnilnice. Polnilnice so lahko v skupno uporabo, ali pa pripadajo določenemu podjetju v stavbi.
+Stavba je objekt, na katero so vezane polnilnice. 
+V stavbi je lahko eno ali več podjetij. 
+Stavba ima (enega ali več) Administratorja stavbe, kateri lahko doda podjetje v stavbo (tako omogoči novemu podjetju uporabo polnilnic).
+Predvsem pa dodaja in ureja polnilnice. 
+Polnilnice so lahko v skupno uporabo, ali pa pripadajo določenemu podjetju v stavbi.
 
 <br>
 To so bile osnovni izrazi, ki se uporabljajo.
@@ -31,7 +45,8 @@ Diagram primerov uporabe za okviren visokonivojski načrt.
 ![](doc_img/Use_case_diagram.png)
 
 ### Administrator Platforme
-Plaftorm admin bo nek zaposlen v tem podjetju (EV charge)(TBD), kateri služi kot avtentikator in vrhovni administrator. Ko želi podjetje uporabljati platformo, pošlje vlogo in Admin platforme ustvari novo podjetje v bazi ter temu podjetju dodeli Admina podjetja.
+Plaftorm admin bo nek zaposlen v tem podjetju (EV charge)(TBD), kateri služi kot avtentikator in vrhovni administrator. 
+Ko želi podjetje uporabljati platformo, pošlje vlogo in Admin platforme ustvari novo podjetje v bazi ter temu podjetju dodeli Admina podjetja.
 
 Admin platforme tudi doda stavbo (tudi prek vloge) v bazo ter dodeli Administratorja stavbe.
 
@@ -49,7 +64,8 @@ Dejanski primeri uporabe:
 > Admin platforme lahko pregleduje, dodaja/ureja/briše vse stavbe, podjetja in končne uporabnike.
 
 ### Administrator Stavbe
-Administrator stavbe skrbi za polnilnice in podjetja v stavbi. Če je podjetje lastnik stavbe, je Admin stavbe po navadi kar Admin podjetja.
+Administrator stavbe skrbi za polnilnice in podjetja v stavbi. 
+Če je podjetje lastnik stavbe, je Admin stavbe po navadi kar Admin podjetja.
 
 Primeri uporabe:
 1) Dodajanje podjetja v stavbo
@@ -71,7 +87,7 @@ Primeri uporabe:
 > Če podjetje posluje v več stavbah, lahko Admin podjetja ureja zaposlene, da dostopajo le do določenih polnilnic stavb. Drugače lahko zaposlen uporablja vse polnilnice v vseh stavbah tega podjetja.
 
 ## VLOGA
-To je nekak visok okviren flow k pristopu uporabe te platforme.
+To je nekak visok okviren potek k pristopu uporabe te platforme.
 >Ko podjetje želi uporabljati platformo, odda vlogo (ali pa kako drugače, pomembna je avtentikacija). Admin platforme registrira podjetje in ustvari Admina podjetja (ter dodeli).
 
 >Če ima podjetje svojo stavbo, lahko ob vlogi tudi poda vlogo za stavbo, kjer bo Admin platforme poleg podjetja dodal tudi stavbo ter ustvaril Admina stavbe (ter dodeli). Ob ustvarjanju stavbe se lahko že pove število polnilnic, ali pa jih Admin stavbe naknadno doda.
@@ -88,27 +104,35 @@ Primeri uporabe:
 > Končni uporabnik ima pregled nad polnilnicami, ki so njemu dostopne. To pomeni polnilnice v stavbah, kjer podjetje posluje, ali pa kakšne prosto dostopne polnilnice.
 >>Tu lahko tudi vidi koliko uporabnikov trenutno čaka na neke polnilnice
 2) Rezervacija poljubne polnilnice v časovnem razponu
-> Ko uporabnik želi polniti, lahko izbere nek časovni razpon in se rezervira. Načeloma se rezervira na vse polnilnice v neki stavbi. 
+> Ko uporabnik želi polniti, lahko izbere nek časovni razpon in se rezervira. Načeloma se rezervira na vse polnilnice v neki stavbi (vendar mu je dodeljena ena določena). 
 >>Izbere lahko časovni razpon, tu lahko nemudoma dobi rezervacijo, če je neka polnilnica prosta, ali pa se postavi v vrsto ter dobi obvestila, če se polnilnice sprostijo.
 3) Rezervacija določenega tipa polnilnice
 > Podobno kot prejšni primer, vendar tu je omogočena rezervacija na točno določen tip polnilnice.
->>Npr. uporabnik potrebuje super hitro polnilnico, ali pa avto podpira točno nekaj
+>>Npr. uporabnik potrebuje super hitro polnilnico, ali pa avto podpira točno določen konektor
 4) Pregled in urejanje rezervacij
-> Uporabnik lahko pregleduje svoje rezervacije ter jih ureja. 
+> Uporabnik lahko pregleduje svoje rezervacije ter jih ureja. Tu se lahko zgodi, da izgubi rezervacijo (če npr. spremeni tip polnilnice na nek drugi, itd...).
 >> Spreminja časovni razpon, spreminja tip, ...
 6) Preklic rezervacije
 > Uporabnik prekliče rezervacijo, s tem se odstrani iz vrste  in se vrsta popravi (drugi dobijo obvestila)
 
 ## REZERVACIJA
 Rezervacija je jedro platforme.
+Rezervacije so mišljene malo bolj dolgoročno, torej je smiselno rezervirati polnilnico vsaj en dan prej, če ne še prej.
+
+Rezervacija na isti dan je mogoča, vendar kompleksnejša glede čakalnih vrst.
+Čakalne vrste so predvidene kot željena rezervacija za tisti dan, če pa kdorkoli prekliče rezervacijo, se po čakalni vrsti izbira naslednjega.
+
 Ko končni uporabnik želi uporabljati polnilnice, bo na platformi izbral željeni čas polnjenja.
 Ta bo omejen z obeh strani.
 > Trenutno se govori za minimum 30 minut in maksimum 3 ure.
 
-Nato bo še izbral dostopni čas, torej od kdaj do kdaj je na voljo in želi polniti.
-> Če so polnilnice proste, mu bo ena dodeljena, drugače se postavi v čakalno vrsto. Če nekdo drug prekine rezervacijo ali nekdo zaključi prej, se čakalna premakne.
+Poleg tega si lahko tudi izbere, ali želi polniti neprekinjeno ali pa dovoli polnjenje v kosih.
+> Če uporabnik izbere neprekinjeno polnjenje, bo morda dosti težje dobiti rezervacijo, če so polnilnice zasedene in bo čakalni vrsti.
 
-Uporabnik lahko tudi poleg rezervacije ure (zgoraj omenjeno) izbere tudi tip polnilnice, nakar bo logika platforme poskrbela, da dobi izbran tip.
+Nato bo še izbral dostopni čas, torej od kdaj do kdaj je na voljo in želi polniti.
+> Če so polnilnice proste, mu bo ena dodeljena, drugače se postavi v čakalno vrsto. Če nekdo drug prekine rezervacijo ali nekdo zaključi prej, se čakalna vrsta premakne.
+
+Uporabnik lahko tudi poleg rezervacije ure (zgoraj omenjeno) izbere tudi tip polnilnice (konektorja), nakar bo logika platforme poskrbela, da dobi izbran tip.
 Če ima uporabnik izbrane 3 ure in dobi 2 uri, je še vedno 1 ura v rezervaciji.
 
 # TEHNIČNI NIVO
@@ -259,8 +283,9 @@ Podjetja, ki operirajo v dani stavbi
 
 ## STATION: /api/v1/station
 Metode za električne polnilne postaje.
+Vsebuje podskupino za tipe polnilnic in za konektorje.
 
-`/api/v1/station/post/new (buildingID)`<br>
+`/api/v1/station/post/new (buildingID, connectors)`<br>
 Dodajanje polnilnice ter kateri stavbi pripada
 
 `/api/v1/station/patch/edit (stationID)`<br>
@@ -272,11 +297,24 @@ Izpis vseh polnilnic, oz. pogosteje vseh polnilnic v neki stavbi
 `/api/v1/station/get/allAvailable (userID)`<br>
 Izpis vsej polnilnic, ki so dostopne danemu uporabniku (torej upošteva stavbe in podjetja)
 
-`/api/v1/station/post/assignCompany (stationID, companyID)`<br>
-Rezervira polnilnico nekemu podjetju
+`/api/v1/station/post/assignCompany (stationID, companyID?)`<br>
+Rezervira polnilnico nekemu podjetju - ali pa odstrani podjetje
 
 `/api/v1/station/delete/station (stationID)`<br>
 Odstrani polnilnico
+
+#### Tip konektorja
+`/api/v1/station/type/post/new (type)`<br>
+Ustvari nov tip (npr. 40W, 15W, 100W ali karkoli).
+
+`/api/v1/station/type/patch/edit (typeID)`<br>
+Uredi tip
+
+`/api/v1/station/type/get/all (buildingID?)`<br>
+Izpis vseh tipov
+
+`/api/v1/station/type/delete/type (stationID)`<br>
+Izbriše tip
 
 <br>
 

@@ -85,10 +85,15 @@ interface GetAllStationsRequest {
     buildingID: number | null;
 }
 
+interface connectorTypeIDAndSerialNumber {
+    chargingTypeID: number;
+    serialNumber: number;
+}
+
 interface CreateStationRequest {
     buildingID: number;
-    chargingTypeID: number;
     stationName: string;
+    chargingConnectors: connectorTypeIDAndSerialNumber[];
 }
 
 interface DeleteStationRequest {
@@ -100,11 +105,10 @@ interface AssignStationToCompanyRequest {
     companyID: number | null;
 }
 
-// Does not include companyID, since that is meant to be changed via the other
-// API call -> station/assignCompany
+// Does not include companyID, different request
+// Does not include connectors, different request
 interface EditStationRequest {
     stationID: number;
-    newTypeID: number | null;
     newBuildingID: number | null;
     newStationName: string | null;
 }
@@ -126,6 +130,21 @@ interface GetAllAvailableStationsRequest {
     userID: number;
 }
 
+interface AddChargingConnectorRequest {
+    stationID: number;
+    chargingConnector: connectorTypeIDAndSerialNumber;
+}
+
+interface ChargingConnectorID {
+    chargingConnectorID: number;
+}
+
+interface EditChargingConnectorRequest {
+    chargingConnectorID: number;
+    chargingTypeID: number | null;
+    serialNumber: number | null;
+}
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -144,11 +163,15 @@ export {
     AssignCompanyRequest,
     GetAllStationsRequest,
     CreateStationRequest,
+    connectorTypeIDAndSerialNumber,
     DeleteStationRequest,
     AssignStationToCompanyRequest,
     EditStationRequest,
     CreateChargingTypeRequest,
     DeleteChargingTypeRequest,
     EditChargingTypeRequest,
-    GetAllAvailableStationsRequest
+    GetAllAvailableStationsRequest,
+    AddChargingConnectorRequest,
+    ChargingConnectorID,
+    EditChargingConnectorRequest
 };
