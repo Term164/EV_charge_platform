@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import log from './logger';
+import { APILogger } from './logger';
 import config from './config';
 import asyncHanlder from 'express-async-handler';
 import { SQLStatementManager } from './SQLStatementManager';
 
 const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
-    log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
+    APILogger.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
     next();
 };
 
@@ -19,7 +19,7 @@ const errorHandler = (error: Error, _request: Request, response: Response, next:
     if (config.NODE_ENV == 'production' || config.NODE_ENV == 'test' ) {
         response.status(500).send({status: 500, message: 'An error occured.', error: Error.name, data: null});
     } else {
-        log.trace(error);
+        APILogger.trace(error);
         next(error);
     }
 };

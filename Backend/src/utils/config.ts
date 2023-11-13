@@ -49,16 +49,20 @@ if (NODE_ENV === 'test') {
 // ================================== LOGGER ===========================================
 const LOG_LEVEL: number = checkEnvVariableIsNumber(process.env.LOG_LEVEL, 'LOG_LEVEL', 0);
 
+// ================================== OCPP ============================================
+const OCPP_PORT: number = checkEnvVariableIsNumber(process.env.OCPP_PORT, 'OCPP_PORT', 5000);
+
 // ================================== OTHER ===============================================
-const PORT: number =  checkEnvVariableIsNumber(process.env.PORT, 'PORT' , 4200);
+const API_PORT: number =  checkEnvVariableIsNumber(process.env.API_PORT, 'API_PORT' , 4200);
 
 export default {
     SQL_HOST,
     SQL_USER,
     SQL_PASS,
     SQL_DB,
-    PORT,
+    API_PORT,
     NODE_ENV,
-    LOG_LEVEL
+    LOG_LEVEL,
+    OCPP_PORT
 };
 
