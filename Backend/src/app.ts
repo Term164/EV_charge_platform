@@ -20,6 +20,7 @@ app.use(middleware.requestLogger);
 
 app.use('/api/v1/auth', authRoutes);
 app.use(middleware.sessionChecker);
+app.use(middleware.authorizationChecker);
 app.use('/api/v1/dev', devRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/company', companyRoutes);

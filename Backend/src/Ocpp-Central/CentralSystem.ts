@@ -87,7 +87,6 @@ centralSystem.on('connection', (client: OcppClientConnection) => {
 
         if (request.reservationId != undefined || request.reservationId != null) {
             const reservation = reservationsHashMap.get(`${client.getCpId()}/${request.connectorId}`);
-            console.log(reservation);
             if (!reservation) {
                 const response: StartTransactionResponse = {
                     transactionId: 1,
@@ -100,7 +99,6 @@ centralSystem.on('connection', (client: OcppClientConnection) => {
             if (reservation.status === Status.Reserved && reservation.reservationID === request.reservationId) {
                 reservation.status = Status.Charging;
             }
-            console.log(reservation);
         }
 
         const response: StartTransactionResponse = {
@@ -108,7 +106,6 @@ centralSystem.on('connection', (client: OcppClientConnection) => {
             idTagInfo: {status:'Accepted'}
         };
 
-        console.log(reservationsHashMap);
 
         callback(response);
     });

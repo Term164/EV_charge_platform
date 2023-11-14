@@ -100,7 +100,6 @@ async function deleteCompanyAdmin(requestBody: unknown): Promise<APIResponse> {
     try {
         userID = parser.parseUserID(requestBody);
     } catch (error) {
-        console.log(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 

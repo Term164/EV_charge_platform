@@ -57,6 +57,7 @@ class StatmentManager {
     getSessionIDStatement: PreparedStatement;
     deleteSessionIDStatmenet: PreparedStatement;
     updateSessionIDStatement: PreparedStatement;
+    checkAdminAuthorizationStatement: PreparedStatement;
 
     // Charging Station Service statements;
     createChargingStationStatement: PreparedStatement;
@@ -340,6 +341,21 @@ class StatmentManager {
             WHERE session_secret = $1`,
             {paramTypes: [DataTypeOIDs.varchar]}
         );
+
+        this.checkAdminAuthorizationStatement = await db.connection.prepare(
+            `SELECT 
+            CASE WHEN badmin.id IS NOT NULL THEN true ELSE false END as isbadmin,
+            CASE WHEN cadmin.id IS NOT NULL THEN true ELSE false END as iscadmin,
+            CASE WHEN padmin.id IS NOT NULL THEN true ELSE false END as ispadmin 
+            FROM
+            sessions as sessions
+            LEFT JOIN accounts ON accounts.id = sessions.account_id
+            LEFT JOIN building_admins as badmin ON badmin.account_id = accounts.id
+            LEFT JOIN company_admins as cadmin ON cadmin.account_id = accounts.id
+            LEFT JOIN platform_admins as padmin ON padmin.account_id = accounts.id
+            WHERE sessions.session_secret = $1;`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
     }
 
     private async prepareChargingStationServiceStatements() {
@@ -466,17 +482,21 @@ class StatmentManager {
 
 
     public async init() {
-        await this.prepareAdminServiceStatements();
-        await this.prepareAssignEmployeeServiceStatements();
-        await this.prepareAuthServiceStatements();
-        await this.prepareBuildingServiceStatements();
-        await this.prepareCompanyServiceStatements();
-        await this.prepareRegisterServiceStatements();
-        await this.prepareUserServiceStatements();
-        await this.prepareMiddlewareStatements();
-        await this.prepareChargingStationServiceStatements();
-        await this.prepareChargingTypeServiceStatements();
-        await this.prepareOCPPStatements();
+        await Promise.all(
+            [
+                this.prepareAdminServiceStatements(),
+                this.prepareAssignEmployeeServiceStatements(),
+                this.prepareAuthServiceStatements(),
+                this.prepareBuildingServiceStatements(),
+                this.prepareCompanyServiceStatements(),
+                this.prepareRegisterServiceStatements(),
+                this.prepareUserServiceStatements(),
+                this.prepareMiddlewareStatements(),
+                this.prepareChargingStationServiceStatements(),
+                this.prepareChargingTypeServiceStatements(),
+                this.prepareOCPPStatements()
+            ]
+        );
         log.info("All SQL statements have been prepared.");
     }
 }
