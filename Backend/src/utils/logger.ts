@@ -25,6 +25,8 @@ if (config.NODE_ENV == 'production') {
     });
 } else if (config.NODE_ENV == 'test') {
     log.settings.type = 'hidden';
+    OCPPLogger.settings.type = 'hidden';
+    APILogger.settings.type = 'hidden';
 }
 
 export default log;

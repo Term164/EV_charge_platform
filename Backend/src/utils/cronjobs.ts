@@ -7,7 +7,7 @@ import { sendReservationRequest } from '../Ocpp-Central/CentralSystem';
 
 function startCronJobs () {
     log.info('Started hourly reservation cron job.');
-    cron.schedule('* * * * *', () => {
+    cron.schedule('0 * * * *', () => {
         log.info('Getting all reservations for ' + new Date().toLocaleTimeString());
         getCurrentReservations()
             .then((reservationList) => {
