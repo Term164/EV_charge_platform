@@ -4,7 +4,7 @@ import { SQLStatementManager } from "../utils/SQLStatementManager";
 beforeAll( async () => {
     await database.establishDBConnection();
     await SQLStatementManager.init();
-});
+}, 15000);
 
 afterAll(async () => {
     await database.closeDBConnection();

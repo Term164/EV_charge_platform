@@ -15,6 +15,7 @@ async function clearAllTables() {
         DELETE FROM registration_secrets;
         DELETE FROM building_admins;
         DELETE FROM building_accesses;
+        DELETE FROM charging_connectors;
         DELETE FROM charging_stations;
         DELETE FROM charging_types;
         DELETE FROM company_admins;
@@ -27,6 +28,14 @@ async function clearAllTables() {
         `
     );
 }
+
+async function clearStationsAndConnectors() {
+    await database.connection.execute(`
+    DELETE FROM charging_connectors;
+    DELETE FROM charging_stations;`
+    );
+}
+
 
 // ============================== RETRIEVE SPECIFIC DATA ==============================
 
@@ -103,6 +112,10 @@ async function getChargingType(id: number): Promise<string> {
     return (await database.connection.execute(`SELECT "type" FROM charging_types WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0)[0] as string;
 }
 
+async function checkChargingConnectorExists(stationID: number, serialNumber: number): Promise<boolean> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_connectors WHERE charging_station_id = '${stationID}' AND serial_number = '${serialNumber}' ;`)).results.at(0)?.rows?.length as number > 0;
+}
+
 async function checkChargingStationExists(chargingStationName: string): Promise<boolean> {
     return (await database.connection.execute(`SELECT COUNT(*) FROM charging_stations WHERE name = '${chargingStationName}';`)).results.at(0)?.rows?.length as number > 0;
 }
@@ -111,8 +124,20 @@ async function getNumberOfChargingStations(): Promise<number> {
     return (await database.connection.execute(`SELECT COUNT(*) FROM charging_stations`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
+async function getNumberOfChargingConnectors(stationID: number): Promise<number> {
+    return (await database.connection.execute(`SELECT COUNT(*) FROM charging_connectors WHERE charging_station_id = '${stationID}';`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function getChargingStationIDFromName(stationName: string): Promise<number> {
+    return (await database.connection.execute(`SELECT "id" FROM charging_stations WHERE name = '${stationName}';`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
 async function getChargingStationData(id: number): Promise<string[]> {
-    return (await database.connection.execute(`SELECT "charging_type_id","building_id","name" FROM charging_stations WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
+    return (await database.connection.execute(`SELECT "building_id","name" FROM charging_stations WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
+}
+
+async function getChargingConnectorData(id: number): Promise<string[]> {
+    return (await database.connection.execute(`SELECT "charging_type_id","serial_number" FROM charging_connectors WHERE ID = '${id}';`)).results.at(0)?.rows?.at(0) as string[];
 }
 
 async function getCompanyIDOfChargingStation(id: number): Promise<number|null> {
@@ -199,8 +224,25 @@ async function insertDummyChargingTypeReturningID(): Promise<number> {
     return (await database.connection.execute(`INSERT INTO charging_types ("type") VALUES ('dummy-test') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
-async function insertDummyChargingStationReturningID(chargingTypeID: number, buildingID: number): Promise<number> {
-    return (await database.connection.execute(`INSERT INTO charging_stations ("charging_type_id", "building_id", "name") VALUES ('${chargingTypeID}', '${buildingID}', 'station-test') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+async function insertDummyChargingStationReturningID(buildingID: number, stationName: string): Promise<number> {
+    return (await database.connection.execute(`INSERT INTO charging_stations ("building_id", "name") VALUES ('${buildingID}', '${stationName}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyChargingConnectorReturningID(stationID: number, typeID: number, serialNumber: number) {
+    return (await database.connection.execute(`INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number") VALUES ('${stationID}','${typeID}', '${serialNumber}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+}
+
+async function insertDummyChargingStationWithOneConnectorReturningID(buildingID: number, stationName: string, typeID: number): Promise<number> {
+    const stationID = (await database.connection.execute(`INSERT INTO charging_stations ("building_id", "name") VALUES ('${buildingID}', '${stationName}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+    await database.connection.execute(`INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number") VALUES ('${stationID}','${typeID}', 1);`);
+    return stationID;
+}
+
+async function insertDummyChargingStationWithTwoConnectorsReturningID(buildingID: number, stationName: string, typeID: number): Promise<number> {
+    const stationID = (await database.connection.execute(`INSERT INTO charging_stations ("building_id", "name") VALUES ('${buildingID}', '${stationName}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
+    await database.connection.execute(`INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number") VALUES ('${stationID}','${typeID}', 1);`);
+    await database.connection.execute(`INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number") VALUES ('${stationID}','${typeID}', 2);`);
+    return stationID;
 }
 
 async function setCompanyIDOfChargingStation(id: number, companyID: number) {
@@ -240,6 +282,7 @@ async function insertUserBuildingAccess(userID: string, buildingID: string, comp
 
 export default {
     clearAllTables,
+    clearStationsAndConnectors,
     getValidationURL,
     getAccountValidatedParameter,
     getUserAssignedCompanyID,
@@ -271,9 +314,16 @@ export default {
     insertDummyChargingTypeReturningID,
     getChargingType,
     checkChargingStationExists,
+    checkChargingConnectorExists,
     getNumberOfChargingStations,
+    getNumberOfChargingConnectors,
     insertDummyChargingStationReturningID,
+    insertDummyChargingConnectorReturningID,
+    insertDummyChargingStationWithOneConnectorReturningID,
+    insertDummyChargingStationWithTwoConnectorsReturningID,
     getChargingStationData,
+    getChargingStationIDFromName,
+    getChargingConnectorData,
     getCompanyIDOfChargingStation,
     setCompanyIDOfChargingStation,
     assignCompanyToBuilding,
