@@ -21,8 +21,8 @@ async function assignBadmin(body: unknown): Promise<APIResponse> {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
-                if (error.message.includes('fk_2')) errorMessage = 'This userID does not exist'; //frn_building_admins_account_id
-                else if (error.message.includes('fk_3')) errorMessage = 'This buildingID does not exist'; //frn_building_admins_building_id
+                if (error.message.includes('frn_building_admins_account_id')) errorMessage = 'This userID does not exist'; //frn_building_admins_account_id
+                else if (error.message.includes('frn_building_admins_building_id')) errorMessage = 'This buildingID does not exist'; //frn_building_admins_building_id
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 1';
                 return {status: 400, message: errorMessage, error: error.message, data: null};
             }
@@ -50,8 +50,8 @@ async function assignCadmin(body: unknown): Promise<APIResponse> {
         if (error instanceof Error) {
             if (error.message.includes("violates foreign key constraint")) {
                 let errorMessage: string;
-                if (error.message.includes('fk_4')) errorMessage = 'This userID does not exist'; //frn_company_admins_account_id
-                else if (error.message.includes('fk_5')) errorMessage = 'This companyID does not exist'; //frn_company_admins_company_id
+                if (error.message.includes('frn_company_admins_account_id')) errorMessage = 'This userID does not exist'; //frn_company_admins_account_id
+                else if (error.message.includes('frn_company_admins_company_id')) errorMessage = 'This companyID does not exist'; //frn_company_admins_company_id
                 else errorMessage = 'Something went wrong please contact the site administrators, error code: 2';
                 return {status: 400, message: errorMessage, error: error.message, data: null};
             }

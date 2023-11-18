@@ -1,3 +1,4 @@
+import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
 import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumber, AddChargingConnectorRequest, ChargingConnectorID, EditChargingConnectorRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse } from "./responseModels";
@@ -14,6 +15,10 @@ function isInt(number: unknown): number is number {
 
 function isBool (booleanValue: unknown): booleanValue is boolean {
     return typeof booleanValue === 'boolean' || booleanValue instanceof Boolean;
+}
+
+function isDate (dateObject: unknown): dateObject is Date {
+    return dateObject instanceof Date;
 }
 
 function parseIntegerParameter(param: unknown, paramName: string): number {
@@ -42,6 +47,14 @@ function parseStringParameter(param: unknown, paramName: string): string {
 
 function parseBooleanParameter(param: unknown, paramName: string): boolean {
     if (param === null || !isBool(param)) {
+        throw new Error(`Incorrect or missing ${paramName}`);
+    }
+
+    return param;
+}
+
+function parseDateParameter(param: unknown, paramName: string): Date {
+    if (param === null || !isDate(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
     }
 
@@ -366,17 +379,23 @@ function parseAddChargingConnectorRequest(request: unknown): AddChargingConnecto
     }
 
     if ('stationID' in request && 'chargingConnector' in request) {
-        const AddChargingConnectorRequest = {} as AddChargingConnectorRequest;
-        AddChargingConnectorRequest.stationID = parseIntegerParameter(request.stationID, 'stationID');
+
         if (!request.chargingConnector || typeof request.chargingConnector !== 'object')
             throw new Error('Incorrect data in chargingConnector');
+
         if ('chargingTypeID' in request.chargingConnector && 'serialNumber' in request.chargingConnector) {
-            const connector = {} as connectorTypeIDAndSerialNumber;
-            connector.chargingTypeID = parseIntegerParameter(request.chargingConnector.chargingTypeID, 'chargingTypeID');
-            connector.serialNumber = parseIntegerParameter(request.chargingConnector.serialNumber, 'serialNumber');
-            AddChargingConnectorRequest.chargingConnector = connector;
+            const connector: connectorTypeIDAndSerialNumber = {
+                chargingTypeID: parseIntegerParameter(request.chargingConnector.chargingTypeID, 'chargingTypeID'),
+                serialNumber: parseIntegerParameter(request.chargingConnector.serialNumber, 'serialNumber')
+            };
+
+            const addChargingConnectorRequest: AddChargingConnectorRequest = {
+                stationID: parseIntegerParameter(request.stationID, 'stationdID'),
+                chargingConnector: connector
+            };
+
+            return addChargingConnectorRequest;
         }
-        return AddChargingConnectorRequest;
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -597,45 +616,93 @@ function parseCompanyAdmin(data: unknown) {
     return companyAdminData;
 }
 
+function parseConnectorIDs(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Connector data should be passed as an array');
+
+    const connectorIDs: string[] = [];
+
+    for (let i = 0; i < data.length; i++) {
+        connectorIDs.push(`${data[i][0]}/${data[i][1]}`);
+    }
+
+    return connectorIDs;
+}
+
+function parseReservationInfo(data: unknown) {
+    if (!data) {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if (!Array.isArray(data)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
+    const reservationData: ReservationData[] = [];
+    for (let i = 0; i < data.length; i++) {
+        const reservation: ReservationData = {
+            stationID: parseStringParameter(data[i][0], 'stationID'),
+            connectorID: parseIntegerParameter(data[i][1], 'connectorID'),
+            expiryDate: parseDateParameter(data[i][2], 'expiryDate'),
+            idTag: parseStringParameter(data[i][3], 'idTag')
+        };
+
+        reservationData.push(reservation);
+    }
+    return reservationData;
+}
 // ==================================== RESPONSE MODEL PARSERS ==============================================
-function parseBuildingResponse(rows: any[]): BuildingResponse[] {
+function parseBuildingResponse(rows: unknown): BuildingResponse[] {
+
+    if (!Array.isArray(rows)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
     const returningArray: BuildingResponse[] = new Array<BuildingResponse>(rows.length);
     let building: BuildingResponse;
     for (let i = 0; i < rows.length; i++) {
         building = new BuildingResponse();
-        building.buildingID = rows[i][0] as number; // from sql
-        building.buildingName = rows[i][1] as string; // from sql
-        building.buildingLocation = rows[i][2] as string; // from sql
+        building.buildingID = parseIntegerParameter(rows[i][0], 'buildingID'); // from sql
+        building.buildingName = parseStringParameter(rows[i][1], 'buildingName'); // from sql
+        building.buildingLocation = parseStringParameter(rows[i][2], 'buildingLocation'); // from sql
         returningArray[i] = building;
     }
     return returningArray;
 }
 
-function parseCompanyResponse(rows: any[]): CompanyResponse[] {
+function parseCompanyResponse(rows: unknown): CompanyResponse[] {
+
+    if (!Array.isArray(rows)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
     const returningArray: CompanyResponse[] = new Array<CompanyResponse>(rows.length);
     let company: CompanyResponse;
     for (let i = 0; i < rows.length; i++) {
         company = new CompanyResponse();
-        company.companyID = rows[i][0] as number; // from sql
-        company.companyName = rows[i][1] as string; // from sql
+        company.companyID = parseIntegerParameter(rows[i][0], 'companyID'); // from sql
+        company.companyName = parseStringParameter(rows[i][1], 'companyName'); // from sql
         returningArray[i] = company;
     }
     return returningArray;
 }
 
-function parseChargingTypeResponse(rows: any[]): ChargingTypeResponse[] {
+function parseChargingTypeResponse(rows: unknown): ChargingTypeResponse[] {
+
+    if (!Array.isArray(rows)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
     const returningArray: ChargingTypeResponse[] = new Array<ChargingTypeResponse>(rows.length);
     let chargingType: ChargingTypeResponse;
     for (let i = 0; i < rows.length; i++) {
         chargingType = new ChargingTypeResponse();
-        chargingType.chargingTypeID = rows[i][0] as number; // from sql
-        chargingType.chargingType = rows[i][1] as string; // from sql
+        chargingType.chargingTypeID = parseIntegerParameter(rows[i][0], 'chargingTypeID'); // from sql
+        chargingType.chargingType = parseStringParameter(rows[i][1], 'chargingType'); // from sql
         returningArray[i] = chargingType;
     }
     return returningArray;
 }
 
-function parseChargingStationResponse(rows: any[], specific: boolean): ChargingStationResponse[] {
+function parseChargingStationResponse(rows: unknown, specific: boolean): ChargingStationResponse[] {
+
+    if (!Array.isArray(rows)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
+
     const processedStations = new Map<number, number>;
     const returningArray: ChargingStationResponse[] = [];
     for (let i = 0; i < rows.length; i++) {
@@ -729,4 +796,7 @@ export default {
     parseCompanyResponse,
     parseChargingTypeResponse,
     parseChargingStationResponse,
+    // ----------------------- OCPP
+    parseConnectorIDs,
+    parseReservationInfo,
 };

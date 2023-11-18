@@ -1,5 +1,6 @@
 import db from './database';
 import { DataTypeOIDs, PreparedStatement } from "postgresql-client";
+import log from './logger';
 
 
 class StatmentManager {
@@ -56,6 +57,7 @@ class StatmentManager {
     getSessionIDStatement: PreparedStatement;
     deleteSessionIDStatmenet: PreparedStatement;
     updateSessionIDStatement: PreparedStatement;
+    checkAdminAuthorizationStatement: PreparedStatement;
 
     // Charging Station Service statements;
     createChargingStationStatement: PreparedStatement;
@@ -75,6 +77,10 @@ class StatmentManager {
     getAllChargingTypesStatement: PreparedStatement;
     deleteChargingTypeStatement: PreparedStatement;
     editChargingTypeStatement: PreparedStatement;
+
+    // OCPP statements
+    getAllConnectorIDStatement: PreparedStatement;
+    getAllNextReservationsStatement: PreparedStatement;
 
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
@@ -335,6 +341,21 @@ class StatmentManager {
             WHERE session_secret = $1`,
             {paramTypes: [DataTypeOIDs.varchar]}
         );
+
+        this.checkAdminAuthorizationStatement = await db.connection.prepare(
+            `SELECT 
+            CASE WHEN badmin.id IS NOT NULL THEN true ELSE false END as isbadmin,
+            CASE WHEN cadmin.id IS NOT NULL THEN true ELSE false END as iscadmin,
+            CASE WHEN padmin.id IS NOT NULL THEN true ELSE false END as ispadmin 
+            FROM
+            sessions as sessions
+            LEFT JOIN accounts ON accounts.id = sessions.account_id
+            LEFT JOIN building_admins as badmin ON badmin.account_id = accounts.id
+            LEFT JOIN company_admins as cadmin ON cadmin.account_id = accounts.id
+            LEFT JOIN platform_admins as padmin ON padmin.account_id = accounts.id
+            WHERE sessions.session_secret = $1;`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
     }
 
     private async prepareChargingStationServiceStatements() {
@@ -439,17 +460,44 @@ class StatmentManager {
         );
     }
 
+    private async prepareOCPPStatements() {
+        this.getAllConnectorIDStatement = await db.connection.prepare(
+            `SELECT station.name, connector.serial_number FROM 
+            charging_connectors as connector
+            LEFT JOIN charging_stations as station ON station.id = connector.charging_station_id;`,
+            {paramTypes: []}
+        );
+
+        this.getAllNextReservationsStatement = await db.connection.prepare(
+            `SELECT name, charging_connector_id, allocated_to, rfid
+            FROM Reservations as reservation
+            LEFT JOIN charging_connectors connector ON connector.id = reservation.charging_connector_id
+            LEFT JOIN charging_stations station ON station.id = connector.charging_station_id
+            LEFT JOIN accounts ON accounts.id = reservation.account_id
+            WHERE reservation.allocated_from BETWEEN now()::timestamp - interval '10 minutes' AND now()::timestamp + interval '10 minutes'
+            `,
+            {paramTypes: []}
+        );
+    }
+
+
     public async init() {
-        await this.prepareAdminServiceStatements();
-        await this.prepareAssignEmployeeServiceStatements();
-        await this.prepareAuthServiceStatements();
-        await this.prepareBuildingServiceStatements();
-        await this.prepareCompanyServiceStatements();
-        await this.prepareRegisterServiceStatements();
-        await this.prepareUserServiceStatements();
-        await this.prepareMiddlewareStatements();
-        await this.prepareChargingStationServiceStatements();
-        await this.prepareChargingTypeServiceStatements();
+        await Promise.all(
+            [
+                this.prepareAdminServiceStatements(),
+                this.prepareAssignEmployeeServiceStatements(),
+                this.prepareAuthServiceStatements(),
+                this.prepareBuildingServiceStatements(),
+                this.prepareCompanyServiceStatements(),
+                this.prepareRegisterServiceStatements(),
+                this.prepareUserServiceStatements(),
+                this.prepareMiddlewareStatements(),
+                this.prepareChargingStationServiceStatements(),
+                this.prepareChargingTypeServiceStatements(),
+                this.prepareOCPPStatements()
+            ]
+        );
+        log.info("All SQL statements have been prepared.");
     }
 }
 
