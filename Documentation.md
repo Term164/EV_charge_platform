@@ -286,13 +286,13 @@ Metode za električne polnilne postaje.
 Vsebuje podskupino za tipe polnilnic in za konektorje.
 
 `/api/v1/station/post/new (buildingID, connectors)`<br>
-Dodajanje polnilnice ter kateri stavbi pripada
+Dodajanje polnilnice ter kateri stavbi pripada, vključno s konektorji (se da posebej urejati, vendar je najpametneje tukaj dodati).
 
-`/api/v1/station/patch/edit (stationID)`<br>
-Urejanje polnilnice
+`/api/v1/station/patch/edit (stationID, ..)`<br>
+Urejanje polnilnice -> ime polnilnice, katera stavba
 
 `/api/v1/station/get/all (buildingID?)`<br>
-Izpis vseh polnilnic, oz. pogosteje vseh polnilnic v neki stavbi
+Izpis vseh polnilnic, oz. pogosteje vseh polnilnic v neki stavbi - vključno s konektorji.
 
 `/api/v1/station/get/allAvailable (userID)`<br>
 Izpis vsej polnilnic, ki so dostopne danemu uporabniku (torej upošteva stavbe in podjetja)
@@ -302,6 +302,16 @@ Rezervira polnilnico nekemu podjetju - ali pa odstrani podjetje
 
 `/api/v1/station/delete/station (stationID)`<br>
 Odstrani polnilnico
+
+#### Konektor
+`/api/v1/station/connector/post/new (stationID, connector)`<br>
+Doda konektor k obsoječi polnilnici
+
+`/api/v1/station/connector/patch/edit (connectorId, ..)`<br>
+Uredi konektor -> serijsko številko, tip
+
+`/api/v1/station/connector/delete/connector (connectorID)`<br>
+Izbriše konektor z neke polnilnice
 
 #### Tip konektorja
 `/api/v1/station/type/post/new (type)`<br>
@@ -316,7 +326,7 @@ Izpis vseh tipov
 `/api/v1/station/type/delete/type (stationID)`<br>
 Izbriše tip
 
-<br>
+> **_O polnilnicah_**  Za več informacij o podrobni uporabi objektov za polnilnice (ker so malce posebne), glej drugo tehnično dokumentacijo
 
 ## RESERVATION: /api/v1/reservation
 Metode namenjene logiki z rezervacijami
