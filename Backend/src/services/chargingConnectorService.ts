@@ -40,7 +40,7 @@ async function addChargingConnector(body: unknown): Promise<APIResponse> {
 async function deleteChargingConnector(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteChargingConnectorRequest(body);
+        data = parser.parseChargingConnectorID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {error}};

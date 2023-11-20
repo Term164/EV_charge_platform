@@ -36,7 +36,7 @@ async function getAllBuildings(): Promise<APIResponse> {
 async function deleteBuilding(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteBuildingRequest(body);
+        data = parser.parseBuildingID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
@@ -73,8 +73,7 @@ async function editBuilding(body: unknown): Promise<APIResponse> {
 async function getAllBuildingsOwnedByCompany(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        //parseDeleteCompanyRequest here, since it parses the same interface -> companyID
-        data = parser.parseDeleteCompanyRequest(body);
+        data = parser.parseCompanyID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
@@ -91,8 +90,7 @@ async function getAllBuildingsOwnedByCompany(body: unknown): Promise<APIResponse
 async function getAllCompaniesAssignedToBuilding(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        //parseDeleteBuildingRequest here, since it parses the same interface -> buildingID
-        data = parser.parseDeleteBuildingRequest(body);
+        data = parser.parseBuildingID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};

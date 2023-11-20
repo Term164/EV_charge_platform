@@ -82,6 +82,9 @@ class StatmentManager {
     getAllConnectorIDStatement: PreparedStatement;
     getAllNextReservationsStatement: PreparedStatement;
 
+    // Reservation statements
+
+
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
             `INSERT INTO Building_admins (account_id, building_id)

@@ -4,13 +4,17 @@ import reservationService from '../services/reservationService';
 
 const router = express.Router();
 
-router.get('/get/all', (_req, res) => {
-    res.send('Get all reservations for a specific user');
-});
+router.get('/get/all', asyncHandler(async (req, res) => {
+    const response = await reservationService.getAllReservations(req.body);
+    res.status(response.status)
+        .send(response);
+}));
 
-router.patch('/patch/edit', (_req, res) => {
-    res.send('Editing a reservation');
-});
+router.patch('/patch/edit', asyncHandler(async (req, res) => {
+    const response = await reservationService.editReservation(req.body);
+    res.status(response.status)
+        .send(response);
+}));
 
 router.delete('/delete/cancel', asyncHandler(async (req, res) => {
     const response = await reservationService.cancelReservation(req.body);
@@ -18,12 +22,16 @@ router.delete('/delete/cancel', asyncHandler(async (req, res) => {
         .send(response);
 }));
 
-router.post('/post/new', (_req, res) => {
-    res.send('Create a new reservation');
-});
+router.post('/post/new', asyncHandler(async (req, res) => {
+    const response = await reservationService.createReservation(req.body);
+    res.status(response.status)
+        .send(response);
+}));
 
-router.get('/get/stationType', (_req, res) => {
-    res.send('Get station type.');
-});
+router.get('/get/stationType', asyncHandler(async (req, res) => {
+    const response = await reservationService.getAllTypesAtBuilding(req.body);
+    res.status(response.status)
+        .send(response);
+}));
 
 export default router;

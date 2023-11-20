@@ -35,7 +35,7 @@ async function getAllCompanies(): Promise<APIResponse> {
 async function deleteCompany(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteCompanyRequest(body);
+        data = parser.parseCompanyID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};

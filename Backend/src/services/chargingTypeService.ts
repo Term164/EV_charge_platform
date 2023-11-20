@@ -24,7 +24,7 @@ async function createChargingType(body: unknown): Promise<APIResponse> {
 async function getAllChargingTypes(): Promise<APIResponse> {
     const result = await SQLStatementManager.getAllChargingTypesStatement.execute({params: []});
     if (result.rows == undefined)
-        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};    
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
     const returnedChargingTypes: ChargingTypeResponse[] =  parser.parseChargingTypeResponse(result.rows);
     return {status: 200, message: `Returned ${result.rows.length} charging types`, error: null, data: {'Result': returnedChargingTypes}};
 }
@@ -32,7 +32,7 @@ async function getAllChargingTypes(): Promise<APIResponse> {
 async function deleteChargingType(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteChargingTypeRequest(body);
+        data = parser.parseChargingTypeID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};

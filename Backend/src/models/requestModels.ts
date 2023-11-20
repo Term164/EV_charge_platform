@@ -145,6 +145,20 @@ interface EditChargingConnectorRequest {
     serialNumber: number | null;
 }
 
+interface CancelReservationRequest {
+    reservationID: number;
+}
+
+interface CreateReservationRequest {
+    userID: number;
+    buildingID: number;
+    chargingTime: number;
+    chargingTypeID: number | null;
+    desiredFrom: EpochTimeStamp;
+    desiredTo: EpochTimeStamp;
+}
+
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -173,5 +187,7 @@ export {
     GetAllAvailableStationsRequest,
     AddChargingConnectorRequest,
     ChargingConnectorID,
-    EditChargingConnectorRequest
+    EditChargingConnectorRequest,
+    CancelReservationRequest,
+    CreateReservationRequest
 };

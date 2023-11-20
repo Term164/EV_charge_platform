@@ -70,7 +70,6 @@ async function createStation(body: unknown): Promise<APIResponse> {
 async function getAllStations(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        //parseDeleteBuildingRequest here, since it parses the same interface -> buildingID
         data = parser.parseGetAllStationsRequest(body);
     } catch (error) {
         log.debug(error);
@@ -96,7 +95,7 @@ async function getAllStations(body: unknown): Promise<APIResponse> {
 async function deleteStation(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteStationRequest(body);
+        data = parser.parseStationID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
@@ -179,13 +178,13 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseGetAllAvailableStationsRequest(body);
+        data = parser.parseUserIDFromInt(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
-    const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data.userID]});
+    const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data]});
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
 
