@@ -57,7 +57,7 @@ interface EditUserProfileRequest {
     username?: string,
     email_account?: string,
     profile_picture?: string,
-    rfid?: number,
+    rfid?: string,
     company_id?: number
 }
 

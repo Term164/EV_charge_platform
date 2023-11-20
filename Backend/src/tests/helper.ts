@@ -56,17 +56,17 @@ async function checkUserExists(username: string) {
     return result.results.at(0)?.rows?.length as number > 0;
 }
 
-async function checkCAdminExists(companyAdminID : string) {
+async function checkCAdminExists(companyAdminID : number) {
     const result = await database.connection.execute(`SELECT company_id FROM company_admins WHERE account_id = '${companyAdminID}'`);
     return result.results.at(0)?.rows?.length as number > 0;
 }
 
-async function checkBAdminExists(buildingAdminID : string) {
+async function checkBAdminExists(buildingAdminID : number) {
     const result = await database.connection.execute(`SELECT building_id FROM building_admins WHERE account_id = '${buildingAdminID}'`);
     return result.results.at(0)?.rows?.length as number > 0;
 }
 
-async function checkUserHasBuildingAccess(userID: string, buildingID: string) {
+async function checkUserHasBuildingAccess(userID: number, buildingID: number) {
     const result = await database.connection.execute(`SELECT id FROM building_accesses WHERE account_id = '${userID}' AND building_id = '${buildingID}'`);
     return result.results.at(0)?.rows?.length as number > 0;
 }
@@ -88,7 +88,7 @@ async function getSessionExpirationDate(sessionSecret: string) {
     return (await database.connection.execute(`SELECT expiration_time FROM sessions WHERE session_secret = '${sessionSecret}'`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
-async function getUserAssignedCompanyID(userID: string): Promise<number> {
+async function getUserAssignedCompanyID(userID: number): Promise<number> {
     return (await database.connection.execute(`SELECT company_id FROM accounts WHERE id = '${userID}'`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
@@ -198,16 +198,16 @@ async function assignCompanyToBuilding(companyID: number, buildingID: number) {
     return (await database.connection.execute( `INSERT INTO "Building-Company" ("building_id", "company_id") VALUES (${buildingID}, ${companyID});`));
 }
 
-async function insertDummyCompanyAdminReturningID(userID: string, companyID: string): Promise<number> {
+async function insertDummyCompanyAdminReturningID(userID: number, companyID: number): Promise<number> {
     return (await database.connection.execute(`INSERT INTO company_admins ("account_id", "company_id") VALUES ('${userID}', '${companyID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
-async function insertDummyBuildingAdminReturningID(userID: string, buildingID: string): Promise<number> {
+async function insertDummyBuildingAdminReturningID(userID: number, buildingID: number): Promise<number> {
     return (await database.connection.execute(`INSERT INTO building_admins ("account_id", "building_id") VALUES ('${userID}', '${buildingID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 
-async function insertNewUserReturningUserID(username: string, password: string, email: string): Promise<string>  {
-    return (await database.connection.execute(`INSERT INTO Accounts ("username","password_hash","email_account") VALUES('${username}', '${password}','${email}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as string;
+async function insertNewUserReturningUserID(username: string, password: string, email: string): Promise<number>  {
+    return Number.parseInt((await database.connection.execute(`INSERT INTO Accounts ("username","password_hash","email_account") VALUES('${username}', '${password}','${email}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as string);
 }
 
 async function insertNewUserReturningNumberOfUsers(username: string, password: string, email: string): Promise<number>  {
@@ -253,29 +253,29 @@ async function setBuildingAccessToUser(userID: number, buildingID: number) {
     return (await database.connection.execute(`INSERT INTO building_accesses ("account_id", "building_id") VALUES ('${userID}', '${buildingID}');`));
 }
 
-async function createNewCompanyAdmin(): Promise<string> {
+async function createNewCompanyAdmin(): Promise<number> {
     const username = crypto.randomBytes(20).toString('hex');
     const password = crypto.randomBytes(20).toString('hex');
     const email = crypto.randomBytes(20).toString('hex');
 
     const userID = await insertNewUserReturningUserID(username,password,email);
     const companyID = await insertDummyCompanyReturningID(crypto.randomBytes(20).toString('hex'));
-    void await insertDummyCompanyAdminReturningID(String(userID), String(companyID));
+    void await insertDummyCompanyAdminReturningID(userID, companyID);
     return userID;
 }
 
-async function createNewBuildingAdmin(): Promise<string> {
+async function createNewBuildingAdmin(): Promise<number> {
     const username = crypto.randomBytes(20).toString('hex');
     const password = crypto.randomBytes(20).toString('hex');
     const email = crypto.randomBytes(20).toString('hex');
 
     const userID = await insertNewUserReturningUserID(username,password,email);
     const buildingID = await insertDummyBuildingReturningID(crypto.randomBytes(20).toString('hex'));
-    void await insertDummyBuildingAdminReturningID(String(userID), String(buildingID));
+    void await insertDummyBuildingAdminReturningID(userID, buildingID);
     return userID;
 }
 
-async function insertUserBuildingAccess(userID: string, buildingID: string, companyAdminID: string) {
+async function insertUserBuildingAccess(userID: number, buildingID: number, companyAdminID: number) {
     return (await database.connection.execute(`INSERT INTO building_accesses ("account_id", "building_id", "company_admin_id") VALUES ('${userID}', '${buildingID}', '${companyAdminID}') RETURNING ID;`)).results.at(0)?.rows?.at(0)[0] as number;
 }
 

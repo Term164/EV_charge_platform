@@ -9,12 +9,12 @@ This is a quick guide on how to configure the backend for development and everyt
 - :stop_sign: Create swagger page for API (Too complex for current scope) [@Term164](https://github.com/Term164)
 - :white_check_mark: Create inital SQL script and define SQL queries [@tadejsivic](https://github.com/tadejsivic)
 - :white_check_mark: Finish auth route API calls and basic unit tests  [@Term164](https://github.com/Term164)
-- :construction: Finish user route API calls and basic unit tests  [@Term164](https://github.com/Term164)
--  Finish company route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
--  Finish building route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
--  Finish station route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
--  Finish reservation route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic) [@Term164](https://github.com/Term164)
--  Integrate Etrel charging point simulator [@tadejsivic](https://github.com/tadejsivic) [@Term164](https://github.com/Term164)
+- :white_check_mark: Finish user route API calls and basic unit tests  [@Term164](https://github.com/Term164)
+- :white_check_mark: company route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
+- :white_check_mark: building route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
+- :white_check_mark: Finish station route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic)
+- :construction: Finish reservation route API calls and basic unit tests  [@tadejsivic](https://github.com/tadejsivic) [@Term164](https://github.com/Term164)
+- :white_check_mark: Integrate Etrel charging point simulator [@tadejsivic](https://github.com/tadejsivic) [@Term164](https://github.com/Term164)
 
 ### Subtasks
 > **ℹ️ Note**
@@ -204,6 +204,10 @@ Example: `npm install node @types/node`
 2. Password hasher: [bcrypt](https://www.npmjs.com/package/bcrypt)
 3. Http server: [Express](https://expressjs.com/)
 4. Unit tests: [jest](https://jestjs.io/docs/getting-started)
+5. cron jobs: [node-cron](https://www.npmjs.com/package/node-cron)
+6. ocpp server: [ocpp-ts](https://www.npmjs.com/package/ocpp-ts)
+7. postgresql connection: [postgresql-client](https://www.npmjs.com/package/postgresql-client)
+8. 
 
 ## REST API Usage
 
