@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text, TextInput, Button, Image, Pressable, Alert,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
+import { SignInScreenProps } from "../utils/types";
 
 
 type Response = {
@@ -13,7 +13,7 @@ type Response = {
     data: object
 }
 
-export default function SignInScreen() {
+export default function SignInScreen({ route, navigation }: SignInScreenProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     // const [data, setData] = useState<Response>();
@@ -48,57 +48,60 @@ export default function SignInScreen() {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
-            <Text className="text-blue-800 font-bold mt-2 text-5xl">Charge Mate</Text>
-            <Text className="text-blue-800 font-bold mt-2 text-4xl mb-24">Login</Text>
 
 
-            {/* <TextInputWithIcon 
-                viewClassNames=""
-                iconName='person' 
-                iconSize={20} 
-                className="flex-1 text-center text-lg font-bold text-gray-800 bg-yellow-800" 
-                placeholder="Username or Email"
-                onChangeText={newUsername => setUsername(newUsername)}
-                defaultValue={username}
-                /> */}
-
-            <TextInputWithIcon 
-                viewClassNames="bg-blue-400 rounded-full w-72 p-2 mb-4"
-                iconName='person' 
-                iconSize={20} 
-                className="flex-1 text-center text-lg font-bold text-gray-800" 
-                placeholder="Username or Email"
-                onChangeText={newUsername => setUsername(newUsername)}
-                defaultValue={username}
+            <Image 
+                source={require('../assets/logo/Charge-Mate-Logo.png')}
+                style={{width: '40%', height: '20%', resizeMode: 'cover'}}
+                className=""
             />
 
-            {/* <View className="bg-blue-400 rounded-full w-72 p-2 mb-4 flex-row items-center justify-center">
-                <Ionicons style={{fontSize: 20}} name="person" />
-                <TextInput
-                    className="flex-1 text-center text-lg font-bold text-gray-800"
+            <Text className="text-black font-bold text-4xl">Welcome Back</Text>
+            <Text className="text-gray-500 ml-1 mb-16 font-bold text-lg">Sign in to continue</Text>
+
+            <View>
+                <TextInputWithIcon 
+                    viewClassNames="stroke-black border rounded-full w-72 p-2 mb-4"
+                    iconName='person' 
+                    iconSize={20} 
+                    className="flex-1 text-center text-lg font-bold text-gray-800" 
                     placeholder="Username or Email"
                     onChangeText={newUsername => setUsername(newUsername)}
                     defaultValue={username}
                 />
-            </View> */}
-             <TextInput
-                className=" bg-blue-400 rounded-full w-72 text-center text-lg p-2 font-bold text-gray-800"
-                secureTextEntry
-                placeholder="Password"
-                onChangeText={newPassword => setPassword(newPassword)}
-                defaultValue={password}
-             />
-             <CustomButton textStyle="font-bold" className="bg-yellow-300" android_ripple={{color: 'yellow-400'}}>This text will be bold</CustomButton>
-             
-             <View className="flex-row self-stretch justify-between m-20">
-                <Button
-                    title="Sign up"
-                />
 
-                <Button 
-                    title="Sign in"
+                <TextInputWithIcon 
+                    viewClassNames="stroke-black border rounded-full w-72 p-2 mb-4"
+                    secureTextEntry
+                    iconName='lock-closed' 
+                    iconSize={20} 
+                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    placeholder="Password"
+                    onChangeText={newPassword => setPassword(newPassword)}
+                    defaultValue={password}
                 />
-             </View>
+            </View>
+
+             <CustomButton
+                    textStyle="font-bold text-lg text-white"
+                    className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500" 
+                    android_ripple={{color: ''}}>SIGN IN</CustomButton>
+
+            <Pressable 
+                onPress={() => navigation.navigate('SignUpScreen')}
+                className="justify-center mt-10"
+            >
+                <Text>Don't have an account yet?  <Text className="font-bold underline text-base">Sign up</Text> </Text>
+            </Pressable>
+
+            <Pressable 
+                    onPress={() => Alert.alert('Forgot password')}
+                    className="justify-center mt-5"
+                >
+                    <Text className="text-gray-500 text-sm">Forgot Password?</Text>
+            </Pressable>
+            
+
         </SafeAreaView>
     )
 }

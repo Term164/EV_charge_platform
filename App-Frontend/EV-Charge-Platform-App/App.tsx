@@ -26,7 +26,7 @@ type HomeTabParamList = {
 
 type RootStackParamList = {
   SignInScreen: undefined;
-  SignUpScren: undefined;
+  SignUpScreen: undefined;
 }
 
 type IoniconIconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -63,7 +63,6 @@ export default function App() {
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: 'tomato',
           tabBarInactiveTintColor: 'gray',
         })}
       >
@@ -76,9 +75,10 @@ export default function App() {
       ) : (
         <Stack.Navigator
           screenOptions={{headerShown: false}}
+          initialRouteName='SignInScreen'
         >
           <Stack.Screen name='SignInScreen' component={SignInScreen}/>
-          <Stack.Screen name='SignUpScren' component={SignInScreen}/>
+          <Stack.Screen name='SignUpScreen' component={SignUpScreen}/>    
         </Stack.Navigator>
       )}
     </NavigationContainer>
