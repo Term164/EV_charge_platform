@@ -259,6 +259,9 @@ However here are some objects for easier working with some APIs.
 
 These are all **examples**, for actual types do visit the _requesModels.ts_.
 
+
+(*Click to expand*)
+
 <details>
 <summary><i>Get Buildings response object</i></summary>
 Some get requests look something like this (for companies, charging types).
