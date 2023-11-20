@@ -3,7 +3,7 @@ import helper, { request } from "./helper";
 
 const randomUsername = Math.random().toString(36).slice(7);
 let currentSessionID: string;
-let userID: string;
+let userID: number;
 
 describe('sessionID middleware checker', () => {
     beforeAll(async () => {
@@ -49,7 +49,7 @@ describe('sessionID middleware checker', () => {
 
 
     test('session is extended upon succesfull request', async () => {
-        await helper.insertDummySession(parseInt(userID),"test");
+        await helper.insertDummySession(userID,"test");
         const expirationBeforeRequest = new Date(await helper.getSessionExpirationDate("test"));
 
         const response = await request.get('/api/v1/dev/ping')
@@ -64,7 +64,7 @@ describe('sessionID middleware checker', () => {
     });
 
     test('request denied due to expired session', async () => {
-        await helper.insertDummySession(parseInt(userID),"test2");
+        await helper.insertDummySession(userID,"test2");
         await helper.makeSessionExpired("test2");
 
         const response = await request.get('/api/v1/dev/ping')

@@ -52,6 +52,7 @@ class StatmentManager {
     deleteAccountStatement: PreparedStatement;
     deleteBuildingAccessStatement: PreparedStatement;
     editUserProfileStatement: PreparedStatement;
+    getUserDataStatement: PreparedStatement;
 
     // Middleware
     getSessionIDStatement: PreparedStatement;
@@ -319,6 +320,16 @@ class StatmentManager {
             `DELETE FROM building_accesses
             WHERE account_id = $1 AND building_id = $2;`,
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4]}
+        );
+
+        this.getUserDataStatement = await db.connection.prepare(
+            `SELECT a.*
+            FROM accounts a
+            INNER JOIN sessions s
+            ON a.id = s.account_id
+            WHERE s.session_secret = $1;
+            `,
+            {paramTypes: [DataTypeOIDs.varchar]}
         );
     }
 

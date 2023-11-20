@@ -39,7 +39,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
 
     let buildingID: number;
     if ('buildingID' in requestBody) {
-        buildingID = parser.parseIntegerParameterFromString(requestBody.buildingID, 'buildingID');
+        buildingID = parser.parseIntegerParameter(requestBody.buildingID, 'buildingID');
     } else {
         return ({status: 400, message: "parameter buildingID missing",  error: null , data: null});
     }
@@ -64,7 +64,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 
     let companyID: number;
     if ('companyID' in requestBody) {
-        companyID = parser.parseIntegerParameterFromString(requestBody.companyID, 'companyID');
+        companyID = parser.parseIntegerParameter(requestBody.companyID, 'companyID');
     } else {
         return ({status: 400, message: "parameter companyID missing", error: null, data: null});
     }
@@ -136,7 +136,7 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
     const editUserProfileData = parser.parseEditUserProfileRequest(requestBody);
 
     const filteredValues = Object.entries(editUserProfileData).filter((pair) => pair[1] !== undefined);
-    const queryParameters = filteredValues.map((pair) => pair[1]);
+    const queryParameters = filteredValues.map((pair) => pair[1] as string);
 
     if (queryParameters.length < 2) return {status: 418, message:"Must provide more details then just the userID.", error: 'Not enough parameters provided', data: null};
 
@@ -158,6 +158,19 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
     else return {status: 200, message: `Successfully updated the following values: ${filteredValues.map((pair) => pair[0]).slice(1,filteredValues.length).join(' , ')} for user with id ${editUserProfileData.id}` , error: null, data: null};
 }
 
+async function getUserProfile(requestBody: unknown): Promise<APIResponse> {
+    const sessionID = parser.parseSessionID(requestBody);
+
+    const result = await SQLStatementManager.getUserDataStatement.execute({params: [sessionID]});
+    if (result.rows != undefined) {
+        const userData = parser.parseUserAccountData(result.rows[0]);
+        userData.password_hash = "***";
+        return {status: 200, message: `Successfully retrieved user data.`, error: null, data: userData};
+    }
+    return {status: 400, message: `Could not retrieve user data`, error: 'Something went wrong while parsing user data', data: null};
+
+}
+
 export default {
     getBuildingAdmins,
     getCompanyAdmins,
@@ -167,5 +180,6 @@ export default {
     deleteCompanyAdmin,
     deleteAccount,
     deleteBuildingAccess,
-    editUserProfile
+    editUserProfile,
+    getUserProfile
 };

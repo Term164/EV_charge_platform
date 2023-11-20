@@ -29,14 +29,6 @@ function parseIntegerParameter(param: unknown, paramName: string): number {
     return param;
 }
 
-function parseIntegerParameterFromString(param: unknown, paramName: string): number {
-    if (!param || !isString(param)) {
-        throw new Error(`Incorrect or missing ${paramName}`);
-    }
-
-    return Number.parseInt(param);
-}
-
 function parseStringParameter(param: unknown, paramName: string): string {
     if (!param || !isString(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
@@ -129,15 +121,15 @@ function parseAssignRequest(request: unknown): AssignRequest {
 
     if ('userID' in request && 'companyID' in request) {
         const assignRequest: AssignRequest = {
-            userID: parseIntegerParameterFromString(request.userID, 'userID'),
-            otherID: parseIntegerParameterFromString(request.companyID, 'companyID')
+            userID: parseIntegerParameter(request.userID, 'userID'),
+            otherID: parseIntegerParameter(request.companyID, 'companyID')
         };
 
         return assignRequest;
     } else if ('userID' in request && 'buildingID' in request) {
         const assignRequest: AssignRequest = {
-            userID: parseIntegerParameterFromString(request.userID, 'userID'),
-            otherID: parseIntegerParameterFromString(request.buildingID, 'buildingID')
+            userID: parseIntegerParameter(request.userID, 'userID'),
+            otherID: parseIntegerParameter(request.buildingID, 'buildingID')
         };
 
         return assignRequest;
@@ -199,9 +191,9 @@ function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeT
 
     if ('userID' in request && 'buildingID' in request && 'companyAdminID' in request) {
         const assignRequest: AssignEmployeeToBuildingRequest = {
-            userID: parseIntegerParameterFromString(request.userID, 'userID'),
-            buildingID: parseIntegerParameterFromString(request.buildingID, 'buildingID'),
-            companyAdminID: parseIntegerParameterFromString(request.companyAdminID, 'companyAdminID'),
+            userID: parseIntegerParameter(request.userID, 'userID'),
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            companyAdminID: parseIntegerParameter(request.companyAdminID, 'companyAdminID'),
             expirationDate: 'expirationDate' in request ? new Date(request.expirationDate as string) : undefined
         };
 
@@ -217,8 +209,8 @@ function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAcces
 
     if ('userID' in request && 'buildingID' in request) {
         const revokeRequest: RevokeBuildingAccessRequest = {
-            userID: parseIntegerParameterFromString(request.userID, 'userID'),
-            buildingID: parseIntegerParameterFromString(request.buildingID, 'buildingID'),
+            userID: parseIntegerParameter(request.userID, 'userID'),
+            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
         };
 
         return revokeRequest;
@@ -248,12 +240,12 @@ function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
 
     if ('userID' in request) {
         const userEditData: EditUserProfileRequest = {
-            id: parseIntegerParameterFromString(request.userID, 'userID'),
+            id: parseIntegerParameter(request.userID, 'userID'),
             username: 'username' in request ? parseStringParameter(request.username, 'username') : undefined,
             email_account: 'email_account' in request ? parseStringParameter(request.email_account, 'email_account') : undefined,
             profile_picture: 'profile_picture' in request ? undefined : undefined, //TODO: find out how to parse pfp
-            rfid: 'rfid' in request ? parseIntegerParameterFromString(request.rfid,'rfid') : undefined,
-            company_id: 'companyID' in request ? parseIntegerParameterFromString(request.companyID, 'companyID') : undefined
+            rfid: 'rfid' in request ? parseStringParameter(request.rfid,'rfid') : undefined,
+            company_id: 'companyID' in request ? parseIntegerParameter(request.companyID, 'companyID') : undefined
         };
 
         return userEditData;
@@ -425,7 +417,7 @@ function parseUserID(dataBody: unknown): number {
     }
 
     if ('userID' in dataBody) {
-        return parseIntegerParameterFromString(dataBody.userID, 'userID');
+        return parseIntegerParameter(dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -528,6 +520,17 @@ function parseDeleteChargingConnectorRequest(request: unknown): ChargingConnecto
         };
 
         return ChargingConnectorID;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseSessionID(request: unknown): string {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('sessionID' in request) {
+        return parseStringParameter(request.sessionID, 'sessionID');
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -760,7 +763,7 @@ function parseChargingStationResponse(rows: unknown, specific: boolean): Chargin
 
 
 export default {
-    parseIntegerParameterFromString,
+    parseIntegerParameter,
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
     parseUserLoginRequest,
@@ -791,6 +794,7 @@ export default {
     parseAddChargingConnectorRequest,
     parseDeleteChargingConnectorRequest,
     parseEditChargingConnectorRequest,
+    parseSessionID,
     // -----------------------
     parseBuildingResponse,
     parseCompanyResponse,

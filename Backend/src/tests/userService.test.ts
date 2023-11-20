@@ -1,18 +1,19 @@
 import helper, { request } from "./helper";
+import {buildingAdmin} from "../models/databaseModels";
 
-let currentUserID: string;
+let currentUserID: number;
 let testCompanyID: number;
 let testBuildingID: number;
 let companyAdminID: number;
 // let buildingAdminID: number;
 
-describe('get all admins', () => {
+describe('User service', () => {
     beforeAll(async () => {
-        currentUserID = String(await helper.insertNewUserReturningUserID("Term", "test", "test.com"));
+        currentUserID = await helper.insertNewUserReturningUserID("Term", "test", "test.com");
         testCompanyID = await helper.insertDummyCompanyReturningID('dummy');
         testBuildingID = await helper.insertDummyBuildingReturningID('dummy');
-        companyAdminID = await helper.insertDummyCompanyAdminReturningID(currentUserID, String(testCompanyID));
-        await helper.insertDummyBuildingAdminReturningID(currentUserID, String(testBuildingID));
+        companyAdminID = await helper.insertDummyCompanyAdminReturningID(currentUserID, testCompanyID);
+        await helper.insertDummyBuildingAdminReturningID(currentUserID, testBuildingID);
     });
 
     test('get all company admins', async () => {
@@ -22,7 +23,8 @@ describe('get all admins', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(Array.isArray(result.body.data.result)).toBe(true);
-        expect(result.body.data.result[0]['account']['username']).toBe('Term');
+        const usernameArray = (result.body.data.result as buildingAdmin[]).map((badmin: buildingAdmin) => badmin.account.username);
+        expect(usernameArray).toContain('Term');
     });
 
     test('get all building admins', async () => {
@@ -33,29 +35,32 @@ describe('get all admins', () => {
             .expect('Content-Type', /application\/json/);
 
         expect(Array.isArray(result.body.data.result)).toBe(true);
-        expect(result.body.data.result[0]['account']['username']).toBe('Term');
+        const usernameArray = (result.body.data.result as buildingAdmin[]).map((badmin: buildingAdmin) => badmin.account.username);
+        expect(usernameArray).toContain('Term');
     });
 
     test('get assigned building admins', async () => {
         const result = await request.get('/api/v1/user/get/assignedBadmins')
-            .send({buildingID: String(testBuildingID)})
+            .send({buildingID: testBuildingID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
         expect(Array.isArray(result.body.data.result)).toBe(true);
-        expect(result.body.data.result[0]['account']['username']).toBe('Term');
+        const usernameArray = (result.body.data.result as buildingAdmin[]).map((badmin: buildingAdmin) => badmin.account.username);
+        expect(usernameArray).toContain('Term');
     });
 
 
     test('get assigned company admins', async () => {
         const result = await request.get('/api/v1/user/get/assignedCadmins')
-            .send({companyID: String(testCompanyID)})
+            .send({companyID: testCompanyID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
         expect(result.body.data).toHaveProperty('result');
         expect(Array.isArray(result.body.data.result)).toBe(true);
-        expect(result.body.data.result[0]['account']['username']).toBe('Term');
+        const usernameArray = (result.body.data.result as buildingAdmin[]).map((badmin: buildingAdmin) => badmin.account.username);
+        expect(usernameArray).toContain('Term');
     });
 
     test('fail assignedBadmins with missing buildingID', async () => {
@@ -77,7 +82,7 @@ describe('get all admins', () => {
     });
 
     test('delete user account', async () => {
-        const testUserID = String(await helper.insertNewUserReturningUserID("random", "test123", "123test.com"));
+        const testUserID = await helper.insertNewUserReturningUserID("random", "test123", "123test.com");
         const result = await request.delete('/api/v1/user/delete/account')
             .send({userID: testUserID})
             .expect(200)
@@ -88,32 +93,32 @@ describe('get all admins', () => {
     });
 
     test('delete building_access', async () => {
-        void await helper.insertUserBuildingAccess(currentUserID, String(testBuildingID), String(companyAdminID));
+        void await helper.insertUserBuildingAccess(currentUserID, testBuildingID, companyAdminID);
 
         const result = await request.delete('/api/v1/user/delete/building_access')
-            .send({userID: String(currentUserID), buildingID: String(testBuildingID)})
+            .send({userID: currentUserID, buildingID: testBuildingID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
         expect(result.body.message).toContain('Successfully');
-        expect(await helper.checkUserHasBuildingAccess(String(currentUserID), String(testBuildingID))).toEqual(false);
+        expect(await helper.checkUserHasBuildingAccess(currentUserID, testBuildingID)).toEqual(false);
     });
 
     test('Succesfully edit user profile', async () => {
         const result = await request.patch('/api/v1/user/patch/editProfile')
-            .send({userID: String(currentUserID), companyID: String(testCompanyID)})
+            .send({userID: currentUserID, companyID: testCompanyID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
         expect(result.body.message).toContain('Successfully');
-        expect(await helper.getUserAssignedCompanyID(String(currentUserID))).toEqual(testCompanyID);
+        expect(await helper.getUserAssignedCompanyID(currentUserID)).toEqual(testCompanyID);
     });
 
     test('Successfully delete company admin', async () => {
         const companyAdminID = await helper.createNewCompanyAdmin();
 
         const result = await request.delete('/api/v1/user/delete/cadmin')
-            .send({userID: String(companyAdminID)})
+            .send({userID: companyAdminID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 
@@ -125,7 +130,7 @@ describe('get all admins', () => {
         const buildingAdminID = await helper.createNewBuildingAdmin();
 
         const result = await request.delete('/api/v1/user/delete/badmin')
-            .send({userID: String(buildingAdminID)})
+            .send({userID: buildingAdminID})
             .expect(200)
             .expect('Content-Type', /application\/json/);
 

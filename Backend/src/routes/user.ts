@@ -84,4 +84,10 @@ router.patch('/patch/editProfile', asyncHandler( async (req, res) => {
         .send(response);
 }));
 
+router.get('/get/profile', asyncHandler( async (req, res) => {
+    const response = await userService.getUserProfile(req.body);
+    res.status(response.status)
+        .send(response);
+}));
+
 export default router;
