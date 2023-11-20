@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { APILogger } from './logger';
 import config from './config';
-import asyncHanlder from 'express-async-handler';
+import asyncHandler from 'express-async-handler';
 import { SQLStatementManager } from './SQLStatementManager';
 import { readFileSync } from 'fs';
 
@@ -25,7 +25,7 @@ const errorHandler = (error: Error, _request: Request, response: Response, next:
     }
 };
 
-const sessionChecker = asyncHanlder(async (request: Request, response: Response, next: NextFunction) => {
+const sessionChecker = asyncHandler(async (request: Request, response: Response, next: NextFunction) => {
     if (config.NODE_ENV == 'test' && !("sessionTest" in request.body)) {
         next();
         return;
@@ -94,7 +94,7 @@ const authListRawData = readFileSync('./src/utils/pathAuthorizationList.json', '
 const authList = JSON.parse(authListRawData) as pathAuthorizationList;
 
 
-const authorizationChecker = asyncHanlder(async (request: Request, response: Response, next: NextFunction) => {
+const authorizationChecker = asyncHandler(async (request: Request, response: Response, next: NextFunction) => {
 
     if (config.NODE_ENV == 'test' && !("sessionTest" in request.body)) {
         next();
