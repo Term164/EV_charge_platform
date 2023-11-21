@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, Image, Pressable, Alert,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import { SignInScreenProps } from "../utils/types";
+import { AuthContext } from "../utils/GlobalStateContext";
 
 
 type Response = {
@@ -16,6 +17,7 @@ type Response = {
 export default function SignInScreen({ route, navigation }: SignInScreenProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const { signIn } = React.useContext(AuthContext);
     // const [data, setData] = useState<Response>();
     
     // const testFetch = async () => {
@@ -48,8 +50,6 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
-
-
             <Image 
                 source={require('../assets/logo/Charge-Mate-Logo.png')}
                 style={{width: '40%', height: '20%', resizeMode: 'cover'}}
@@ -83,6 +83,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
             </View>
 
              <CustomButton
+                    onPress={() => signIn('test')}
                     textStyle="font-bold text-lg text-white"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500" 
                     android_ripple={{color: ''}}>SIGN IN</CustomButton>
