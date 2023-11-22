@@ -1,7 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
 import { BottomTabScreenProps ,createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 import SignInScreen from './pages/SignInScreen';
 import SignUpScreen from './pages/SignUpScreen';
 import Dashboard from './pages/Dashboard';
@@ -10,27 +9,10 @@ import Stations from './pages/Stations';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import React, { useReducer } from 'react';
-import { AuthContext } from './utils/GlobalStateContext';
-
-
-enum StateActionKind {
-  RESTORE_TOKEN = 'RESTORE_TOKEN',
-  SIGN_IN = 'SIGN_IN',
-  SIGN_OUT = 'SIGN_OUT'
-}
-
-type TokenAction = {
-  type: StateActionKind.RESTORE_TOKEN | StateActionKind.SIGN_IN;
-  token: string
-};
-type SignOutAction = { type: StateActionKind.SIGN_OUT};
-type StateAction  = TokenAction | SignOutAction;
-
-interface AppState {
-  isLoading: boolean,
-  isSignout: boolean,
-  userToken: string | null
-}
+import { AppStateReducer, AuthContext } from './utils/GlobalStateContext';
+import { StateAction, StateActionKind, AppState, IoniconIconName, RootStackParamList } from './utils/types';
+import { Ionicons } from '@expo/vector-icons';
+import { getAuthContextFunctions } from './utils/authentication';
 
 const startingState: AppState = {
   isLoading: true,
@@ -38,76 +20,13 @@ const startingState: AppState = {
   userToken: null
 }
 
-function AppStateReducer(prevState: AppState, action: StateAction) {
-  switch (action.type) {
-    case StateActionKind.RESTORE_TOKEN:
-      return {
-        ...prevState,
-        userToken: action.token,
-        isLoading: false,
-      };
-    case StateActionKind.SIGN_IN:
-      return {
-        ...prevState,
-        isSignout: false,
-        userToken: action.token,
-      };
-    case StateActionKind.SIGN_OUT:
-      return {
-        ...prevState,
-        isSignout: true,
-        userToken: null
-      };
-    default: return prevState
-  }
-}
-
-type HomeTabParamList = {
-  Dashboard: undefined;
-  Map: undefined;
-  Stations: undefined;
-  Settings: undefined;
-  Profile: undefined;
-}
-
-type RootStackParamList = {
-  SignInScreen: undefined;
-  SignUpScreen: undefined;
-}
-
-type IoniconIconName = React.ComponentProps<typeof Ionicons>['name'];
-
-// type StackProps = NativeStackScreenProps<RootStackParamList, 'SignInScreen'>;
-// type TabProps = BottomTabScreenProps<HomeTabParamList, 'Dashboard'>;
-
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   const [state, dispatch] = useReducer(AppStateReducer, startingState);
+  const authContext = getAuthContextFunctions(dispatch);
 
-  const authContext = React.useMemo(
-    () => ({
-      signIn: async (_data: string) => {
-        // In a production app, we need to send some data (usually username, password) to server and get a token
-        // We will also need to handle errors if sign in failed
-        // After getting token, we need to persist the token using `SecureStore`
-        // In the example, we'll use a dummy token
-
-        dispatch({ type: StateActionKind.SIGN_IN, token: 'dummy-auth-token' });
-      },
-      signOut: () => dispatch({ type: StateActionKind.SIGN_OUT }),
-      signUp: async (_data: string) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `SecureStore`
-        // In the example, we'll use a dummy token
-
-        dispatch({ type: StateActionKind.SIGN_IN, token: 'dummy-auth-token' });
-      },
-    }),
-    []
-  );
 
   return(
     <AuthContext.Provider value={authContext}>
