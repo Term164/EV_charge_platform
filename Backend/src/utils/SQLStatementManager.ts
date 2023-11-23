@@ -68,7 +68,7 @@ class StatmentManager {
     deleteChargingConnectorByStationIDStatement: PreparedStatement;
     deleteChargingConnectorStatement: PreparedStatement;
     editChargingStationStatement: PreparedStatement;
-    eidtChargingConnectorStatement: PreparedStatement;
+    editChargingConnectorStatement: PreparedStatement;
     assignChargingStationToCompanyStatement: PreparedStatement;
     getAllAvailableChargingStationsStatement: PreparedStatement;
 
@@ -419,7 +419,7 @@ class StatmentManager {
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.varchar]}
         );
 
-        this.eidtChargingConnectorStatement = await db.connection.prepare(
+        this.editChargingConnectorStatement = await db.connection.prepare(
             `call edit_connector($1, $2, $3);`,
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4]}
         );
@@ -432,7 +432,8 @@ class StatmentManager {
         );
 
         this.getAllAvailableChargingStationsStatement = await db.connection.prepare(
-            `SELECT * FROM get_all_available($1);`,
+            //`SELECT * FROM get_all_available($1);`,
+            `SELECT * FROM get_all_available_for_building($1,1);`,
             {paramTypes: [DataTypeOIDs.int4]}
         );
     }

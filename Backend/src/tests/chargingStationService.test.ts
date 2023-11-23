@@ -280,7 +280,7 @@ describe('charging station service', () => {
         const data = {
             stationID: lastInsertedChargingStationID,
             newBuildingID: otherBuildingID,
-            newStationName: "eidt-1-modified"
+            newStationName: "edit-1-modified"
         };
 
         await request.patch('/api/v1/station/patch/edit')

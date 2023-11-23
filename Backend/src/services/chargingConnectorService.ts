@@ -64,7 +64,7 @@ async function editChargingConnector(body: unknown): Promise<APIResponse> {
 
     await db.connection.startTransaction();
     try {
-        await SQLStatementManager.eidtChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber]});
+        await SQLStatementManager.editChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber]});
     } catch (error) {
         await db.connection.rollback();
         if (error instanceof Error) {
