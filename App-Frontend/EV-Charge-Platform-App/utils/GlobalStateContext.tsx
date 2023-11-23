@@ -2,13 +2,13 @@ import React from 'react';
 import { AppState, StateAction, StateActionKind } from './types';
 
 type authContextFunctions = {
-  signIn: (_data: string) => Promise<void>,
+  signIn: (username: string, password: string) => Promise<void>,
   signOut: () => void,
   signUp: (_data: string) => Promise<void>
 }
   
 export const AuthContext = React.createContext<authContextFunctions>({
-  signIn: async (test) => {},
+  signIn: async (username, password) => {},
   signOut: () => {},
   signUp: async (test) => {},
 });

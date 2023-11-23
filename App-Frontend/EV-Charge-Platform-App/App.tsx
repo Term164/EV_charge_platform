@@ -10,9 +10,10 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import React, { useReducer } from 'react';
 import { AppStateReducer, AuthContext } from './utils/GlobalStateContext';
-import { StateAction, StateActionKind, AppState, IoniconIconName, RootStackParamList } from './utils/types';
+import { AppState, IoniconIconName, RootStackParamList } from './utils/types';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuthContextFunctions } from './utils/authentication';
+import { ToastProvider } from 'react-native-toast-notifications';
 
 const startingState: AppState = {
   isLoading: true,
@@ -29,48 +30,50 @@ export default function App() {
 
 
   return(
-    <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
-        { state.userToken != null ? (
-        <Tab.Navigator
-        screenOptions={({ route }) => ({
-            headerShown: false,
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName: IoniconIconName = 'close-circle-outline';
+    <ToastProvider>
+      <AuthContext.Provider value={authContext}>
+        <NavigationContainer>
+          { state.userToken != null ? (
+          <Tab.Navigator
+          screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName: IoniconIconName = 'close-circle-outline';
 
-              if (route.name === 'Profile') {
-                iconName = focused ? 'person-circle' : 'person-circle-outline';
-              } else if (route.name === 'Dashboard') {
-                iconName = focused ? 'home' : 'home-outline';
-              } else if (route.name === 'Map') {
-                iconName = focused ? 'map' : 'map-outline';
-              } else if (route.name === 'Stations') {
-                iconName = focused ? 'battery-charging' : 'battery-charging-outline';
-              } else if (route.name === 'Settings') {
-                iconName = focused ? 'settings' : 'settings-outline';
-              }
-              // You can return any component that you like here!
-              return <Ionicons name={iconName} size={size} color={color} />;
-            },
-            tabBarInactiveTintColor: 'gray',
-          })}
-        >
-          <Tab.Screen name='Profile' component={Profile} />
-          <Tab.Screen name='Dashboard' component={Dashboard}/>
-          <Tab.Screen name='Map' component={Map}/>
-          <Tab.Screen name='Stations' component={Stations}/>
-          <Tab.Screen name='Settings' component={Settings}/>
-        </Tab.Navigator>
-        ) : (
-          <Stack.Navigator
-            screenOptions={{headerShown: false}}
-            initialRouteName='SignInScreen'
+                if (route.name === 'Profile') {
+                  iconName = focused ? 'person-circle' : 'person-circle-outline';
+                } else if (route.name === 'Dashboard') {
+                  iconName = focused ? 'home' : 'home-outline';
+                } else if (route.name === 'Map') {
+                  iconName = focused ? 'map' : 'map-outline';
+                } else if (route.name === 'Stations') {
+                  iconName = focused ? 'battery-charging' : 'battery-charging-outline';
+                } else if (route.name === 'Settings') {
+                  iconName = focused ? 'settings' : 'settings-outline';
+                }
+                // You can return any component that you like here!
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarInactiveTintColor: 'gray',
+            })}
           >
-            <Stack.Screen name='SignInScreen' component={SignInScreen}/>
-            <Stack.Screen name='SignUpScreen' component={SignUpScreen}/>    
-          </Stack.Navigator>
-        )}
-      </NavigationContainer>
-    </AuthContext.Provider>
+            <Tab.Screen name='Profile' component={Profile} />
+            <Tab.Screen name='Dashboard' component={Dashboard}/>
+            <Tab.Screen name='Map' component={Map}/>
+            <Tab.Screen name='Stations' component={Stations}/>
+            <Tab.Screen name='Settings' component={Settings}/>
+          </Tab.Navigator>
+          ) : (
+            <Stack.Navigator
+              screenOptions={{headerShown: false}}
+              initialRouteName='SignInScreen'
+            >
+              <Stack.Screen name='SignInScreen' component={SignInScreen}/>
+              <Stack.Screen name='SignUpScreen' component={SignUpScreen}/>    
+            </Stack.Navigator>
+          )}
+        </NavigationContainer>
+      </AuthContext.Provider>
+    </ToastProvider>
   );
 }
