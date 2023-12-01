@@ -14,7 +14,6 @@ type RootStackParamList = {
     SignUpScreen: undefined;
 }
 
-
 enum StateActionKind {
     RESTORE_TOKEN = 'RESTORE_TOKEN',
     SIGN_IN = 'SIGN_IN',
@@ -33,12 +32,80 @@ interface AppState {
     isSignout: boolean,
     userToken: string | null
 }
-
   
 type IoniconIconName = React.ComponentProps<typeof Ionicons>['name'];
-  
+
+// Screen props
+
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignInScreen'>
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpScreen'>
+
+// Station types
+
+enum ChargingType {
+  TYPE1 = 'TYPE1',
+  TYPE2 = 'TYPE2',
+  CHAdeMO = 'CHAdeMO',
+  CCS = 'CCS',
+  TESLASUC = 'TESLASUC'
+}
+
+type Connector = {
+  chargingType: ChargingType,
+  watts: number
+  numberOfConnectors: number
+}
+
+type Coordinate = {
+  latitude: number,
+  longitude: number
+}
+
+type Building = {
+  coordinate: Coordinate,
+  name: string,
+  address: string,
+  availability: number,
+  stations: number,
+  Connectors: Connector[]
+}
+
+const mapStyle = [
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    }
+  ]
 
 export {
     SignInScreenProps,
@@ -48,5 +115,8 @@ export {
     StateActionKind,
     HomeTabParamList,
     RootStackParamList,
-    IoniconIconName
+    IoniconIconName,
+    Building,
+    ChargingType,
+    mapStyle
 }
