@@ -1,12 +1,13 @@
-import { View, Text, Dimensions, Animated, ScrollView } from "react-native";
+import { View, Text, Dimensions, Animated, ScrollView, Pressable } from "react-native";
 import MapView, {MapMarker} from "react-native-maps";
 import React from 'react';
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faChargingStation } from "@fortawesome/free-solid-svg-icons";
-import CustomButton from "../components/CustomButton";
 import { markers } from "../utils/markers";
-import { mapStyle } from "../utils/types";
+import { Building, mapStyle } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
+import { searchBuildingsByName } from "../utils/search";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BackHandler } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 const {width, height} = Dimensions.get('window');
 
@@ -35,6 +36,24 @@ export default class MapScreen extends React.Component<any, any> {
         this.regionTimeout = setTimeout(()=>{},0);
         this.map = null;
         this.state = {index: 0};
+        this.state = {searchBarSelected: false};
+        this.state = {filteredBuildings: markers}
+        this.state = {searching: false};
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    componentWillUnmount(): void {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        if (this.state.searchBarSelected) {
+            this.setState({searchBarSelected: false})
+            return true;
+        } else {
+            return false;
+        }
     }
 
     getColorBasedOnAvailability(availability: number) {
@@ -56,6 +75,37 @@ export default class MapScreen extends React.Component<any, any> {
     }
 
     render(): React.ReactNode {
+
+        const filterBuildings = async (searchWord: string) => {
+            if (!this.state.searchBarSelected)
+                this.setState({searchBarSelected: true})
+            this.setState({searching: true});
+            this.setState({filteredBuildings: searchBuildingsByName(searchWord, markers)});
+            this.setState({searching: false});
+        }
+
+        let searchWindow;
+
+        if (this.state.filteredBuildings) {
+            searchWindow = <ScrollView className="mt-20 w-full h-full">
+                {
+                    this.state.filteredBuildings.map((building: Building, index: number) => {
+                        return(
+                            <Pressable key={index} android_ripple={{color: '#9ca3af'}}>
+                                <View className="px-3 pt-3">
+                                    <Text className="font-semibold text-base text-gray-800" >{building.name}</Text>
+                                    <Text className="text-gray-500 text-base">{building.address}</Text>
+                                </View>
+                                <View style={{borderBottomWidth: 1}} className="border-gray-600/50 mt-2 pt-3"></View>
+                            </Pressable>
+                        );
+                    })
+                }
+            </ScrollView>
+        } else {
+            <></>
+        }
+
         return (
             <View className="justify-end items-center flex-1">
                 <MapView
@@ -104,7 +154,29 @@ export default class MapScreen extends React.Component<any, any> {
                     }
 
                 </MapView>
-                <SearchBar className="absolute left-0 top-6 m-3 w-11/12 h-12" textInputStyle={{fontSize: 16}} placeholder="search building"/>
+                <SearchBar 
+                    className="absolute left-0 top-6 m-3 w-11/12 h-12 z-10" 
+                    fontSize={20}
+                    placeholderTextColor="#9ca3af"
+                    spinnerVisibility={this.state.searching}
+                    placeholder="search building"
+                    onClearPress={() => {this.setState({searchBarSelected: false})}}
+                    onChangeText={(text) => {
+                        if (text.length === 0) 
+                            this.setState({searchBarSelected: false})
+                        else 
+                            filterBuildings(text)
+                            
+                    }}
+                />
+                {
+
+                    this.state.searchBarSelected ? 
+                        <View className="absolute pt-2 left-0 top-0 z-0 w-full h-full bg-slate-100">
+                            {searchWindow}
+                        </View> 
+                        : <></>
+                }
             </View>
             
         )   
