@@ -1,5 +1,5 @@
-import { View, Text, Dimensions, Animated, ScrollView, Pressable } from "react-native";
-import MapView, {MapMarker} from "react-native-maps";
+import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert } from "react-native";
+import MapView, {Callout, MapMarker} from "react-native-maps";
 import React from 'react';
 import { markers } from "../utils/markers";
 import { Building, mapStyle } from "../utils/types";
@@ -87,7 +87,7 @@ export default class MapScreen extends React.Component<any, any> {
         let searchWindow;
 
         if (this.state.filteredBuildings) {
-            searchWindow = <ScrollView className="mt-20 w-full h-full">
+            searchWindow = <ScrollView className="mt-20 w-full h-full">t
                 {
                     this.state.filteredBuildings.map((building: Building, index: number) => {
                         return(
@@ -148,6 +148,20 @@ export default class MapScreen extends React.Component<any, any> {
                                         <Animated.View className={ringStyle} style={scaleStyle} />
                                         <View className={markerStyle} />
                                     </Animated.View>
+                                    <Callout
+                                        alphaHitTest
+                                        tooltip={true}
+                                        onPress={_ => Alert.alert('callout pressed')}
+                                        className="w-56 pb-3"
+                                    >
+                                        <View className="bg-white rounded-lg w-full h-full p-2 border border-slate-300">
+                                            <Text className="text-gray-800 text-sm">{marker.name}</Text>
+                                            <View className="flex-row justify-between items-center">
+                                                <Text className="text-gray-500 text-xs">{marker.address}</Text>
+                                                <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(marker.availability)}>{marker.availability} %</Text>
+                                            </View>
+                                        </View>
+                                    </Callout>
                                 </MapMarker>
                             )
                         })
