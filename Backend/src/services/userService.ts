@@ -39,7 +39,7 @@ async function getAssignedBuildingAdmins(requestBody: unknown): Promise<APIRespo
 
     let buildingID: number;
     if ('buildingID' in requestBody) {
-        buildingID = parser.parseIntegerParameter(requestBody.buildingID, 'buildingID');
+        buildingID = parser.parseNumberParameter(requestBody.buildingID, 'buildingID');
     } else {
         return ({status: 400, message: "parameter buildingID missing",  error: null , data: null});
     }
@@ -64,7 +64,7 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 
     let companyID: number;
     if ('companyID' in requestBody) {
-        companyID = parser.parseIntegerParameter(requestBody.companyID, 'companyID');
+        companyID = parser.parseNumberParameter(requestBody.companyID, 'companyID');
     } else {
         return ({status: 400, message: "parameter companyID missing", error: null, data: null});
     }

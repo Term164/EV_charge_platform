@@ -7,18 +7,20 @@
 -- --------------- edit_building ---------------
 -- Edit building info
 -- /api/v1/building/patch/edit
--- edit_building(id, new_name?, new_location?)
-CREATE OR REPLACE PROCEDURE edit_building(id_of_building int, new_name varchar(50), new_location varchar(50))
+-- edit_building(id, new_name?, new_location?, longitude?, latitude?)
+CREATE OR REPLACE PROCEDURE edit_building(id_of_building int, new_name varchar(50), new_location varchar(50), new_longitude real, new_latitude real)
 LANGUAGE plpgsql AS
 $$
 DECLARE
   old_name varchar(50);
   old_location varchar(50);
+  old_longitude real;
+  old_latitude real;
 BEGIN
-  SELECT building_name, building_location
+  SELECT building_name, building_location, longitude, latitude
     FROM Buildings
     WHERE id = id_of_building
-    INTO old_name, old_location;
+    INTO old_name, old_location, old_longitude, old_latitude;
   
   IF NOT FOUND THEN
       RAISE EXCEPTION 'Building with ID % not found', id_of_building;
@@ -26,7 +28,9 @@ BEGIN
   
   UPDATE Buildings SET
     building_name = COALESCE(new_name, old_name),
-    building_location = COALESCE(new_location, old_location)
+    building_location = COALESCE(new_location, old_location),
+    longitude = COALESCE(new_longitude, old_longitude),
+    latitude = COALESCE(new_latitude, old_latitude)
     WHERE id = id_of_building;
 END
 $$;
@@ -128,6 +132,58 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- --------------- get_all_available_for_building ---------------
+-- Get All Avaiable connectors for a given building
+-- Helper function for reservations
+CREATE OR REPLACE FUNCTION get_all_available_for_building(user_id int, selected_building_id int)
+RETURNS int[]
+AS $$
+DECLARE
+    ids_array int[];
+    id_temp int;
+    rt record;
+    rt_array int[];
+BEGIN
+    -- Get all building_id from building_accesses, if has any special
+    FOR id_temp IN (
+        SELECT ba.building_id 
+        FROM building_accesses ba
+        WHERE account_id = user_id
+        AND selected_building_id = ba.building_id
+    ) LOOP
+        ids_array := ids_array || ARRAY[id_temp];
+    END LOOP;
+    
+    -- If no specific building_access if given, use his primary company_id in accounts information
+    IF ids_array IS NULL OR array_length(ids_array, 1) = 0 THEN
+      FOR id_temp IN (
+        SELECT bb.id
+        FROM Buildings bb JOIN "Building-Company" bc ON bb.id = bc.building_id JOIN Companies cc ON cc.id = bc.company_id
+        WHERE cc.id = (
+          SELECT acc.company_id 
+          FROM accounts acc
+          WHERE id = user_id
+        ) AND selected_building_id = bb.id
+      ) LOOP
+          ids_array := ids_array || ARRAY[id_temp];
+      END LOOP;
+    
+    END IF;
+    
+    -- Select all stations using array of building_ids
+    RETURN array(
+      SELECT cc.id as connector_id
+      FROM Charging_stations cs LEFT JOIN Charging_connectors cc ON cc.charging_station_id = cs.id
+      LEFT JOIN Charging_types ct ON cc.charging_type_id = ct.id 
+      LEFT JOIN Buildings b ON cs.building_id = b.id 
+      LEFT JOIN Accounts acc ON acc.id = user_id
+      WHERE b.id = ANY(ids_array::int[]) AND
+      (cs.company_id IS NULL OR (acc.company_id IS NOT NULL AND acc.company_id = cs.company_id))
+    );
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- --------------- delete_employee ---------------
 -- Deletes an account from multiple places
 CREATE OR REPLACE PROCEDURE delete_employee(userID integer)
@@ -163,18 +219,19 @@ end $$;
 -- --------------- edit_connector ---------------
 -- Edits a charging connector
 -- /api/v1/station/connector/patch/edit
--- edit_connector(chargingConnectorID, chargingTypeID?, serialNumer?)
-CREATE OR REPLACE PROCEDURE edit_connector(id_of_connector int, new_type_id int, new_serial_numbner int)
+-- edit_connector(chargingConnectorID, chargingTypeID?, serialNumer?, power_output?)
+CREATE OR REPLACE PROCEDURE edit_connector(id_of_connector int, new_type_id int, new_serial_number int, new_power_output int)
 LANGUAGE plpgsql AS
 $$
 DECLARE
   old_type_id int;
   old_serial_number int;
+  old_power_output int;
 BEGIN
-  SELECT charging_type_id, serial_number
+  SELECT charging_type_id, serial_number, power_output
     FROM Charging_connectors
     WHERE id = id_of_connector
-    INTO old_type_id, old_serial_number;
+    INTO old_type_id, old_serial_number, old_power_output;
   
   IF NOT FOUND THEN
       RAISE EXCEPTION 'Connector with ID % not found', id_of_connector;
@@ -182,7 +239,8 @@ BEGIN
   
   UPDATE Charging_connectors SET
     charging_type_id = COALESCE(new_type_id, old_type_id),
-    serial_number = COALESCE(new_serial_numbner, old_serial_number)
+    serial_number = COALESCE(new_serial_number, old_serial_number),
+    power_output = COALESCE(new_power_output, old_power_output)
     WHERE id = id_of_connector;
 END
 $$;

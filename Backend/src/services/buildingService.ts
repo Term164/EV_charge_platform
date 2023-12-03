@@ -16,7 +16,7 @@ async function createBuilding(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.createBuildingStatement.execute({params: [data.buildingName, data.buildingLocation]});
+    const result = await SQLStatementManager.createBuildingStatement.execute({params: [data.buildingName, data.buildingLocation, data.buildingLongitude, data.buildingLatitude]});
 
     if (result.rowsAffected != 1)
         return {status: 500, message: "Something went wrong while trying to create a new building.", error: "Something went wrong while trying to create a new building", data: result};
@@ -60,7 +60,7 @@ async function editBuilding(body: unknown): Promise<APIResponse> {
     }
 
     try {
-        const result = await SQLStatementManager.editBuildingStatement.execute({params: [data.buildingID, data.newBuildingName, data.newBuildingLocation]}); //data.buildingID
+        const result = await SQLStatementManager.editBuildingStatement.execute({params: [data.buildingID, data.newBuildingName, data.newBuildingLocation, data.newBuildingLongitude, data.newBuildingLatitude]});
         log.debug("result: ", result);
     } catch (error: unknown) {
         log.debug(error);

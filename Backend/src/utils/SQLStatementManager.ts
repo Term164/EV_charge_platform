@@ -138,9 +138,9 @@ class StatmentManager {
 
     private async prepareBuildingServiceStatements () {
         this.createBuildingStatement = await db.connection.prepare(
-            `INSERT INTO Buildings (building_name, building_location)
-            VALUES ($1, $2);`,
-            {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.varchar]}
+            `INSERT INTO Buildings (building_name, building_location, longitude, latitude)
+            VALUES ($1, $2, $3, $4);`,
+            {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.varchar, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
 
         this.getAllBuildingsStatement = await db.connection.prepare(
@@ -155,8 +155,8 @@ class StatmentManager {
         );
 
         this.editBuildingStatement = await db.connection.prepare(
-            `call edit_building($1, $2, $3);`,
-            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.varchar, DataTypeOIDs.varchar]}
+            `call edit_building($1, $2, $3, $4, $5);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.varchar, DataTypeOIDs.varchar, DataTypeOIDs.float4, DataTypeOIDs.float4]}
         );
 
         this.getAllBuildingsByCompanyStatement = await db.connection.prepare(
@@ -377,15 +377,16 @@ class StatmentManager {
         );
 
         this.createChargingConnectorStatement = await db.connection.prepare(
-            `INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number")
-            VALUES ($1, $2, $3);`,
-            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
+            `INSERT INTO charging_connectors ("charging_station_id", "charging_type_id", "serial_number", "power_output")
+            VALUES ($1, $2, $3, $4);`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
 
         this.getAllChargingStationsSpecificStatement = await db.connection.prepare(
             `SELECT cc.id, cc.charging_station_id, cs.name as charging_station_name,
                 cc.charging_type_id, ct.type as charging_type,
-                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number
+                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number, cc.power_output,
+                b.longitude, b.latitude
             FROM charging_connectors cc JOIN charging_stations cs ON cc.charging_station_id = cs.id 
                 JOIN charging_types ct ON cc.charging_type_id = ct.id JOIN buildings b ON b.id = cs.building_id
                 LEFT JOIN companies c ON cs.company_id = c.id
@@ -396,7 +397,8 @@ class StatmentManager {
         this.getAllChargingStationsFullStatement = await db.connection.prepare(
             `SELECT cc.id, cs.id, cs.name as charging_station_name,
                 cc.charging_type_id, ct.type as charging_type,
-                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number
+                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number, cc.power_output,
+                b.longitude, b.latitude
             FROM charging_stations cs LEFT JOIN charging_connectors cc ON cc.charging_station_id = cs.id
                 LEFT JOIN charging_types ct ON cc.charging_type_id = ct.id 
                 LEFT JOIN buildings b ON b.id = cs.building_id
@@ -428,8 +430,8 @@ class StatmentManager {
         );
 
         this.eidtChargingConnectorStatement = await db.connection.prepare(
-            `call edit_connector($1, $2, $3);`,
-            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4]}
+            `call edit_connector($1, $2, $3, $4);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs. int4]}
         );
 
         this.assignChargingStationToCompanyStatement = await db.connection.prepare(

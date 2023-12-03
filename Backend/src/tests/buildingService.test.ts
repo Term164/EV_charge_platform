@@ -9,7 +9,9 @@ describe('building service', () => {
 
         const data = {
             buildingName: "dummy",
-            buildingLocation: "dummy_location"
+            buildingLocation: "dummy_location",
+            buildingLongitude: 1.1,
+            buildingLatitude: 2.2
         };
 
         await request.post('/api/v1/building/post/new')

@@ -261,8 +261,9 @@ These can all be deducted from requestModels.ts and by comparing the functions t
 
 However here are some objects for easier working with some APIs.
 
-These are all **examples**, for actual types do visit the _requesModels.ts_.
+Note that ALL request objects have a variable called **sessionID**, with a value of a received session secret when login was performed. SessionID is skipped here.
 
+These are all **examples**, for actual types do visit the _requesModels.ts_.
 
 (*Click to expand*)
 
@@ -275,7 +276,9 @@ For actual types visit the <i>requesModels.ts</i>.
 {
     "buildingID": 1,
     "buildingName": "TEHNOLOŠKI PARK - STAVBA G",
-    "buildingLocation": "Večna pot 150"
+    "buildingLocation": "Večna pot 150",
+    "buildingLongitude": 46.54642,
+    "buildingLatitude": 15.423567
 }
 ```
 </details>
@@ -289,7 +292,8 @@ Only include the attributes you wish to change.
 {   // Since this is a PATCH, use only the needed variables
     "buildingID": 8,
     "newBuildingName": "dummy_version_2",
-    "newBuildingLocation": "location_version_2"
+    "newBuildingLocation": "location_version_2",
+    "newBuildingLongitude": 46.1
 }
 
 {   // This is a valid request, we are only changing the name. 
@@ -303,7 +307,7 @@ Only include the attributes you wish to change.
 <details>
 <summary><i>Create Charging Station request object</i></summary>
 Creating a charging station is a bit special, since a station (besides having a name and belonging to a building) has any number of connectors (which themself have types).
-when creating a station, pass in the array of connectors, which each have a type and a serial number.
+When creating a station, pass in the array of connectors, which each have a type,serial number and power output (in Watts).
 
 ```json
 {
@@ -312,15 +316,18 @@ when creating a station, pass in the array of connectors, which each have a type
     "chargingConnectors": [
         {
             "chargingTypeID":1,
-            "serialNumber": 1
+            "serialNumber": 1,
+            "powerOutput": 25
         },
         {
             "chargingTypeID":1,
-            "serialNumber": 2   // Serial numbers must be unique to a station
+            "serialNumber": 2,   // Serial numbers must be unique to a station
+            "powerOutput": 25
         },
         {
             "chargingTypeID":1,
-            "serialNumber": 3
+            "serialNumber": 3,
+            "powerOutput": 25
         }
     ]
 }
@@ -339,8 +346,9 @@ Returning IDs here for everything is important, since these are all needed for f
     "chargingStationName": "Počasna 1",
     "chargingConnectors": [             // array of connectors,
     {
-        "chargingConnectorID": 4,       // each one will have id, serial number,
+        "chargingConnectorID": 4,       // each one has id, serial num and power
         "chargingConnectorSerialNumber": 1,
+        "chargingConnectorPowerOutput": 50,
         "chargingType": {               // and detailed charging type object
             "chargingTypeID": 3,
             "chargingType": "15W"
@@ -349,6 +357,7 @@ Returning IDs here for everything is important, since these are all needed for f
     {
         "chargingConnectorID": 5,
         "chargingConnectorSerialNumber": 2,
+        "chargingConnectorPowerOutput": 60,
         "chargingType": {
             "chargingTypeID": 3,
             "chargingType": "15W"
@@ -358,7 +367,7 @@ Returning IDs here for everything is important, since these are all needed for f
     "building": { // details about a building, null if only this building was searched
         "buildingID": 3,
         "buildingName": "A1 Maribor",
-        "buildingLocation": "Mariborska cesta"
+        "buildingLocation": "Mariborska cesta",
     },
     "company": null     // details about a company, if it owns this station
 }
@@ -370,6 +379,8 @@ Returning IDs here for everything is important, since these are all needed for f
 This is to be used when adding a connector to a station.
 A connector alone doesn't exist.
 
+This is a so called backup method, not really to be used regularly (since when creating stations you add all connectors).
+
 If more than one connectors need to be added, request the API for each one.
 
 ```json
@@ -378,8 +389,23 @@ If more than one connectors need to be added, request the API for each one.
     "chargingConnector":
     {
         "chargingTypeID": 1,
-        "serialNumber": 2   // Or if a serial number is in use on this station
+        "serialNumber": 2,   // Or if a serial number is in use on this station
+        "powerOutput": 75
     }
 }
 ```
 </details>
+
+### Delete methods
+Do note that delete methods (usually) require only one argument, that being the ID of an entity.
+
+There are many ways of sending a single number via REST API, like in headers, or in a query parameter.
+We are using request object, so an object will just have a single ID inside.
+There will always be a request object sent with at least a session ID, hence we can freely use the object.
+
+```json
+{   // Example: /api/v1/.../delete/building
+    "sessionID": "{{session}}", // Always present, in examples above it was skipped
+    "buildingID": 7
+}
+```

@@ -17,7 +17,8 @@ describe('charging station service', () => {
             chargingConnectors: [
                 {
                     chargingTypeID: dummyChargingTypeID,
-                    serialNumber: 42
+                    serialNumber: 42,
+                    powerOutput: 80
                 }
             ]
         };
@@ -40,7 +41,8 @@ describe('charging station service', () => {
             chargingConnectors: [
                 {
                     chargingTypeID: dummyChargingTypeID,
-                    serialNumber: 42
+                    serialNumber: 42,
+                    powerOutput: 60
                 }
             ]
         };
