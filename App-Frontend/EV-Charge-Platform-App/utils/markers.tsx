@@ -1,4 +1,4 @@
-import { Building, ChargingType } from "./types";
+import { Building, ChargingType, Reservation, ReservationStatus } from "./types";
 
 export const markers: Building[] = [
     {
@@ -182,4 +182,48 @@ export const markers: Building[] = [
             }
         ]
     },
+]
+
+export const reservations: Reservation[] = [
+    {
+        building: markers[0],
+        allocated_connector: {
+            chargingType: ChargingType.TYPE2,
+            watts: 22,
+            numberOfConnectors: 1
+        },
+        charging_time: 3,
+        desired_from: new Date(),
+        desired_to: new Date(),
+        allocated_from: new Date(),
+        allocated_to: new Date(new Date().getTime() + 60 * 60 * 1000),
+        queueNumber: 0,
+        reservation_status: ReservationStatus.RESERVED
+    },
+    {
+        building: markers[1],
+        allocated_connector: {
+            chargingType: ChargingType.CCS,
+            watts: 40,
+            numberOfConnectors: 1
+        },
+        charging_time: 3,
+        desired_from: new Date(),
+        desired_to: new Date(),
+        allocated_from: new Date(),
+        allocated_to: new Date(),
+        queueNumber: 0,
+        reservation_status: ReservationStatus.ALLOCATED
+    },
+    {
+        building: markers[2],
+        allocated_connector: null,
+        charging_time: 3,
+        desired_from: new Date(),
+        desired_to: new Date(),
+        allocated_from: new Date(),
+        allocated_to: new Date(new Date().getTime() + 60 * 60 * 1000),
+        queueNumber: 4,
+        reservation_status: ReservationStatus.INQUEUE
+    }   
 ]

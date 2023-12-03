@@ -1,9 +1,104 @@
-import { View, Text } from "react-native";
-
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { reservations } from "../utils/markers";
+import CustomButton from "../components/CustomButton";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { getConnectorIcon } from "../utils/utils";
+import { Connector, Reservation, ReservationStatus } from "../utils/types";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { Ionicons } from '@expo/vector-icons';
+import { useToast } from "react-native-toast-notifications";
 
 export default function SignInScreen() {
+
+    const toast = useToast();
+
+    const getReservationStatus = (reservation: Reservation) => {
+        switch (reservation.reservation_status) {
+            case ReservationStatus.RESERVED:
+                return (
+                        <Text className="bg-green-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">Reserved</Text>
+                );
+            case ReservationStatus.ALLOCATED:
+                return (
+                    <View className="flex-row items-center">
+                        <Text className="bg-yellow-300 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2 mr-2">Allocated</Text>
+                    </View>
+                );
+            case ReservationStatus.INQUEUE:
+                return (
+                <View>
+                    <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {reservation.queueNumber} In Queue</Text>
+                </View>);
+        }
+
+        <Text></Text>
+    }
+
+    const getConnectorInfo = (connector: Connector | null) => {
+        if (connector) {
+            return (
+                <View className="flex-row items-center pt-1">
+                    {getConnectorIcon(connector.chargingType)}
+                    <Text className="ml-1 font-semibold text-lg text-gray-800">{connector.watts} kW</Text>
+                </View>
+            );
+        } else {
+            return <></>
+        }
+    }
+
     return (
-        <View>
-        </View>
+        <SafeAreaView className="flex-1 items-center justify-center">
+            <ScrollView
+                className="w-full h-full"
+            >
+                {
+                    reservations.map((reservation, index) => {
+                        return(
+                            <View key={index} className="bg-slate-50 my-2 mx-1 p-3 rounded-xl shadow-xl shadow-black">
+                                <View className="flex-row justify-between ">
+                                    <Text className="font-bold text-base text-gray-700 uppercase">{reservation.building.name}</Text>
+                                    {
+                                        reservation.reservation_status == ReservationStatus.ALLOCATED ?
+                                            <Pressable
+                                                onPress={() => toast.show('You have been allocated a certain time but this might still change.', )}
+                                            >
+                                                <Ionicons name={'information-circle-outline'} size={30} color={'#64748b'} />
+                                            </Pressable>
+                                        : <></>
+                                    }
+                                </View>
+                                <Text className="font-bold text-base text-gray-500 mb-2">{reservation.building.address}</Text>
+                                <View className="flex-row items-center">
+                                    {getReservationStatus(reservation)}
+                                    {getConnectorInfo(reservation.allocated_connector)}
+                                </View>
+
+                                <Text className="pb-4 text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{reservation.allocated_from?.getHours()}:{reservation.allocated_from?.getMinutes()} - {reservation.allocated_to?.getHours()}:{reservation.allocated_to?.getMinutes()}</Text></Text>
+                                <View className="flex-row justify-end items-center px-2">
+                                    <CustomButton
+                                        textStyle="font-bold text-lg text-white"
+                                        className="w-20 h-10 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
+                                        android_ripple={{color: ''}}
+                                    >
+                                        <FontAwesomeIcon icon={faPen} color="white" /> EDIT
+                                    </CustomButton>
+
+                                    <CustomButton
+                                        textStyle="font-bold text-lg text-gray-800"
+                                        className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
+                                        android_ripple={{color: ''}}
+                                    >
+                                        CANCLE
+                                    </CustomButton>
+                                </View>
+                            </View>
+                        )
+                    })                    
+                }                
+
+            </ScrollView>
+        </SafeAreaView>
     )
 }

@@ -9,7 +9,7 @@ interface MyButtonProps extends PressableProps {
 function CustomButton({ textStyle, children, ...props }: MyButtonProps) {
     return(
         <Pressable {...props}>
-            <Text style={textStyle}><>{children}</></Text>    
+            <Text style={textStyle}><>{children}</></Text>
         </Pressable>
     )
 }

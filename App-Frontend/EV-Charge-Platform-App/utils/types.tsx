@@ -70,6 +70,24 @@ type Building = {
   Connectors: Connector[]
 }
 
+enum ReservationStatus {
+  RESERVED = 'Reserved',
+  ALLOCATED = 'Allocated',
+  INQUEUE = 'In Queue',
+}
+
+type Reservation = {
+  building: Building,
+  allocated_connector: Connector | null;
+  charging_time: number,
+  desired_from: Date,
+  desired_to: Date,
+  allocated_from: Date | null,
+  allocated_to: Date | null,
+  queueNumber: number,
+  reservation_status: ReservationStatus
+}
+
 const mapStyle = [
     {
       "featureType": "administrative",
@@ -116,7 +134,10 @@ export {
     HomeTabParamList,
     RootStackParamList,
     IoniconIconName,
+    Connector,
     Building,
+    ReservationStatus,
+    Reservation,
     ChargingType,
     mapStyle
 }
