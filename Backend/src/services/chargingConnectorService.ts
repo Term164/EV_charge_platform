@@ -16,7 +16,7 @@ async function addChargingConnector(body: unknown): Promise<APIResponse> {
 
     let result;
     try {
-        result = await SQLStatementManager.createChargingConnectorStatement.execute({params: [data.stationID, data.chargingConnector.chargingTypeID, data.chargingConnector.serialNumber]});
+        result = await SQLStatementManager.createChargingConnectorStatement.execute({params: [data.stationID, data.chargingConnector.chargingTypeID, data.chargingConnector.serialNumber, data.chargingConnector.powerOutput]});
     } catch (error) {
         await db.connection.rollback();
         if (error instanceof Error) {
@@ -64,7 +64,7 @@ async function editChargingConnector(body: unknown): Promise<APIResponse> {
 
     await db.connection.startTransaction();
     try {
-        await SQLStatementManager.editChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber]});
+        await SQLStatementManager.editChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber, data.powerOutput]});
     } catch (error) {
         await db.connection.rollback();
         if (error instanceof Error) {

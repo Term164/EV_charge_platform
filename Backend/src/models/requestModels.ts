@@ -57,19 +57,23 @@ interface EditUserProfileRequest {
     username?: string,
     email_account?: string,
     profile_picture?: string,
-    rfid?: number,
+    rfid?: string,
     company_id?: number
 }
 
 interface CreateBuildingRequest {
     buildingName: string;
     buildingLocation: string;
+    buildingLongitude: number;
+    buildingLatitude: number;
 }
 
 interface EditBuildingRequest {
     buildingID: number;
     newBuildingName: string | null;
     newBuildingLocation: string | null;
+    newBuildingLongitude: number | null;
+    newBuildingLatitude: number | null;
 }
 
 interface DeleteBuildingRequest {
@@ -85,15 +89,16 @@ interface GetAllStationsRequest {
     buildingID: number | null;
 }
 
-interface connectorTypeIDAndSerialNumber {
+interface connectorTypeIDAndSerialNumberAndPowerOutput {
     chargingTypeID: number;
     serialNumber: number;
+    powerOutput: number;
 }
 
 interface CreateStationRequest {
     buildingID: number;
     stationName: string;
-    chargingConnectors: connectorTypeIDAndSerialNumber[];
+    chargingConnectors: connectorTypeIDAndSerialNumberAndPowerOutput[];
 }
 
 interface DeleteStationRequest {
@@ -132,7 +137,7 @@ interface GetAllAvailableStationsRequest {
 
 interface AddChargingConnectorRequest {
     stationID: number;
-    chargingConnector: connectorTypeIDAndSerialNumber;
+    chargingConnector: connectorTypeIDAndSerialNumberAndPowerOutput;
 }
 
 interface ChargingConnectorID {
@@ -143,6 +148,7 @@ interface EditChargingConnectorRequest {
     chargingConnectorID: number;
     chargingTypeID: number | null;
     serialNumber: number | null;
+    powerOutput: number | null;
 }
 
 interface CancelReservationRequest {
@@ -177,7 +183,7 @@ export {
     AssignCompanyRequest,
     GetAllStationsRequest,
     CreateStationRequest,
-    connectorTypeIDAndSerialNumber,
+    connectorTypeIDAndSerialNumberAndPowerOutput,
     DeleteStationRequest,
     AssignStationToCompanyRequest,
     EditStationRequest,

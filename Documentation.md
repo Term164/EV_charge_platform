@@ -352,8 +352,6 @@ IDEA: When displaying buildings where to make reservation there should be a capa
 
 IDEA: If user wants continuous charging, check for spot if no spot is found ask the user if they would like to switch to other mode (informing them that if they stay with continuous mode they might not get a spot)
 
-QUESTION: When is the reservation request actually sent to the station ? Since the station has only two states... reserved or not reserved.
-
 (User creates reservation and sends the request to the server)
 1. Save user reservation to database
 2. (Function) Querry database to get all building charging station timetables (and or charging type)
@@ -383,6 +381,11 @@ QUESTION: When is the reservation request actually sent to the station ? Since t
 (User edits reservation, when not allocated)
 1. Update user reservation in database
 2. run algo to allocate timeslot to user (look at first example)
+
+(Other user edits or cancles reservation same day)
+If the reservation is edited or canceled as the same day the reservation has been allocated
+we cannot change the starting times of other reservations. So the algorithm should only extend the current reservations
+withouth changing the start times.
 
 
 

@@ -16,7 +16,8 @@ describe('charging connector service', () => {
             stationID: dummyStationID,
             chargingConnector: {
                 chargingTypeID: dummyChargingTypeID,
-                serialNumber: 1
+                serialNumber: 1,
+                powerOutput: 50
             }
         };
 

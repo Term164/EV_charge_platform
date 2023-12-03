@@ -44,7 +44,7 @@ async function createStation(body: unknown): Promise<APIResponse> {
     for (let i = 0; i < data.chargingConnectors.length; i++) {
         let connectorResult;
         try {
-            connectorResult = await SQLStatementManager.createChargingConnectorStatement.execute({params: [stationID, data.chargingConnectors[i].chargingTypeID, data.chargingConnectors[i].serialNumber]});
+            connectorResult = await SQLStatementManager.createChargingConnectorStatement.execute({params: [stationID, data.chargingConnectors[i].chargingTypeID, data.chargingConnectors[i].serialNumber, data.chargingConnectors[i].powerOutput]});
         } catch (error) {
             await db.connection.rollback();
             if (error instanceof Error) {

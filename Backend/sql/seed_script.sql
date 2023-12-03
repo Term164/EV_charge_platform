@@ -20,16 +20,16 @@ INSERT INTO Accounts ("username","password_hash", "email_account", "rfid", "comp
     ('tadej_a1', 'god','tadej.sivic@a1.si', null, 3);
 
 -- Buildings
-INSERT INTO Buildings ("building_name", "building_location") VALUES
-    ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150'),
-    ('A1 poslovna stavba', 'Ameriška ulica 4'),
-    ('A1 Maribor','Mariborska cesta');
+INSERT INTO Buildings ("building_name", "building_location", "longitude", "latitude") VALUES
+    ('TEHNOLOŠKI PARK - STAVBA G', 'Večna pot 150', 14.460913, 46.048447),
+    ('A1 poslovna stavba', 'Ameriška ulica 4', 14.540685, 46.067772),
+    ('A1 Maribor','Mariborska cesta', 15.650402, 46.55936);
 
 -- Charging Types
 INSERT INTO Charging_types ("type") VALUES 
-    ('45W'),
-    ('20W'),
-    ('15W'),
+    ('Type 1'),
+    ('Type 2'),
+    ('Tesla'),
     ('Ostalo');
 
 -- Charging Stations
@@ -43,16 +43,16 @@ INSERT INTO Charging_stations ("building_id", "name") VALUES
     (2, 'Srednja A1');
 
 -- Charging connectors
-INSERT INTO Charging_connectors ("charging_type_id", "charging_station_id", "serial_number") VALUES
-    (1, 1, 1),
-    (1, 2, 1),
-    (1, 3, 1),
-    (3, 4, 1),
-    (3, 4, 2),
-    (3, 5, 1),
-    (3, 5, 2),
-    (1, 6, 1),
-    (2, 7, 1);
+INSERT INTO Charging_connectors ("charging_type_id", "charging_station_id", "serial_number", "power_output") VALUES
+    (1, 1, 1, 25),
+    (1, 2, 1, 45),
+    (1, 3, 1, 20),
+    (3, 4, 1, 35),
+    (3, 4, 2, 60),
+    (3, 5, 1, 70),
+    (3, 5, 2, 80),
+    (1, 6, 1, 90),
+    (2, 7, 1, 69);
 
 -- Platform admins
 INSERT INTO Platform_admins ("account_id") VALUES (4);

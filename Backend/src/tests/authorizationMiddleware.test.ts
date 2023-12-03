@@ -6,24 +6,24 @@ let normalUserSessionID: string;
 let bAdminSessionID: string;
 let cAdminUserSessionID: string;
 
-let userID: string;
-let bAdminID: string;
-let cAdminID: string;
+let userID: number;
+let bAdminID: number;
+let cAdminID: number;
 
 describe('authorization middleware checker', () => {
 
     beforeAll(async () => {
         userID = await helper.insertNewUserReturningUserID("test","test","test");
         normalUserSessionID = crypto.randomBytes(20).toString('hex');
-        await helper.insertDummySession(Number.parseInt(userID), normalUserSessionID);
+        await helper.insertDummySession(userID, normalUserSessionID);
 
         bAdminID = await helper.createNewBuildingAdmin();
         bAdminSessionID = crypto.randomBytes(20).toString('hex');
-        await helper.insertDummySession(Number.parseInt(bAdminID), bAdminSessionID);
+        await helper.insertDummySession(bAdminID, bAdminSessionID);
 
         cAdminID = await helper.createNewCompanyAdmin();
         cAdminUserSessionID = crypto.randomBytes(20).toString('hex');
-        await helper.insertDummySession(Number.parseInt(cAdminID), cAdminUserSessionID);
+        await helper.insertDummySession(cAdminID, cAdminUserSessionID);
 
 
     });
