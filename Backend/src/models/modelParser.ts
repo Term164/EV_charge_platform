@@ -1,6 +1,6 @@
 import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumber, AddChargingConnectorRequest, ChargingConnectorID, EditChargingConnectorRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, ChargingConnectorID, EditChargingConnectorRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse } from "./responseModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
@@ -9,7 +9,7 @@ function isString(text: unknown): text is string {
     return typeof text === 'string' || text instanceof String;
 }
 
-function isInt(number: unknown): number is number {
+function isNumber(number: unknown): number is number {
     return typeof number === 'number' || number instanceof Number;
 }
 
@@ -21,8 +21,8 @@ function isDate (dateObject: unknown): dateObject is Date {
     return dateObject instanceof Date;
 }
 
-function parseIntegerParameter(param: unknown, paramName: string): number {
-    if (!param || !isInt(param)) {
+function parseNumberParameter(param: unknown, paramName: string): number {
+    if (!param || !isNumber(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
     }
 
@@ -80,7 +80,7 @@ function parseUserVerificationRequest(request: unknown): UserVerificationRequest
 
     if ('id' in request && 'token' in request) {
         const userRequest: UserVerificationRequest = {
-            id: parseIntegerParameter(Number(request.id), 'id'),
+            id: parseNumberParameter(Number(request.id), 'id'),
             token: parseStringParameter(request.token, 'token'),
         };
 
@@ -121,15 +121,15 @@ function parseAssignRequest(request: unknown): AssignRequest {
 
     if ('userID' in request && 'companyID' in request) {
         const assignRequest: AssignRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID'),
-            otherID: parseIntegerParameter(request.companyID, 'companyID')
+            userID: parseNumberParameter(request.userID, 'userID'),
+            otherID: parseNumberParameter(request.companyID, 'companyID')
         };
 
         return assignRequest;
     } else if ('userID' in request && 'buildingID' in request) {
         const assignRequest: AssignRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID'),
-            otherID: parseIntegerParameter(request.buildingID, 'buildingID')
+            userID: parseNumberParameter(request.userID, 'userID'),
+            otherID: parseNumberParameter(request.buildingID, 'buildingID')
         };
 
         return assignRequest;
@@ -160,7 +160,7 @@ function parseDeleteCompanyRequest(request: unknown): DeleteCompanyRequest {
 
     if ('companyID' in request) {
         const DeleteCompanyRequest: DeleteCompanyRequest = {
-            companyID: parseIntegerParameter(request.companyID, 'companyID')
+            companyID: parseNumberParameter(request.companyID, 'companyID')
         };
 
         return DeleteCompanyRequest;
@@ -175,7 +175,7 @@ function parseEditCompanyRequest(request: unknown): EditCompanyRequest {
 
     if ('companyID' in request && 'newCompanyName' in request) {
         const EditCompanyRequest: EditCompanyRequest = {
-            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+            companyID: parseNumberParameter(request.companyID, 'companyID'),
             newCompanyName: parseStringParameter(request.newCompanyName, 'newCompanyName')
         };
 
@@ -191,9 +191,9 @@ function parseAssignEmployeeToBuildingRequest(request: unknown): AssignEmployeeT
 
     if ('userID' in request && 'buildingID' in request && 'companyAdminID' in request) {
         const assignRequest: AssignEmployeeToBuildingRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID'),
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
-            companyAdminID: parseIntegerParameter(request.companyAdminID, 'companyAdminID'),
+            userID: parseNumberParameter(request.userID, 'userID'),
+            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
+            companyAdminID: parseNumberParameter(request.companyAdminID, 'companyAdminID'),
             expirationDate: 'expirationDate' in request ? new Date(request.expirationDate as string) : undefined
         };
 
@@ -209,8 +209,8 @@ function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAcces
 
     if ('userID' in request && 'buildingID' in request) {
         const revokeRequest: RevokeBuildingAccessRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID'),
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            userID: parseNumberParameter(request.userID, 'userID'),
+            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
         };
 
         return revokeRequest;
@@ -222,11 +222,20 @@ function parseCreateBuildingRequest(request: unknown): CreateBuildingRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
-    if ('buildingName' in request && 'buildingLocation' in request) {
-        const CreateBuildingRequest: CreateBuildingRequest = {
-            buildingName: parseStringParameter(request.buildingName, 'buildingName'),
-            buildingLocation: parseStringParameter(request.buildingLocation, 'buildingLocation')
-        };
+    if ('buildingName' in request && 'buildingLocation' in request && 'buildingLongitude' in request && 'buildingLatitude' in request) {
+        const CreateBuildingRequest: CreateBuildingRequest = {} as CreateBuildingRequest;
+        CreateBuildingRequest.buildingName = parseStringParameter(request.buildingName, 'buildingName');
+        CreateBuildingRequest.buildingLocation = parseStringParameter(request.buildingLocation, 'buildingLocation');
+
+        if (request.buildingLongitude == Number(request.buildingLongitude))
+            CreateBuildingRequest.buildingLongitude = Number(request.buildingLongitude);
+        else
+            throw new Error('Incorrect data: longitude must be a floating number');
+
+        if (request.buildingLatitude == Number(request.buildingLatitude))
+            CreateBuildingRequest.buildingLatitude = Number(request.buildingLatitude);
+        else
+            throw new Error('Incorrect data: latitdue must be a floating number');
 
         return CreateBuildingRequest;
     }
@@ -240,12 +249,12 @@ function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
 
     if ('userID' in request) {
         const userEditData: EditUserProfileRequest = {
-            id: parseIntegerParameter(request.userID, 'userID'),
+            id: parseNumberParameter(request.userID, 'userID'),
             username: 'username' in request ? parseStringParameter(request.username, 'username') : undefined,
             email_account: 'email_account' in request ? parseStringParameter(request.email_account, 'email_account') : undefined,
             profile_picture: 'profile_picture' in request ? undefined : undefined, //TODO: find out how to parse pfp
             rfid: 'rfid' in request ? parseStringParameter(request.rfid,'rfid') : undefined,
-            company_id: 'companyID' in request ? parseIntegerParameter(request.companyID, 'companyID') : undefined
+            company_id: 'companyID' in request ? parseNumberParameter(request.companyID, 'companyID') : undefined
         };
 
         return userEditData;
@@ -261,9 +270,11 @@ function parseEditBuildingRequest(request: unknown): EditBuildingRequest {
 
     if ('buildingID' in request) {
         const EditBuildingRequest: EditBuildingRequest = {
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
+            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
             newBuildingName : ('newBuildingName' in request) ? parseStringParameter(request.newBuildingName, 'newBuildingName') : null,
-            newBuildingLocation : ('newBuildingLocation' in request) ? parseStringParameter(request.newBuildingLocation, 'newBuildingLocation') : null
+            newBuildingLocation : ('newBuildingLocation' in request) ? parseStringParameter(request.newBuildingLocation, 'newBuildingLocation') : null,
+            newBuildingLongitude : ('newBuildingLongitude' in request) ? parseNumberParameter(request.newBuildingLongitude, 'newBuildingLongitude') : null,
+            newBuildingLatitude : ('newBuildingLatitude' in request) ? parseNumberParameter(request.newBuildingLatitude, 'newBuildingLatitude') : null
         };
 
         return EditBuildingRequest;
@@ -278,8 +289,8 @@ function parseAssignCompanyRequest(request: unknown): AssignCompanyRequest {
 
     if ('buildingID' in request && 'companyID' in request) {
         const AssignCompanyRequest: AssignCompanyRequest = {
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID'),
-            companyID: parseIntegerParameter(request.companyID, 'companyID'),
+            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
+            companyID: parseNumberParameter(request.companyID, 'companyID'),
         };
 
         return AssignCompanyRequest;
@@ -294,7 +305,7 @@ function parseCreateStationRequest(request: unknown): CreateStationRequest {
 
     if ('buildingID' in request && 'stationName' in request && 'chargingConnectors' in request) {
         const CreateStationRequest: CreateStationRequest = {} as CreateStationRequest ;
-        CreateStationRequest.buildingID = parseIntegerParameter(request.buildingID, 'buildingID');
+        CreateStationRequest.buildingID = parseNumberParameter(request.buildingID, 'buildingID');
         CreateStationRequest.stationName = parseStringParameter(request.stationName, 'stationName');
 
         if (Array.isArray(request.chargingConnectors)) {
@@ -302,13 +313,15 @@ function parseCreateStationRequest(request: unknown): CreateStationRequest {
                 throw new Error('Incorrect data in connectors array: at least one element must be supplied');
             request.chargingConnectors.forEach(element => {
                 if ('chargingTypeID' in element && 'serialNumber' in element) {
-                    if (!isInt((element as connectorTypeIDAndSerialNumber).chargingTypeID) ||
-                        !isInt((element as connectorTypeIDAndSerialNumber).serialNumber))
-                        throw new Error('Incorrect data in connectors array: both elements must be numbers');
+                    if (!isNumber((element as connectorTypeIDAndSerialNumberAndPowerOutput).chargingTypeID) ||
+                        !isNumber((element as connectorTypeIDAndSerialNumberAndPowerOutput).serialNumber) ||
+                        !isNumber((element as connectorTypeIDAndSerialNumberAndPowerOutput).powerOutput)
+                    )
+                        throw new Error('Incorrect data in connectors array: all elements must be numbers');
                 } else
-                    throw new Error('Incorrect data in connectors array: must have chargingTypeID and serialNumber');
+                    throw new Error('Incorrect data in connectors array: must have chargingTypeID, serialNumber and powerOutput');
             });
-            CreateStationRequest.chargingConnectors = request.chargingConnectors as connectorTypeIDAndSerialNumber[];
+            CreateStationRequest.chargingConnectors = request.chargingConnectors as connectorTypeIDAndSerialNumberAndPowerOutput[];
             return CreateStationRequest;
         }
         throw new Error('Incorrect data: chargingConnectors must be an array');
@@ -323,8 +336,8 @@ function parseAssignStationToCompanyRequest(request: unknown): AssignStationToCo
 
     if ('stationID' in request && 'companyID' in request) {
         const AssignStationToCompanyRequest: AssignStationToCompanyRequest = {
-            stationID: parseIntegerParameter(request.stationID, 'stationID'),
-            companyID: request.companyID != null ? parseIntegerParameter(request.companyID, 'companyID') : null
+            stationID: parseNumberParameter(request.stationID, 'stationID'),
+            companyID: request.companyID != null ? parseNumberParameter(request.companyID, 'companyID') : null
         };
 
         return AssignStationToCompanyRequest;
@@ -339,8 +352,8 @@ function parseEditStationRequest(request: unknown): EditStationRequest {
 
     if ('stationID' in request) {
         const EditStationRequest: EditStationRequest = {
-            stationID: parseIntegerParameter(request.stationID, 'stationID'),
-            newBuildingID : ('newBuildingID' in request) ? parseIntegerParameter(request.newBuildingID, 'newBuildingID') : null,
+            stationID: parseNumberParameter(request.stationID, 'stationID'),
+            newBuildingID : ('newBuildingID' in request) ? parseNumberParameter(request.newBuildingID, 'newBuildingID') : null,
             newStationName : ('newStationName' in request) ? parseStringParameter(request.newStationName, 'newStationName') : null
         };
 
@@ -356,7 +369,7 @@ function parseEditChargingTypeRequest(request: unknown): EditChargingTypeRequest
 
     if ('chargingTypeID' in request && 'newChargingType' in request) {
         const EditChargingTypeRequest: EditChargingTypeRequest = {
-            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID'),
+            chargingTypeID: parseNumberParameter(request.chargingTypeID, 'chargingTypeID'),
             newChargingType: parseStringParameter(request.newChargingType, 'newChargingType')
         };
 
@@ -375,14 +388,15 @@ function parseAddChargingConnectorRequest(request: unknown): AddChargingConnecto
         if (!request.chargingConnector || typeof request.chargingConnector !== 'object')
             throw new Error('Incorrect data in chargingConnector');
 
-        if ('chargingTypeID' in request.chargingConnector && 'serialNumber' in request.chargingConnector) {
-            const connector: connectorTypeIDAndSerialNumber = {
-                chargingTypeID: parseIntegerParameter(request.chargingConnector.chargingTypeID, 'chargingTypeID'),
-                serialNumber: parseIntegerParameter(request.chargingConnector.serialNumber, 'serialNumber')
+        if ('chargingTypeID' in request.chargingConnector && 'serialNumber' in request.chargingConnector && 'powerOutput' in request.chargingConnector) {
+            const connector: connectorTypeIDAndSerialNumberAndPowerOutput = {
+                chargingTypeID: parseNumberParameter(request.chargingConnector.chargingTypeID, 'chargingTypeID'),
+                serialNumber: parseNumberParameter(request.chargingConnector.serialNumber, 'serialNumber'),
+                powerOutput: parseNumberParameter(request.chargingConnector.powerOutput, 'powerOutput')
             };
 
             const addChargingConnectorRequest: AddChargingConnectorRequest = {
-                stationID: parseIntegerParameter(request.stationID, 'stationdID'),
+                stationID: parseNumberParameter(request.stationID, 'stationID'),
                 chargingConnector: connector
             };
 
@@ -399,9 +413,10 @@ function parseEditChargingConnectorRequest(request: unknown): EditChargingConnec
 
     if ('chargingConnectorID' in request) {
         const EditChargingConnectorRequest: EditChargingConnectorRequest = {
-            chargingConnectorID: parseIntegerParameter(request.chargingConnectorID, 'chargingConnectorID'),
-            chargingTypeID : ('chargingTypeID' in request) ? parseIntegerParameter(request.chargingTypeID, 'chargingTypeID') : null,
-            serialNumber : ('serialNumber' in request) ? parseIntegerParameter(request.serialNumber, 'serialNumber') : null
+            chargingConnectorID: parseNumberParameter(request.chargingConnectorID, 'chargingConnectorID'),
+            chargingTypeID : ('chargingTypeID' in request) ? parseNumberParameter(request.chargingTypeID, 'chargingTypeID') : null,
+            serialNumber : ('serialNumber' in request) ? parseNumberParameter(request.serialNumber, 'serialNumber') : null,
+            powerOutput: ('powerOutput' in request) ? parseNumberParameter(request.powerOutput, 'powerOutput') : null
         };
 
         return EditChargingConnectorRequest;
@@ -417,7 +432,7 @@ function parseUserID(dataBody: unknown): number {
     }
 
     if ('userID' in dataBody) {
-        return parseIntegerParameter(dataBody.userID, 'userID');
+        return parseNumberParameter(dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -430,7 +445,7 @@ function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
 
     if ('buildingID' in request) {
         const DeleteBuildingRequest: DeleteBuildingRequest = {
-            buildingID: parseIntegerParameter(request.buildingID, 'buildingID')
+            buildingID: parseNumberParameter(request.buildingID, 'buildingID')
         };
 
         return DeleteBuildingRequest;
@@ -444,7 +459,7 @@ function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
     }
 
     const GetAllStationsRequest: GetAllStationsRequest = {
-        buildingID : ('buildingID' in request) ? parseIntegerParameter(request.buildingID, 'buildingID') : null
+        buildingID : ('buildingID' in request) ? parseNumberParameter(request.buildingID, 'buildingID') : null
     };
     return GetAllStationsRequest;
 }
@@ -456,7 +471,7 @@ function parseDeleteStationRequest(request: unknown): DeleteStationRequest {
 
     if ('stationID' in request) {
         const DeleteStationRequest: DeleteStationRequest = {
-            stationID: parseIntegerParameter(request.stationID, 'stationID')
+            stationID: parseNumberParameter(request.stationID, 'stationID')
         };
 
         return DeleteStationRequest;
@@ -486,7 +501,7 @@ function parseDeleteChargingTypeRequest(request: unknown): DeleteChargingTypeReq
 
     if ('chargingTypeID' in request) {
         const DeleteChargingTypeRequest: DeleteChargingTypeRequest = {
-            chargingTypeID: parseIntegerParameter(request.chargingTypeID, 'chargingTypeID')
+            chargingTypeID: parseNumberParameter(request.chargingTypeID, 'chargingTypeID')
         };
 
         return DeleteChargingTypeRequest;
@@ -501,7 +516,7 @@ function parseGetAllAvailableStationsRequest(request: unknown): GetAllAvailableS
 
     if ('userID' in request) {
         const GetAllAvailableStationsRequest: GetAllAvailableStationsRequest = {
-            userID: parseIntegerParameter(request.userID, 'userID')
+            userID: parseNumberParameter(request.userID, 'userID')
         };
 
         return GetAllAvailableStationsRequest;
@@ -516,7 +531,7 @@ function parseDeleteChargingConnectorRequest(request: unknown): ChargingConnecto
 
     if ('chargingConnectorID' in request) {
         const ChargingConnectorID: ChargingConnectorID = {
-            chargingConnectorID: parseIntegerParameter(request.chargingConnectorID, 'chargingConnectorID')
+            chargingConnectorID: parseNumberParameter(request.chargingConnectorID, 'chargingConnectorID')
         };
 
         return ChargingConnectorID;
@@ -545,14 +560,14 @@ function parseUserAccountData(data: unknown): UserAccount {
     if (!Array.isArray(data)) throw new Error('Incorrect data format: User account data should be passed as an array');
 
     const userAccount: UserAccount = {
-        id: parseIntegerParameter(data[0], 'id'),
+        id: parseNumberParameter(data[0], 'id'),
         username: parseStringParameter(data[1], 'username'),
         password_hash: parseStringParameter(data[2], 'password_hash'),
         email_account: parseStringParameter(data[3], 'email_account'),
         validated: parseBooleanParameter(data[4], 'validated'),
         profile_picture: data[5] === null ? undefined : parseStringParameter('TODO', 'profile_picture'),
-        rfid: data[6] === null ? undefined : parseIntegerParameter(data[6], 'rfid'),
-        company_id: data[7] === null ? undefined : parseIntegerParameter(data[7], 'company_id')
+        rfid: data[6] === null ? undefined : parseNumberParameter(data[6], 'rfid'),
+        company_id: data[7] === null ? undefined : parseNumberParameter(data[7], 'company_id')
     };
 
     return userAccount;
@@ -566,7 +581,7 @@ function parseBuildingData(data: unknown): building {
     if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
 
     const buildingData: building = {
-        id: parseIntegerParameter(data[0], 'id'),
+        id: parseNumberParameter(data[0], 'id'),
         building_name: parseStringParameter(data[1], 'building_name'),
         building_location: parseStringParameter(data[2], 'building_location')
     };
@@ -582,7 +597,7 @@ function parseCompanyData(data: unknown): company {
     if (!Array.isArray(data)) throw new Error('Incorrect data format: Building data should be passed as an array');
 
     const companyData: company = {
-        id: parseIntegerParameter(data[0], 'id'),
+        id: parseNumberParameter(data[0], 'id'),
         company_name: parseStringParameter(data[1], 'company_name'),
     };
 
@@ -646,7 +661,7 @@ function parseReservationInfo(data: unknown) {
     for (let i = 0; i < data.length; i++) {
         const reservation: ReservationData = {
             stationID: parseStringParameter(data[i][0], 'stationID'),
-            connectorID: parseIntegerParameter(data[i][1], 'connectorID'),
+            connectorID: parseNumberParameter(data[i][1], 'connectorID'),
             expiryDate: parseDateParameter(data[i][2], 'expiryDate'),
             idTag: parseStringParameter(data[i][3], 'idTag')
         };
@@ -664,9 +679,11 @@ function parseBuildingResponse(rows: unknown): BuildingResponse[] {
     let building: BuildingResponse;
     for (let i = 0; i < rows.length; i++) {
         building = new BuildingResponse();
-        building.buildingID = parseIntegerParameter(rows[i][0], 'buildingID'); // from sql
+        building.buildingID = parseNumberParameter(rows[i][0], 'buildingID'); // from sql
         building.buildingName = parseStringParameter(rows[i][1], 'buildingName'); // from sql
         building.buildingLocation = parseStringParameter(rows[i][2], 'buildingLocation'); // from sql
+        building.buildingLongitude = Number(rows[i][3]);
+        building.buildingLatitude = Number(rows[i][4]);
         returningArray[i] = building;
     }
     return returningArray;
@@ -680,7 +697,7 @@ function parseCompanyResponse(rows: unknown): CompanyResponse[] {
     let company: CompanyResponse;
     for (let i = 0; i < rows.length; i++) {
         company = new CompanyResponse();
-        company.companyID = parseIntegerParameter(rows[i][0], 'companyID'); // from sql
+        company.companyID = parseNumberParameter(rows[i][0], 'companyID'); // from sql
         company.companyName = parseStringParameter(rows[i][1], 'companyName'); // from sql
         returningArray[i] = company;
     }
@@ -695,7 +712,7 @@ function parseChargingTypeResponse(rows: unknown): ChargingTypeResponse[] {
     let chargingType: ChargingTypeResponse;
     for (let i = 0; i < rows.length; i++) {
         chargingType = new ChargingTypeResponse();
-        chargingType.chargingTypeID = parseIntegerParameter(rows[i][0], 'chargingTypeID'); // from sql
+        chargingType.chargingTypeID = parseNumberParameter(rows[i][0], 'chargingTypeID'); // from sql
         chargingType.chargingType = parseStringParameter(rows[i][1], 'chargingType'); // from sql
         returningArray[i] = chargingType;
     }
@@ -703,7 +720,11 @@ function parseChargingTypeResponse(rows: unknown): ChargingTypeResponse[] {
 }
 
 function parseChargingStationResponse(rows: unknown, specific: boolean): ChargingStationResponse[] {
-
+    /*
+    `SELECT cc.id, cs.id, cs.name as charging_station_name,
+                cc.charging_type_id, ct.type as charging_type,
+                cs.building_id, building_name, building_location, company_id, company_name, cc.serial_number, cc.power_output, b.longitude, b.latitude
+    */
     if (!Array.isArray(rows)) throw new Error('Incorrect data format: Reservation data should be passed as an array');
 
     const processedStations = new Map<number, number>;
@@ -716,6 +737,7 @@ function parseChargingStationResponse(rows: unknown, specific: boolean): Chargin
         const connector = new ChargingConnectorResponse;
         connector.chargingConnectorID = rows[i][0] as number;
         connector.chargingConnectorSerialNumber = rows[i][10] as number;
+        connector.chargingConnectorPowerOutput = rows[i][11] as number;
 
         const type = new ChargingTypeResponse;
         type.chargingTypeID = rows[i][3] as number;
@@ -747,6 +769,8 @@ function parseChargingStationResponse(rows: unknown, specific: boolean): Chargin
             station.building.buildingID = rows[i][5] as number;
             station.building.buildingName = rows[i][6] as string;
             station.building.buildingLocation = rows[i][7] as string;
+            station.building.buildingLongitude = rows[i][12] as number;
+            station.building.buildingLatitude = rows[i][13] as number;
         }
         if (rows[i][8] == null) {
             station.company = null;
@@ -763,7 +787,7 @@ function parseChargingStationResponse(rows: unknown, specific: boolean): Chargin
 
 
 export default {
-    parseIntegerParameter,
+    parseNumberParameter,
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
     parseUserLoginRequest,

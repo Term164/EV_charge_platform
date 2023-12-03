@@ -2,6 +2,8 @@ class BuildingResponse {
     buildingID: number;
     buildingName: string;
     buildingLocation: string;
+    buildingLongitude: number;
+    buildingLatitude: number;
 }
 
 class CompanyResponse {
@@ -17,6 +19,7 @@ class ChargingTypeResponse {
 class ChargingConnectorResponse {
     chargingConnectorID: number;
     chargingConnectorSerialNumber: number;
+    chargingConnectorPowerOutput: number;
     chargingType: ChargingTypeResponse;
 }
 

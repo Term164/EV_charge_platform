@@ -11,9 +11,9 @@
 -- -> uni for unique constraint
 --
 --=============================================
--- V 3.0
--- -> Refactors stations table and adds connectors
--- -> Renames constraints and optimizies overall initial script
+-- V 3.1
+-- -> Adds "longitude" & "lattitude" to Buildings table
+-- -> Adds "power_output" to Charging Connectors table
 --=============================================
 
 CREATE TABLE Companies
@@ -63,6 +63,8 @@ CREATE TABLE Buildings
  "id"              SERIAL,
  building_name     varchar(50) NOT NULL,
  building_location varchar(50) NOT NULL,
+ longitude         REAL,
+ latitude          REAL,
  CONSTRAINT prm_buildings_id PRIMARY KEY ("id")
 );
 
@@ -195,6 +197,7 @@ CREATE TABLE Charging_connectors
   charging_station_id int NOT NULL,
   charging_type_id    int NOT NULL,
   serial_number       int NOT NULL,
+  power_output        int,
   CONSTRAINT prm_charging_connectors_id PRIMARY KEY ("id"),
   CONSTRAINT frn_charging_connectors_charging_station_id FOREIGN KEY (charging_station_id) REFERENCES Charging_stations ("id"),
   CONSTRAINT frn_charging_connectors_charging_type_id FOREIGN KEY (charging_type_id) REFERENCES Charging_types ("id"),
