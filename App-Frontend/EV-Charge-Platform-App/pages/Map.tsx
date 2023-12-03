@@ -173,7 +173,7 @@ export default class MapScreen extends React.Component<any, any> {
                     fontSize={20}
                     placeholderTextColor="#9ca3af"
                     spinnerVisibility={this.state.searching}
-                    placeholder="search building"
+                    placeholder="Search here"
                     onClearPress={() => {this.setState({searchBarSelected: false})}}
                     onChangeText={(text) => {
                         if (text.length === 0) 

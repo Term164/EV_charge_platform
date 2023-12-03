@@ -221,8 +221,8 @@ export const reservations: Reservation[] = [
         charging_time: 3,
         desired_from: new Date(),
         desired_to: new Date(),
-        allocated_from: new Date(),
-        allocated_to: new Date(new Date().getTime() + 60 * 60 * 1000),
+        allocated_from: null,
+        allocated_to: null,
         queueNumber: 4,
         reservation_status: ReservationStatus.INQUEUE
     }   

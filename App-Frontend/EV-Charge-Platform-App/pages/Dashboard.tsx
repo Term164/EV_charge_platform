@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Modal, Alert } from "react-native";
 import { reservations } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,8 +8,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from "react-native-toast-notifications";
+import { useState } from 'react';
 
 export default function SignInScreen() {
+
+    const [cancelModalVisible, setCancelModalVisible] = useState(false);
 
     const toast = useToast();
 
@@ -31,8 +34,6 @@ export default function SignInScreen() {
                     <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {reservation.queueNumber} In Queue</Text>
                 </View>);
         }
-
-        <Text></Text>
     }
 
     const getConnectorInfo = (connector: Connector | null) => {
@@ -50,6 +51,40 @@ export default function SignInScreen() {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
+            
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={cancelModalVisible}
+                onRequestClose={() => {
+                    setCancelModalVisible(!cancelModalVisible);
+                }}
+            >
+                <View className="flex-1 justify-center items-center">
+                    <View className="bg-slate-300 rounded-lg shadow-lg shadow-black w-72 p-3 justify-center">
+                        <Text className="text-2xl font-bold self-center text-gray-800">Cancel reservation ?</Text>
+                        <Text className="py-4 text-center text-base font-medium self-center leading-4 text-gray-600">You are about to cancel your reservation. This action is not reversable and you will lose your spot at the specific building.</Text>
+                        <View className="flex-row justify-between items-center px-2">
+                            <CustomButton
+                                textStyle="font-bold text-lg text-white"
+                                className="w-24 h-10 bg-red-500 text-center rounded-lg justify-center items-center border border-red-800 shadow-lg"
+                                android_ripple={{color: ''}}
+                            >
+                                CANCEL
+                            </CustomButton>
+
+                            <CustomButton
+                                onPress={() => setCancelModalVisible(false)}
+                                textStyle="font-bold text-lg text-gray-800"
+                                className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
+                                android_ripple={{color: ''}}
+                            >
+                                GO BACK
+                            </CustomButton>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             <ScrollView
                 className="w-full h-full"
             >
@@ -75,7 +110,12 @@ export default function SignInScreen() {
                                     {getConnectorInfo(reservation.allocated_connector)}
                                 </View>
 
-                                <Text className="pb-4 text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{reservation.allocated_from?.getHours()}:{reservation.allocated_from?.getMinutes()} - {reservation.allocated_to?.getHours()}:{reservation.allocated_to?.getMinutes()}</Text></Text>
+                                {
+                                    reservation.allocated_from && reservation.allocated_to ?
+                                        <Text className="pb-4 text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{reservation.allocated_from?.getHours()}:{reservation.allocated_from?.getMinutes()} - {reservation.allocated_to?.getHours()}:{reservation.allocated_to?.getMinutes()}</Text></Text>
+                                    : <></>
+                                }
+                                
                                 <View className="flex-row justify-end items-center px-2">
                                     <CustomButton
                                         textStyle="font-bold text-lg text-white"
@@ -86,11 +126,12 @@ export default function SignInScreen() {
                                     </CustomButton>
 
                                     <CustomButton
+                                        onPress={() => setCancelModalVisible(true)}
                                         textStyle="font-bold text-lg text-gray-800"
                                         className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
                                         android_ripple={{color: ''}}
                                     >
-                                        CANCLE
+                                        CANCEL
                                     </CustomButton>
                                 </View>
                             </View>

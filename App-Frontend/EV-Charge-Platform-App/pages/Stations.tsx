@@ -26,7 +26,7 @@ export default function SignInScreen() {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
-            <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 16}} placeholder="search building"/>
+            <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 16}} placeholder="Search here"/>
             <ScrollView 
                 className="w-full h-full"
             >
