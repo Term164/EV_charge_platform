@@ -5,9 +5,7 @@ import { markers } from "../utils/markers";
 import { Building, mapStyle } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
 import { searchBuildingsByName } from "../utils/search";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { BackHandler } from "react-native";
-import { ActivityIndicator } from "react-native";
 
 const {width, height} = Dimensions.get('window');
 
@@ -101,9 +99,9 @@ export default class MapScreen extends React.Component<any, any> {
                         );
                     })
                 }
-            </ScrollView>
+            </ScrollView>;
         } else {
-            <></>
+            searchWindow = <></>;
         }
 
         return (
