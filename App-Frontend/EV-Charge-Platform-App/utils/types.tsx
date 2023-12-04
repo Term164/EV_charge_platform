@@ -88,6 +88,10 @@ type Reservation = {
   reservation_status: ReservationStatus
 }
 
+type ProfilePageProps = {
+  exitModal: () => void;
+}
+
 const mapStyle = [
     {
       "featureType": "administrative",
@@ -139,5 +143,6 @@ export {
     ReservationStatus,
     Reservation,
     ChargingType,
-    mapStyle
+    mapStyle,
+    ProfilePageProps
 }

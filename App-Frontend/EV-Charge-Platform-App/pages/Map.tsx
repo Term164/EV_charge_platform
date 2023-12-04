@@ -16,8 +16,8 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATION;
 
 const region = {
-    latitude: LATITUDE,
-    longitude: 	LONGITUDE,
+    latitude: markers[0].coordinate.latitude,
+    longitude: 	markers[0].coordinate.longitude,
     latitudeDelta: LATITUDE_DELTA,
     longitudeDelta: LONGITUDE_DELTA
 }
@@ -27,16 +27,20 @@ export default class MapScreen extends React.Component<any, any> {
     animation: Animated.Value;
     regionTimeout: NodeJS.Timeout;
     map: MapView | null;
+    firstMarker: MapMarker | null;
 
     constructor(props: any) {
         super(props);
         this.animation = new Animated.Value(0);
         this.regionTimeout = setTimeout(()=>{},0);
         this.map = null;
-        this.state = {index: 0};
-        this.state = {searchBarSelected: false};
-        this.state = {filteredBuildings: markers}
-        this.state = {searching: false};
+        this.firstMarker = null;
+        this.state = {
+            index: 0,
+            searchBarSelected: false,
+            filteredBuildings: markers,
+            searching: false
+        };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
@@ -85,7 +89,7 @@ export default class MapScreen extends React.Component<any, any> {
         let searchWindow;
 
         if (this.state.filteredBuildings) {
-            searchWindow = <ScrollView className="mt-20 w-full h-full">t
+            searchWindow = <ScrollView className="mt-20 w-full h-full">
                 {
                     this.state.filteredBuildings.map((building: Building, index: number) => {
                         return(
@@ -104,10 +108,18 @@ export default class MapScreen extends React.Component<any, any> {
             searchWindow = <></>;
         }
 
+        const mapReadyCallout = () => {
+            if(this.firstMarker) {
+                setTimeout(() => this.firstMarker.showCallout(), 0)
+            }
+                
+        }
+
         return (
-            <View className="justify-end items-center flex-1">
+            <View className="justify-center items-center flex-1">
                 <MapView
                     ref={map => this.map = map}
+                    onMapReady={mapReadyCallout}
                     className="w-full h-full"
                     initialRegion={region}
                     showsCompass={false}
@@ -118,7 +130,6 @@ export default class MapScreen extends React.Component<any, any> {
     
                     {
                         markers.map((marker, index) => {
-
                             const scaleStyle = {
                                 transform: [
                                     {
@@ -135,7 +146,11 @@ export default class MapScreen extends React.Component<any, any> {
                             const markerStyle = "w-2 h-2 rounded-full absolute " + this.getDeepColorBasedOnAvailability(marker.availability);
 
                             return (
-                                <MapMarker 
+                                <MapMarker
+                                    ref={marker => {
+                                        if (this.state.index === index)
+                                            this.firstMarker = marker;
+                                    }}
                                     onPress={() => {this.setState({index: index})}}
                                     key={index} 
                                     coordinate={marker.coordinate}
@@ -167,7 +182,7 @@ export default class MapScreen extends React.Component<any, any> {
 
                 </MapView>
                 <SearchBar 
-                    className="absolute left-0 top-6 m-3 w-11/12 h-12 z-10" 
+                    className="absolute top-8 m-3 w-11/12 h-12 z-10" 
                     fontSize={20}
                     placeholderTextColor="#9ca3af"
                     spinnerVisibility={this.state.searching}

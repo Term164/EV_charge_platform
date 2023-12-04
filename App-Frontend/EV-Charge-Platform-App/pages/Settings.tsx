@@ -1,18 +1,21 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToggleSwitch from "toggle-switch-react-native";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import DropDownPicker from "react-native-dropdown-picker";
 import SloveniaIcon from "../assets/flag-icons/slovenia.svg";
 import UKIcon from "../assets/flag-icons/united-kingdom.svg";
-import { Text, View, Pressable, ScrollView } from "react-native";
+import { Text, View, Pressable, ScrollView, Modal } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from "../utils/GlobalStateContext";
+import Profile from '../pages/Profile';
 
 
-export default function SignInScreen() {
+export default function SettingsPage() {
     const [darkMode, setDarkMode] = useState(false);
     const [notifications, setNotifications] = useState(false);
+    const [editProfile, setEditProfile] = useState(false);
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('english');
@@ -21,14 +24,25 @@ export default function SignInScreen() {
         {label: 'Slovensko', value: 'slovensko', icon: () => <SloveniaIcon width={32} height={30} />}
     ]);
 
+    // Auth context
+    const { signOut } = React.useContext(AuthContext);
     return (
         <SafeAreaView className="flex-1">
             
+            <Modal
+                animationType="slide"
+                visible={editProfile}
+                onRequestClose={() => {setEditProfile(!editProfile)}}
+            >
+                <Profile exitModal={() => setEditProfile(false)} />
+            </Modal>
+
             <ScrollView className="w-full h-full" contentContainerStyle={{flexGrow: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">Account</Text>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl">
                     <Pressable 
+                        onPress={() => setEditProfile(true)}
                         className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                     >
@@ -157,6 +171,7 @@ export default function SignInScreen() {
 
                 <View className="w-11/12 overflow-hidden rounded-2xl mb-4">
                     <Pressable 
+                        onPress={signOut}
                         className="flex-row items-center justify-between p-2 h-16 rounded-2xl"
                         android_ripple={{color: ''}}
                     >

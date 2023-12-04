@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useToast } from "react-native-toast-notifications";
 import { useState } from 'react';
 
-export default function SignInScreen() {
+export default function DashboardPage() {
 
     const [cancelModalVisible, setCancelModalVisible] = useState(false);
 

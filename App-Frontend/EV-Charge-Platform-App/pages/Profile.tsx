@@ -8,17 +8,17 @@ import { TextInputWithTitle } from "../components/TextInputWithTitle";
 import { Pressable } from "react-native";
 import { ViewBase } from "react-native";
 import { useToast } from 'react-native-toast-notifications'
+import { ProfilePageProps } from "../utils/types";
 
-export default function SignInScreen() {
+
+
+export default function ProfilePage({exitModal}: ProfilePageProps) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [rfid, setRfid] = useState(null);
     const [isEditable, setIsEditable] = useState(false)
 
     const toast = useToast();
-
-    // Auth context
-    const { signOut } = React.useContext(AuthContext);
 
     useEffect(() => {
         setUsername('Term');
@@ -112,11 +112,11 @@ export default function SignInScreen() {
             {
                 isEditable ? (<></>) :
                 (<CustomButton
-                    onPress={() => {signOut()}}
+                    onPress={() => {exitModal()}}
                     textStyle="font-bold text-lg text-white"
                     className="h-12 w-8/12 text-center items-center justify-center rounded-lg mt-4 bg-red-500"
                     android_ripple={{color: ''}}>
-                    LOG OUT
+                    CANCEL
                 </CustomButton>)
             }
             

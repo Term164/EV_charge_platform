@@ -35,14 +35,13 @@ export default function App() {
         <NavigationContainer>
           { state.userToken != null ? (
           <Tab.Navigator
+          initialRouteName='Map'
           screenOptions={({ route }) => ({
               headerShown: false,
               tabBarIcon: ({ focused, color, size }) => {
                 let iconName: IoniconIconName = 'close-circle-outline';
 
-                if (route.name === 'Profile') {
-                  iconName = focused ? 'person-circle' : 'person-circle-outline';
-                } else if (route.name === 'Dashboard') {
+                if (route.name === 'Dashboard') {
                   iconName = focused ? 'home' : 'home-outline';
                 } else if (route.name === 'Map') {
                   iconName = focused ? 'map' : 'map-outline';
@@ -57,7 +56,6 @@ export default function App() {
               tabBarInactiveTintColor: 'gray',
             })}
           >
-            <Tab.Screen name='Profile' component={Profile} />
             <Tab.Screen name='Dashboard' component={Dashboard}/>
             <Tab.Screen name='Map' component={Map}/>
             <Tab.Screen name='Stations' component={Stations}/>

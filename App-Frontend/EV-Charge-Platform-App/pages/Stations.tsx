@@ -17,7 +17,7 @@ function getTextColorBasedOnAvailability(availability: number) {
     return colorStyle;
 }
 
-export default function SignInScreen() {
+export default function StationsPage() {
     const [buildings, setBuildings] = useState(markers);
 
     const filterBuildings = (searchWord: string) => {
@@ -26,7 +26,7 @@ export default function SignInScreen() {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
-            <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 16}} placeholder="Search here"/>
+            <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 20}} placeholderTextColor="#9ca3af" placeholder="Search here"/>
             <ScrollView 
                 className="w-full h-full"
             >
