@@ -20,9 +20,22 @@ function getTextColorBasedOnAvailability(availability: number) {
 }
 
 export default function MakeReservationPage({exitModal, building}: MakeReservationPageProps) {
-    const [date, setDate] = useState(new Date());
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
+
+    const today = new Date();
+    today.setHours(0,1,0,0);
+    const tommorow = new Date(today)
+    tommorow.setDate(today.getDate() + 1);
+    const startTimeDate = new Date();
+    const endTimeDate = new Date();
+
+    startTimeDate.setHours(7,0,0,0);
+    endTimeDate.setHours(17,0,0,0);
+
+
+
+    const [selectedDate, setSelectedDate] = useState<Date>(tommorow);
+    const [startTime, setStartTime] = useState<Date>(startTimeDate);
+    const [endTime, setEndTime] = useState<Date>(endTimeDate);
     const [numOfHours, setNumOfHours] = useState(1);
 
     const [open, setOpen] = useState(false);
@@ -32,11 +45,16 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
         {label: 'Tesla', value: 'tesla', icon: () => getConnectorIcon(ChargingType.TESLASUC)}
     ]);
 
-    const selectedHourStyle = "basis-2/12 bg-blue-200 py-3 rounded-md shadow-lg shadow-black";
-    const hourStyle = "basis-2/12 bg-gray-200 py-3 rounded-md shadow-lg";
+    const selectedHourStyle = "basis-4/12 bg-blue-200 py-4 rounded-md shadow-lg shadow-black";
+    const hourStyle = "basis-3/12 bg-gray-200 py-2 rounded-md shadow-lg";
+
+    const getTimeFromDate = (date: Date) => {
+        return `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)} `
+    }
 
     return(
         <View className="p-5 bg-slate-100 rounded-xl rounded-t-none border-t-blue-400 border-t-8">
+            <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">Making new reservation</Text>
             <Text className="text-lg font-semibold text-gray-800 uppercase">{building.name}</Text>
             <Text className="text-base font-medium text-gray-500">{building.address}</Text>
             <Text className="font-semibold text-lg text-gray-600 mb-2">Availability for this building is at <Text className={getTextColorBasedOnAvailability(building.availability)}>{building.availability}</Text>%</Text>
@@ -62,20 +80,25 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                         android_ripple={{color: ''}}
                         onPress={() => {
                                 DateTimePickerAndroid.open({
-                                    value: new Date(),
+                                    value: selectedDate,
                                     mode: 'date',
+                                    minimumDate: today,
+                                    onChange(event, date) {
+                                        if(date)
+                                            setSelectedDate(date);
+                                    },
                                     is24Hour: true
                                 });
                         }}
                     >
                         <TextInputWithIcon
                             editable={false}
-                            className="flex-1 text-center text-lg text-gray-800"
+                            className="flex-1 text-center text-lg text-gray-800 font-medium"
                             iconName="calendar-outline"
                             iconSize={20}
                             front={false}
                             placeholder="Select a date"
-                            value={ date ? String(date.getTime()) : ""}
+                            value={String(selectedDate.toLocaleDateString('sl-SI'))}
                             viewClassNames="stroke-black border rounded-md p-2 bg-white"
                         />
                     </Pressable>
@@ -92,20 +115,27 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                             android_ripple={{color: ''}}
                             onPress={() => {
                                     DateTimePickerAndroid.open({
-                                        value: new Date(),
+                                        display: 'spinner',
+                                        value: startTime,
                                         mode: 'time',
+                                        onChange(event, date) {
+                                            if (date){
+                                                date.setHours(date.getHours(),0,0,0);
+                                                setStartTime(date);
+                                            }
+                                        },
                                         is24Hour: true
                                     });
                             }}
                         >
                             <TextInputWithIcon
                                 editable={false}
-                                className="flex-1 text-center text-lg text-gray-800"
+                                className="flex-1 text-center text-lg text-gray-800 font-semibold"
                                 iconName="time-outline"
                                 iconSize={20}
                                 front={false}
                                 placeholder=""
-                                value={ startTime ? String(date.getTime()) : ""}
+                                value={getTimeFromDate(startTime)}
                                 viewClassNames="stroke-black border rounded-md w-28 p-1 bg-white"
                             />
                         </Pressable>
@@ -119,20 +149,27 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                             android_ripple={{color: ''}}
                             onPress={() => {
                                     DateTimePickerAndroid.open({
-                                        value: new Date(),
+                                        display: 'spinner',
+                                        value: endTime,
                                         mode: 'time',
+                                        onChange(event, date) {
+                                            if(date){
+                                                date.setHours(date.getHours(),0,0,0);
+                                                setEndTime(date);
+                                            }
+                                        },
                                         is24Hour: true
                                     });
                             }}
                         >
                             <TextInputWithIcon
                                 editable={false}
-                                className="flex-1 text-center text-lg text-gray-800"
+                                className="flex-1 text-center text-lg text-gray-800 font-semibold"
                                 iconName="time-outline"
                                 iconSize={20}
                                 front={false}
                                 placeholder=""
-                                value={ endTime ? String(date.getTime()) : ""}
+                                value={getTimeFromDate(endTime)}
                                 viewClassNames="stroke-black border rounded-md w-28 p-1 bg-white"
                             />
                         </Pressable>
@@ -141,16 +178,18 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                 
             </View>
 
+            {
+                endTime.getHours() - startTime.getHours() > 3 ? <View>
+                                    <Text className="text-gray-600 self-center text-xl mt-3">Desired length of Reservation:</Text>
 
-            <Text className="text-gray-600 self-center text-xl mt-3">Maximum hours:</Text>
-
-            <View className="flex flex-row gap-x-4 items-center justify-center mt-2">
-                <Pressable className={numOfHours == 1 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(1)}><Text className="text-center text-2xl font-semibold">1</Text></Pressable>
-                <Pressable className={numOfHours == 2 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(2)}><Text className="text-center text-2xl font-semibold">2</Text></Pressable>
-                <Pressable className={numOfHours == 3 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(3)}><Text className="text-center text-2xl font-semibold">3</Text></Pressable>
-                <Pressable className={numOfHours == 4 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(4)}><Text className="text-center text-2xl font-semibold">4</Text></Pressable>
-            </View>
-
+                                    <View className="flex flex-row gap-x-4 items-center justify-center mt-2">
+                                        <Pressable className={numOfHours == 1 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(1)}><Text className="text-center text-2xl font-semibold">1h</Text></Pressable>
+                                        <Pressable className={numOfHours == 2 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(2)}><Text className="text-center text-2xl font-semibold">2h</Text></Pressable>
+                                        <Pressable className={numOfHours == 3 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(3)}><Text className="text-center text-2xl font-semibold">3h</Text></Pressable>
+                                    </View>
+                                </View>
+                                : <></>
+            }
 
             <View className="flex-row justify-end items-center px-2 self-center mt-4">
                 <CustomButton

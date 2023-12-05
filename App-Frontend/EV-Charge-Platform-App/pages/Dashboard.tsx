@@ -9,10 +9,29 @@ import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
 import { useToast } from "react-native-toast-notifications";
 import { useState } from 'react';
+import { BlurView } from "expo-blur";
+import EditReservationPage from "./EditReservation";
+
+function ordinal_suffix_of(i: number) {
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
+}
 
 export default function DashboardPage() {
 
     const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [editReservation, setEditReservation] = useState(false);
+    const [selectedReservation, setSelectedReservation] = useState(reservations[0]);
 
     const toast = useToast();
 
@@ -31,7 +50,7 @@ export default function DashboardPage() {
             case ReservationStatus.INQUEUE:
                 return (
                 <View>
-                    <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {reservation.queueNumber} In Queue</Text>
+                    <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {ordinal_suffix_of(reservation.queueNumber)} In Queue</Text>
                 </View>);
         }
     }
@@ -54,14 +73,14 @@ export default function DashboardPage() {
             
             <Modal
                 transparent={true}
-                animationType="slide"
+                animationType="none"
                 visible={cancelModalVisible}
                 onRequestClose={() => {
                     setCancelModalVisible(!cancelModalVisible);
                 }}
             >
-                <View className="flex-1 justify-center items-center">
-                    <View className="bg-slate-300 rounded-lg shadow-lg shadow-black w-72 p-3 justify-center">
+                <BlurView intensity={20} className="flex-1 justify-center items-center">
+                    <View className="bg-slate-200 rounded-lg shadow-lg shadow-black w-72 p-3 justify-center">
                         <Text className="text-2xl font-bold self-center text-gray-800">Cancel reservation ?</Text>
                         <Text className="py-4 text-center text-base font-medium self-center leading-4 text-gray-600">You are about to cancel your reservation. This action is not reversable and you will lose your spot at the specific building.</Text>
                         <View className="flex-row justify-between items-center px-2">
@@ -83,26 +102,35 @@ export default function DashboardPage() {
                             </CustomButton>
                         </View>
                     </View>
-                </View>
+                </BlurView>
             </Modal>
             <ScrollView
                 className="w-full h-full"
             >
                 {
                     reservations.map((reservation, index) => {
+                        let toastInfo: string;
+                        console.log(reservation.reservation_status);
+                        switch (reservation.reservation_status) {
+                            case ReservationStatus.ALLOCATED:
+                                toastInfo = 'You have been allocated a certain time but this might still change.'
+                                break;
+                            case ReservationStatus.INQUEUE:
+                                toastInfo = `We could not find a spot for you yet. You are ${ordinal_suffix_of(reservation.queueNumber)} in queue.`
+                                break;
+                            case ReservationStatus.RESERVED:
+                                toastInfo = 'Your reservation has been set and it will not change unless edited.'
+                                break;
+                        }
+
                         return(
                             <View key={index} className="bg-slate-50 my-2 mx-1 p-3 rounded-xl shadow-xl shadow-black">
                                 <View className="flex-row justify-between ">
                                     <Text className="font-bold text-base text-gray-700 uppercase">{reservation.building.name}</Text>
-                                    {
-                                        reservation.reservation_status == ReservationStatus.ALLOCATED ?
-                                            <Pressable
-                                                onPress={() => toast.show('You have been allocated a certain time but this might still change.', )}
-                                            >
+                                    <Pressable
+                                        onPress={() => toast.show(toastInfo)}>
                                                 <Ionicons name={'information-circle-outline'} size={30} color={'#64748b'} />
-                                            </Pressable>
-                                        : <></>
-                                    }
+                                    </Pressable>
                                 </View>
                                 <Text className="font-bold text-base text-gray-500 mb-2">{reservation.building.address}</Text>
                                 <View className="flex-row items-center">
@@ -118,6 +146,7 @@ export default function DashboardPage() {
                                 
                                 <View className="flex-row justify-end items-center px-2">
                                     <CustomButton
+                                        onPress={() => {setEditReservation(true); setSelectedReservation(reservation)}}
                                         textStyle="font-bold text-lg text-white"
                                         className="w-20 h-10 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
                                         android_ripple={{color: ''}}
@@ -140,6 +169,17 @@ export default function DashboardPage() {
                 }                
 
             </ScrollView>
+
+            <Modal
+                transparent
+                animationType="slide"
+                visible={editReservation}
+                onRequestClose={() => setEditReservation(false)}
+            >
+                <BlurView intensity={10} className="flex-1 justify-end items-center" tint="dark">            
+                    <EditReservationPage exitModal={() => setEditReservation(false)} reservation={selectedReservation} />
+                </BlurView>
+            </Modal>
         </SafeAreaView>
     )
 }

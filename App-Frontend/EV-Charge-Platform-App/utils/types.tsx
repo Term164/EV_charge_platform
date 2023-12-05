@@ -82,6 +82,7 @@ type Reservation = {
   charging_time: number,
   desired_from: Date,
   desired_to: Date,
+  desired_type: ChargingType,
   allocated_from: Date | null,
   allocated_to: Date | null,
   queueNumber: number,
@@ -95,6 +96,11 @@ type ProfilePageProps = {
 type MakeReservationPageProps = {
   exitModal: () => void
   building: Building
+}
+
+type EditReservationPageProps = {
+  exitModal: () => void
+  reservation: Reservation;
 }
 
 const mapStyle = [
@@ -150,5 +156,6 @@ export {
     ChargingType,
     mapStyle,
     ProfilePageProps,
-    MakeReservationPageProps
-}
+    MakeReservationPageProps,
+    EditReservationPageProps
+  }

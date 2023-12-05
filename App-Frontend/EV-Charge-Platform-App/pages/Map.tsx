@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal } from "react-native";
 import MapView, {Callout, MapMarker} from "react-native-maps";
 import React from 'react';
 import { markers } from "../utils/markers";
@@ -6,6 +6,8 @@ import { Building, mapStyle } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
 import { searchBuildingsByName } from "../utils/search";
 import { BackHandler } from "react-native";
+import { BlurView } from "expo-blur";
+import MakeReservationPage from "./MakeReservation";
 
 const {width, height} = Dimensions.get('window');
 
@@ -39,7 +41,9 @@ export default class MapScreen extends React.Component<any, any> {
             index: 0,
             searchBarSelected: false,
             filteredBuildings: markers,
-            searching: false
+            searching: false,
+            makeReservation: false,
+            selectedBuilding: markers[0]
         };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -115,6 +119,10 @@ export default class MapScreen extends React.Component<any, any> {
                 
         }
 
+        const exitModal = () => {
+            this.setState({makeReservation: true});
+        }
+
         return (
             <View className="justify-center items-center flex-1">
                 <MapView
@@ -164,7 +172,7 @@ export default class MapScreen extends React.Component<any, any> {
                                     <Callout
                                         alphaHitTest
                                         tooltip={true}
-                                        onPress={_ => Alert.alert('callout pressed')}
+                                        onPress={_ => {this.setState({selectedBuilding: marker, makeReservation: true})}}
                                         className="w-56 pb-3"
                                     >
                                         <View className="bg-white rounded-lg w-full h-full p-2 border border-slate-300">
@@ -204,6 +212,16 @@ export default class MapScreen extends React.Component<any, any> {
                         </View> 
                         : <></>
                 }
+                <Modal
+                    transparent
+                    animationType="slide"
+                    visible={this.state.makeReservation}
+                    onRequestClose={() => this.setState({makeReservation: false})}
+                >
+                    <BlurView intensity={10} className="flex-1 justify-end items-center" tint="dark">            
+                        <MakeReservationPage exitModal={() => exitModal()} building={this.state.selectedBuilding} />
+                    </BlurView>
+                </Modal>
             </View>
             
         )   
