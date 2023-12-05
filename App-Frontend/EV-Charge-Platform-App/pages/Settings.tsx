@@ -20,8 +20,8 @@ export default function SettingsPage() {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('english');
     const [items, setItems] = useState([
-        {label: 'English', value: 'english', icon: () => <UKIcon width={30} height={32} style={{}} />},
-        {label: 'Slovensko', value: 'slovensko', icon: () => <SloveniaIcon width={32} height={30} />}
+        {label: 'English', value: 'eng', icon: () => <UKIcon width={30} height={32} style={{}} />},
+        {label: 'Slovenščina', value: 'slo', icon: () => <SloveniaIcon width={32} height={30} />}
     ]);
 
     // Auth context

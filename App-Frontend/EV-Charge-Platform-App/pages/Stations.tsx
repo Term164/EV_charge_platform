@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { markers } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
@@ -6,6 +6,8 @@ import SearchBar from "react-native-dynamic-search-bar";
 import { useState } from "react";
 import { searchBuildingsByName } from "../utils/search";
 import { getConnectorIcon } from "../utils/utils";
+import MakeReservationPage from "./MakeReservation";
+import { BlurView } from "expo-blur";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -19,6 +21,8 @@ function getTextColorBasedOnAvailability(availability: number) {
 
 export default function StationsPage() {
     const [buildings, setBuildings] = useState(markers);
+    const [makeReservation, setMakeReservation] = useState(false);
+    const [selectedBuilding, setSelectedBuilding] = useState(markers[0]);
 
     const filterBuildings = (searchWord: string) => {
         setBuildings(searchBuildingsByName(searchWord, markers));
@@ -34,7 +38,7 @@ export default function StationsPage() {
                     buildings.map((marker, index) => {
 
                         return(
-                            <View key={index} className="bg-slate-50 my-2 mx-1 p-2 h-48 rounded-xl overflow-hidden shadow-xl shadow-black">
+                            <View key={index} className="bg-slate-50 my-2 mx-1 p-2 rounded-xl overflow-hidden shadow-xl shadow-black">
                                 <Text className="font-bold text-base text-gray-700 uppercase">{marker.name}</Text>
                                 <Text className="font-bold text-sm text-gray-500">{marker.address}</Text>
                                 <ScrollView
@@ -59,6 +63,10 @@ export default function StationsPage() {
                                 <View className="flex-row justify-between items-center px-2 mt-2">
                                     <Text className="font-semibold text-lg text-gray-800">Availability at <Text className={getTextColorBasedOnAvailability(marker.availability)}>{marker.availability}</Text>%</Text>
                                     <CustomButton
+                                        onPress={() => {
+                                            setSelectedBuilding(marker);
+                                            setMakeReservation(true);
+                                        }}
                                         textStyle="font-bold text-lg text-white"
                                         className="w-5/12 h-12 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg"
                                         android_ripple={{color: ''}}
@@ -72,6 +80,19 @@ export default function StationsPage() {
                 }
                 
             </ScrollView>
+
+            <Modal
+                transparent
+                animationType="slide"
+                visible={makeReservation}
+                onRequestClose={() => setMakeReservation(false)}
+            >
+                <BlurView intensity={10} className="flex-1 justify-end items-center" tint="dark">            
+                    <MakeReservationPage exitModal={() => setMakeReservation(false)} building={selectedBuilding} />
+                </BlurView>
+            </Modal>
+            
+
         </SafeAreaView>
     )
 }

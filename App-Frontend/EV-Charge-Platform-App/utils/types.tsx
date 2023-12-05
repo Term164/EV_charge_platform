@@ -92,6 +92,11 @@ type ProfilePageProps = {
   exitModal: () => void;
 }
 
+type MakeReservationPageProps = {
+  exitModal: () => void
+  building: Building
+}
+
 const mapStyle = [
     {
       "featureType": "administrative",
@@ -144,5 +149,6 @@ export {
     Reservation,
     ChargingType,
     mapStyle,
-    ProfilePageProps
+    ProfilePageProps,
+    MakeReservationPageProps
 }

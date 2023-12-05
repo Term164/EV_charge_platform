@@ -12,11 +12,11 @@ export class TextInputWithTitle extends React.Component<TextWithInputTitleProps>
     render(): React.ReactNode {
         return (
             <View className={this.props.mainViewClassNames != undefined ? this.props.mainViewClassNames : ''}>
-            <Text className={this.props.titleClassNames != undefined ? this.props.titleClassNames : ''}>{this.props.title}</Text>
-            <View className={this.props.innerViewClassNames != undefined ? this.props.innerViewClassNames : ''}>
-                <TextInput {...this.props}></TextInput>
+                <Text className={this.props.titleClassNames != undefined ? this.props.titleClassNames : ''}>{this.props.title}</Text>
+                <View className={this.props.innerViewClassNames != undefined ? this.props.innerViewClassNames : ''}>
+                    <TextInput {...this.props}></TextInput>
+                </View>
             </View>
-        </View>
         )
     }
 }
