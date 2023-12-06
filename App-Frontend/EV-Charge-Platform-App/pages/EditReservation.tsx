@@ -44,7 +44,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
     }
 
     return(
-        <View className="p-5 bg-slate-100 rounded-xl rounded-t-none border-t-blue-400 border-t-8">
+        <View className="p-5 flex-1 bg-slate-100 rounded-xl rounded-t-none">
             <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">Editing reservation</Text>
             <Text className="text-lg font-semibold text-gray-800 uppercase">{reservation.building.name}</Text>
             <Text className="text-base font-medium text-gray-500">{reservation.building.address}</Text>
