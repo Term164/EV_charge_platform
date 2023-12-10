@@ -18,7 +18,7 @@ export default function SettingsPage() {
     const [editProfile, setEditProfile] = useState(false);
 
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState('english');
+    const [value, setValue] = useState('eng');
     const [items, setItems] = useState([
         {label: 'English', value: 'eng', icon: () => <UKIcon width={30} height={32} style={{}} />},
         {label: 'Slovenščina', value: 'slo', icon: () => <SloveniaIcon width={32} height={30} />}

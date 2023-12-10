@@ -157,5 +157,5 @@ export {
     mapStyle,
     ProfilePageProps,
     MakeReservationPageProps,
-    EditReservationPageProps
+    EditReservationPageProps,
   }

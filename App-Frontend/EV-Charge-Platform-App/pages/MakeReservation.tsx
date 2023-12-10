@@ -53,7 +53,7 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
     }
 
     return(
-        <View className="p-5 bg-slate-100 rounded-xl rounded-t-none border-t-blue-400 border-t-8">
+        <View className="flex-1 p-5 bg-slate-100">
             <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">Making new reservation</Text>
             <Text className="text-lg font-semibold text-gray-800 uppercase">{building.name}</Text>
             <Text className="text-base font-medium text-gray-500">{building.address}</Text>

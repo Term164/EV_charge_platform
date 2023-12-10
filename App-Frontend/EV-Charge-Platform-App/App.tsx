@@ -1,20 +1,18 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
-import { BottomTabScreenProps ,createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import SignInScreen from './pages/SignInScreen';
 import SignUpScreen from './pages/SignUpScreen';
 import Dashboard from './pages/Dashboard';
 import Map from './pages/Map';
 import Stations from './pages/Stations';
 import Settings from './pages/Settings';
-import Profile from './pages/Profile';
 import React, { useReducer } from 'react';
 import { AppStateReducer, AuthContext } from './utils/GlobalStateContext';
 import { AppState, IoniconIconName, RootStackParamList } from './utils/types';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuthContextFunctions } from './utils/authentication';
 import { ToastProvider } from 'react-native-toast-notifications';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const startingState: AppState = {

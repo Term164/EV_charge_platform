@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, Modal, Alert, Button, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, Modal } from "react-native";
 import { reservations } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,10 +11,12 @@ import { useToast } from "react-native-toast-notifications";
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { BlurView } from "expo-blur";
 import EditReservationPage from "./EditReservation";
+import { customStyle } from "../utils/styles";
 import {
     BottomSheetModal,
     BottomSheetModalProvider,
   } from '@gorhom/bottom-sheet';
+import CustomBackdrop from "../components/CustomBackdrop";
 
 function ordinal_suffix_of(i: number) {
     var j = i % 10,
@@ -48,9 +50,10 @@ export default function DashboardPage() {
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
     }, []);
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-    }, []);
+
+    const handleCloseModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.dismiss();
+    }, [])
 
 
     const getReservationStatus = (reservation: Reservation) => {
@@ -89,16 +92,16 @@ export default function DashboardPage() {
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
             <BottomSheetModalProvider>
-
                 <BottomSheetModal
                         ref={bottomSheetModalRef}
                         index={1}
                         snapPoints={snapPoints}
-                        onChange={handleSheetChanges}
-                        handleStyle={{backgroundColor: '#60a5fa', borderTopLeftRadius: 20, borderTopRightRadius: 20}}
+                        backgroundStyle={customStyle.reservationModalHandle}
+                        handleStyle={customStyle.reservationModalHandle}
+                        backdropComponent={CustomBackdrop}
                         handleIndicatorStyle={{backgroundColor: 'white'}}
                     >
-                        <EditReservationPage exitModal={() => {}} reservation={selectedReservation} />
+                        <EditReservationPage exitModal={handleCloseModalPress} reservation={selectedReservation} />
                 </BottomSheetModal>
             
                 <Modal

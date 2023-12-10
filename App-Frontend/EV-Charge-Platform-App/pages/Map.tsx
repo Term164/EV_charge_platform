@@ -1,6 +1,6 @@
 import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal } from "react-native";
 import MapView, {Callout, MapMarker} from "react-native-maps";
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { markers } from "../utils/markers";
 import { Building, mapStyle } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
@@ -8,6 +8,11 @@ import { searchBuildingsByName } from "../utils/search";
 import { BackHandler } from "react-native";
 import { BlurView } from "expo-blur";
 import MakeReservationPage from "./MakeReservation";
+import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { customStyle } from "../utils/styles";
+import CustomBackdrop from "../components/CustomBackdrop";
+import * as Animatable from 'react-native-animatable';
+import CustomButton from "../components/CustomButton";
 
 const {width, height} = Dimensions.get('window');
 
@@ -42,8 +47,10 @@ export default class MapScreen extends React.Component<any, any> {
             searchBarSelected: false,
             filteredBuildings: markers,
             searching: false,
-            makeReservation: false,
-            selectedBuilding: markers[0]
+            selectedBuilding: markers[0],
+            bottomSheetModalRef: React.createRef(),
+            isItemSelected: true,
+            ModalShowing: false
         };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -114,114 +121,146 @@ export default class MapScreen extends React.Component<any, any> {
 
         const mapReadyCallout = () => {
             if(this.firstMarker) {
-                setTimeout(() => this.firstMarker.showCallout(), 0)
+                setTimeout(() => this.firstMarker?.showCallout(), 0)
             }
                 
         }
 
-        const exitModal = () => {
-            this.setState({makeReservation: true});
+        // variables
+        const snapPoints = ['25%', '80%', '100%'];
+
+        // callbacks
+
+        const handleCloseModalPress = () => {
+            this.state.bottomSheetModalRef.current?.dismiss();
+        }
+    
+        const handlePresentModalPress = () => {
+            this.setState({isItemSelected: false, ModalShowing: true});
+            this.state.bottomSheetModalRef.current?.present();
+        }
+
+
+        // Animated Button
+
+        let makeReservationButton;
+
+        if (this.state.isItemSelected) {
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideInUp"><CustomButton onPress={handlePresentModalPress} textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >MAKE RESERVATION</CustomButton></Animatable.View>
+        } else {
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >MAKE RESERVATION</CustomButton></Animatable.View>
         }
 
         return (
             <View className="justify-center items-center flex-1">
-                <MapView
-                    ref={map => this.map = map}
-                    onMapReady={mapReadyCallout}
-                    className="w-full h-full"
-                    initialRegion={region}
-                    showsCompass={false}
-                    showsBuildings={false}
-                    showsIndoors={false}
-                    customMapStyle={mapStyle}
-                >
-    
-                    {
-                        markers.map((marker, index) => {
-                            const scaleStyle = {
-                                transform: [
-                                    {
-                                        scale: index === this.state.index ? 1.5 : 1
-                                    }
-                                ]
-                            }
+                <BottomSheetModalProvider>
+                    <MapView
+                        ref={map => this.map = map}
+                        onMapReady={mapReadyCallout}
+                        className="w-full h-full"
+                        initialRegion={region}
+                        showsCompass={false}
+                        showsBuildings={false}
+                        showsIndoors={false}
+                        customMapStyle={mapStyle}
+                        onPanDrag={() => {if(this.state.isItemSelected)this.setState({isItemSelected: false});}}
+                    >
+        
+                        {
+                            markers.map((marker, index) => {
+                                const scaleStyle = {
+                                    transform: [
+                                        {
+                                            scale: index === this.state.index ? 1.5 : 1
+                                        }
+                                    ]
+                                }
 
-                            const opacityStlye = {
-                                opacity: this.state.index === index ? 1 : 0.35
-                            }
+                                const opacityStlye = {
+                                    opacity: this.state.index === index ? 1 : 0.35
+                                }
 
-                            const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(marker.availability);
-                            const markerStyle = "w-2 h-2 rounded-full absolute " + this.getDeepColorBasedOnAvailability(marker.availability);
+                                const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(marker.availability);
+                                const markerStyle = "w-2 h-2 rounded-full absolute " + this.getDeepColorBasedOnAvailability(marker.availability);
 
-                            return (
-                                <MapMarker
-                                    ref={marker => {
-                                        if (this.state.index === index)
-                                            this.firstMarker = marker;
-                                    }}
-                                    onPress={() => {this.setState({index: index})}}
-                                    key={index} 
-                                    coordinate={marker.coordinate}
-                                    title={marker.name}
-                                    description={marker.address}
-                                >
-                                    <Animated.View className="w-9 h-9 items-center justify-center" style={opacityStlye}>
-                                        <Animated.View className={ringStyle} style={scaleStyle} />
-                                        <View className={markerStyle} />
-                                    </Animated.View>
-                                    <Callout
-                                        alphaHitTest
-                                        tooltip={true}
-                                        onPress={_ => {this.setState({selectedBuilding: marker, makeReservation: true})}}
-                                        className="w-56 pb-3"
+                                return (
+                                    <MapMarker
+                                        ref={marker => {
+                                            if (this.state.index === index)
+                                                this.firstMarker = marker;
+                                        }}
+                                        onPress={() => {this.setState({index: index, selectedBuilding: marker, isItemSelected: true})}}
+                                        key={index} 
+                                        coordinate={marker.coordinate}
+                                        title={marker.name}
+                                        description={marker.address}
                                     >
-                                        <View className="bg-white rounded-lg w-full h-full p-2 border border-slate-300">
-                                            <Text className="text-gray-800 text-sm">{marker.name}</Text>
-                                            <View className="flex-row justify-between items-center">
-                                                <Text className="text-gray-500 text-xs">{marker.address}</Text>
-                                                <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(marker.availability)}>{marker.availability} %</Text>
+                                        <Animated.View className="w-9 h-9 items-center justify-center" style={opacityStlye}>
+                                            <Animated.View className={ringStyle} style={scaleStyle} />
+                                            <View className={markerStyle} />
+                                        </Animated.View>
+                                        <Callout
+                                            alphaHitTest
+                                            tooltip={true}
+                                            onPress={handlePresentModalPress}
+                                            className="w-56 pb-3"
+                                        >
+                                            <View className="bg-white rounded-lg w-full h-full p-2 border border-slate-300">
+                                                <Text className="text-gray-800 text-sm">{marker.name}</Text>
+                                                <View className="flex-row justify-between items-center">
+                                                    <Text className="text-gray-500 text-xs">{marker.address}</Text>
+                                                    <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(marker.availability)}>{marker.availability} %</Text>
+                                                </View>
                                             </View>
-                                        </View>
-                                    </Callout>
-                                </MapMarker>
-                            )
-                        })
+                                        </Callout>
+                                    </MapMarker>
+                                )
+                            })
+                        }
+
+                    </MapView>
+                    {
+                        // Search bar visible logic
+                        !this.state.ModalShowing ? 
+                        <SearchBar
+                            className="absolute top-8 m-3 w-11/12 h-12 z-10" 
+                            fontSize={20}
+                            placeholderTextColor="#9ca3af"
+                            spinnerVisibility={this.state.searching}
+                            placeholder="Search here"
+                            onClearPress={() => {this.setState({searchBarSelected: false})}}
+                            onChangeText={(text) => {
+                                if (text.length === 0) 
+                                    this.setState({searchBarSelected: false})
+                                else 
+                                    filterBuildings(text)
+                                    
+                            }}
+                            /> : <></>
                     }
-
-                </MapView>
-                <SearchBar 
-                    className="absolute top-8 m-3 w-11/12 h-12 z-10" 
-                    fontSize={20}
-                    placeholderTextColor="#9ca3af"
-                    spinnerVisibility={this.state.searching}
-                    placeholder="Search here"
-                    onClearPress={() => {this.setState({searchBarSelected: false})}}
-                    onChangeText={(text) => {
-                        if (text.length === 0) 
-                            this.setState({searchBarSelected: false})
-                        else 
-                            filterBuildings(text)
-                            
-                    }}
-                />
-                {
-
-                    this.state.searchBarSelected ? 
-                        <View className="absolute pt-2 left-0 top-0 z-0 w-full h-full bg-slate-100">
-                            {searchWindow}
-                        </View> 
-                        : <></>
-                }
-                <Modal
-                    transparent
-                    animationType="slide"
-                    visible={this.state.makeReservation}
-                    onRequestClose={() => this.setState({makeReservation: false})}
-                >
-                    <BlurView intensity={10} className="flex-1 justify-end items-center" tint="dark">            
-                        <MakeReservationPage exitModal={() => exitModal()} building={this.state.selectedBuilding} />
-                    </BlurView>
-                </Modal>
+                    {
+                        // Search bar modal visible logic
+                        this.state.searchBarSelected ? 
+                            <View className="absolute pt-2 left-0 top-0 z-0 w-full h-full bg-slate-100">
+                                {searchWindow}
+                            </View> 
+                            : <></>
+                    }
+                    <BottomSheetModal
+                            ref={this.state.bottomSheetModalRef}
+                            index={1}
+                            snapPoints={snapPoints}
+                            backgroundStyle={customStyle.reservationModalHandle}
+                            handleStyle={customStyle.reservationModalHandle}
+                            backdropComponent={CustomBackdrop}
+                            handleIndicatorStyle={{backgroundColor: 'white'}}
+                            onDismiss={() => {this.setState({ModalShowing: false})}}
+                        >
+                            <MakeReservationPage exitModal={handleCloseModalPress} building={this.state.selectedBuilding} />
+                    </BottomSheetModal>
+                    
+                </BottomSheetModalProvider>
+                {makeReservationButton}
             </View>
             
         )   
