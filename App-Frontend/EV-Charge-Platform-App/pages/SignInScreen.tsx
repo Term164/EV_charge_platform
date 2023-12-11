@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Button, Image, Pressable, Alert,} from "react-native";
+import React, { useState } from "react";
+import { View, Text, Image, Pressable, Alert,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import { SignInScreenProps } from "../utils/types";
 import { AuthContext } from "../utils/GlobalStateContext";
-
-
-type Response = {
-    status: number,
-    message: string,
-    error: string,
-    data: object
-}
+import { useTranslation } from "react-i18next";
 
 export default function SignInScreen({ route, navigation }: SignInScreenProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const { signIn } = React.useContext(AuthContext);
+
+    const { t } = useTranslation();
+
     // const [data, setData] = useState<Response>();
     
     // const testFetch = async () => {
@@ -56,8 +52,8 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                 className=""
             />
 
-            <Text className="text-black font-bold text-4xl">Welcome Back</Text>
-            <Text className="text-gray-500 ml-1 mb-16 font-bold text-lg">Sign in to continue</Text>
+            <Text className="text-black font-bold text-4xl">{t("signInWelcome")}</Text>
+            <Text className="text-gray-500 ml-1 mb-16 font-bold text-lg">{t("signInSubHeader")}</Text>
 
             <View>
                 <TextInputWithIcon 
@@ -65,7 +61,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                     iconName='person' 
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Username or Email"
+                    placeholder={t("usernameEmailInputPlaceholder")}
                     onChangeText={newUsername => setUsername(newUsername)}
                     defaultValue={username}
                 />
@@ -76,7 +72,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                     iconName='lock-closed' 
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Password"
+                    placeholder={t("passInputPlaceholder")}
                     onChangeText={newPassword => setPassword(newPassword)}
                     defaultValue={password}
                 />
@@ -86,20 +82,20 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                     onPress={() => signIn(username, password)}
                     textStyle="font-bold text-lg text-white tracking-widest"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500" 
-                    android_ripple={{color: ''}}>SIGN IN</CustomButton>
+                    android_ripple={{color: ''}}>{t('signInButtonText')}</CustomButton>
 
             <Pressable 
                 onPress={() => navigation.navigate('SignUpScreen')}
                 className="justify-center mt-10"
             >
-                <Text>Don't have an account yet?  <Text className="font-bold underline text-base">Sign up</Text> </Text>
+                <Text>{t('registerTextNormal')} <Text className="font-bold underline text-base">{t('registerTextBold')}</Text></Text>
             </Pressable>
 
             <Pressable 
                     onPress={() => Alert.alert('Forgot password')}
                     className="justify-center mt-5"
                 >
-                    <Text className="text-gray-500 text-sm">Forgot Password?</Text>
+                    <Text className="text-gray-500 text-sm">{t('forgotPassword')}</Text>
             </Pressable>
             
 

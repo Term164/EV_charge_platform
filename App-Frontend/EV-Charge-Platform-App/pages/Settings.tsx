@@ -10,6 +10,7 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from "../utils/GlobalStateContext";
 import Profile from '../pages/Profile';
+import { useTranslation } from "react-i18next";
 
 
 export default function SettingsPage() {
@@ -23,6 +24,8 @@ export default function SettingsPage() {
         {label: 'English', value: 'eng', icon: () => <UKIcon width={30} height={32} style={{}} />},
         {label: 'Slovenščina', value: 'slo', icon: () => <SloveniaIcon width={32} height={30} />}
     ]);
+
+    const { t } = useTranslation();
 
     // Auth context
     const { signOut } = React.useContext(AuthContext);
@@ -49,8 +52,8 @@ export default function SettingsPage() {
                         <View className="flex-row items-center">
                             <Ionicons name="person-circle-outline" size={32} color={'#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">Personal Information</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">Edit your profile</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800">{t('personalInfo')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500">{t('editProfile')}</Text>
                             </View>
                         </View>
                         <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
@@ -66,8 +69,8 @@ export default function SettingsPage() {
                         <View className="flex-row items-center">
                             <Ionicons name={notifications ? 'notifications-circle-outline' : 'notifications-off-circle-outline'} size={32} color={'#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">Notifications</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">{notifications ? 'On' : 'Off'}</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800">{t('notifications')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500">{notifications ? t('on') : t('off')}</Text>
                             </View>
                         </View>
                         <ToggleSwitch
@@ -80,7 +83,7 @@ export default function SettingsPage() {
                 </View>
 
                 <View style={{borderBottomWidth: 1.2}} className="border-gray-600/50 my-5 w-11/12"/>
-                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">Interface</Text>
+                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">{t('interface')}</Text>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl">
                     <Pressable 
@@ -91,21 +94,21 @@ export default function SettingsPage() {
                         <View className="flex-row items-center">
                             <Ionicons name='contrast-outline' size={32} color={'#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">Theme</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">{darkMode ? 'Dark' : 'Light'}</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800">{t('theme')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500">{darkMode ? t('dark') : t('light')}</Text>
                             </View>
                         </View>
                         <ToggleSwitch
                             isOn={darkMode}
                             onColor={'#3b82f6'}
                             offColor={'#9ca3af'}
-                            onToggle={isOn => {setNotifications(isOn)}}
+                            onToggle={isOn => {setDarkMode(isOn)}}
                         />
                     </Pressable>
                 </View>
 
                 <View className="w-11/12 h-16 bg-gray-300/70 rounded-2xl mt-3 z-10 relative">
-                    <Text className="text-base font-medium ml-4 text-gray-800 absolute left-10 top-2">Language</Text>
+                    <Text className="text-base font-medium ml-4 text-gray-800 absolute left-10 top-2">{t('language')}</Text>
                     <DropDownPicker
                         open={open}
                         value={value}
@@ -126,7 +129,7 @@ export default function SettingsPage() {
                 </View>
 
                 <View style={{borderBottomWidth: 1.2}} className="border-gray-600/50 my-5 w-11/12"/>
-                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">Service</Text>
+                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">{t('service')}</Text>
 
                 <View className="w-11/12 overflow-hidden rounded-2xl">
                     <Pressable 
@@ -135,7 +138,7 @@ export default function SettingsPage() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="lock-closed-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">Privacy & Security</Text>
+                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('pp')}</Text>
                         </View>
                         <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
                     </Pressable>
@@ -148,7 +151,7 @@ export default function SettingsPage() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="help-circle-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">Help</Text>
+                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('help')}</Text>
                         </View>
                         <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
                     </Pressable>
@@ -161,7 +164,7 @@ export default function SettingsPage() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="information-circle-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">About</Text>
+                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('about')}</Text>
                         </View>
                         <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
                     </Pressable>
@@ -177,7 +180,7 @@ export default function SettingsPage() {
                     >
                         <View className="flex-row items-center">
                             <Ionicons name="log-out-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">Log out</Text>
+                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('logout')}</Text>
                         </View>
                         <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
                     </Pressable>

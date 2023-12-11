@@ -12,6 +12,7 @@ import { customStyle } from "../utils/styles";
 import CustomBackdrop from "../components/CustomBackdrop";
 import * as Animatable from 'react-native-animatable';
 import CustomButton from "../components/CustomButton";
+import { useTranslation, withTranslation } from "react-i18next";
 
 const {width, height} = Dimensions.get('window');
 
@@ -28,7 +29,7 @@ const region = {
     longitudeDelta: LONGITUDE_DELTA
 }
 
-export default class MapScreen extends React.Component<any, any> {
+class MapScreen extends React.Component<any, any> {
 
     animation: Animated.Value;
     regionTimeout: NodeJS.Timeout;
@@ -87,7 +88,7 @@ export default class MapScreen extends React.Component<any, any> {
     }
 
     render(): React.ReactNode {
-
+        const { t } = this.props;
         const filterBuildings = async (searchWord: string) => {
             if (!this.state.searchBarSelected)
                 this.setState({searchBarSelected: true})
@@ -145,9 +146,9 @@ export default class MapScreen extends React.Component<any, any> {
         let makeReservationButton;
 
         if (this.state.isItemSelected) {
-            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideInUp"><CustomButton onPress={handlePresentModalPress} textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >MAKE RESERVATION</CustomButton></Animatable.View>
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideInUp"><CustomButton onPress={handlePresentModalPress} textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         } else {
-            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >MAKE RESERVATION</CustomButton></Animatable.View>
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         }
 
         return (
@@ -226,7 +227,7 @@ export default class MapScreen extends React.Component<any, any> {
                             fontSize={20}
                             placeholderTextColor="#9ca3af"
                             spinnerVisibility={this.state.searching}
-                            placeholder="Search here"
+                            placeholder={t('searchHere')}
                             onClearPress={() => {this.setState({searchBarSelected: false})}}
                             onChangeText={(text) => {
                                 if (text.length === 0) 
@@ -265,3 +266,5 @@ export default class MapScreen extends React.Component<any, any> {
         )   
     }
 }
+
+export default withTranslation()(MapScreen);

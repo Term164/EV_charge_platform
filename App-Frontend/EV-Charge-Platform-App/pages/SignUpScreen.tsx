@@ -3,6 +3,7 @@ import { View, Text, Image,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
+import { useTranslation } from "react-i18next";
 
 
 type Response = {
@@ -17,6 +18,7 @@ export default function SignInScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const { t } = useTranslation();
     // const [data, setData] = useState<Response>();
     
     // const testFetch = async () => {
@@ -57,7 +59,7 @@ export default function SignInScreen() {
                 className=""
             />
 
-            <Text className="text-black font-bold text-4xl mb-10 mt-5 ">Create account</Text>
+            <Text className="text-black font-bold text-4xl mb-10 mt-5 ">{t('createAccount')}</Text>
 
             <View>
                 <TextInputWithIcon 
@@ -65,7 +67,7 @@ export default function SignInScreen() {
                     iconName='person' 
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Username"
+                    placeholder={t('usernameInputPlaceholder')}
                     onChangeText={newUsername => setUsername(newUsername)}
                     defaultValue={username}
                 />
@@ -74,7 +76,7 @@ export default function SignInScreen() {
                     iconName='mail'
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Email"
+                    placeholder={t('emailInputPlaceholder')}
                     onChangeText={newEmail => setEmail(newEmail)}
                     defaultValue={email}
                 />
@@ -85,7 +87,7 @@ export default function SignInScreen() {
                     iconName='lock-closed' 
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Password"
+                    placeholder={t('passwordInputPlaceholder')}
                     onChangeText={newPassword => setPassword(newPassword)}
                     defaultValue={password}
                 />
@@ -96,7 +98,7 @@ export default function SignInScreen() {
                     iconName='lock-closed' 
                     iconSize={20} 
                     className="flex-1 text-center text-lg font-bold text-gray-800" 
-                    placeholder="Confirm password"
+                    placeholder={t('confirmPassInputPlaceholder')}
                     onChangeText={newConfirmPassword => setConfirmPassword(newConfirmPassword)}
                     defaultValue={confirmPassword}
                 />
@@ -106,7 +108,7 @@ export default function SignInScreen() {
              <CustomButton
                     textStyle="font-bold text-lg text-white tracking-widest"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500" 
-                    android_ripple={{color: ''}}>SIGN UP</CustomButton>
+                    android_ripple={{color: ''}}>{t('signUpButtonText')}</CustomButton>
             
 
         </SafeAreaView>

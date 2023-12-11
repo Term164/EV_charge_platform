@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import DropDownPicker from "react-native-dropdown-picker";
 import { getConnectorIcon } from "../utils/utils";
+import { useTranslation } from "react-i18next";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -32,6 +33,8 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
         {label: 'Tesla', value: 'tesla', icon: () => getConnectorIcon(ChargingType.TESLASUC)}
     ]);
 
+    const { t } = useTranslation();
+
     const selectedHourStyle = "basis-4/12 bg-blue-200 py-4 rounded-md shadow-lg shadow-black";
     const hourStyle = "basis-3/12 bg-gray-200 py-2 rounded-md shadow-lg";
 
@@ -45,12 +48,12 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
 
     return(
         <View className="p-5 flex-1 bg-slate-100">
-            <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">Editing reservation</Text>
+            <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">{t('editingReservation')}</Text>
             <Text className="text-lg font-semibold text-gray-800 uppercase">{reservation.building.name}</Text>
             <Text className="text-base font-medium text-gray-500">{reservation.building.address}</Text>
-            <Text className="font-semibold text-lg text-gray-600 mb-2">Availability for this building is at <Text className={getTextColorBasedOnAvailability(reservation.building.availability)}>{reservation.building.availability}</Text>%</Text>
+            <Text className="font-semibold text-lg text-gray-600 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(reservation.building.availability)}>{reservation.building.availability}</Text>%</Text>
 
-            <Text className="text-gray-600 text-xl mb-1">Type</Text>
+            <Text className="text-gray-600 text-xl mb-1">{t('type')}</Text>
             <DropDownPicker
                         placeholder="Charger type"
                         placeholderStyle={{color: '#6b7280', fontSize: 20}}
@@ -65,7 +68,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
                         showArrowIcon={true}
                         itemSeparator={true}/>
             <View className="mt-2">
-                <Text className="text-gray-600 text-xl mb-1">Date</Text>
+                <Text className="text-gray-600 text-xl mb-1">{t('date')}</Text>
                 <View className="rounded-md overflow-hidden">
                     <Pressable
                         android_ripple={{color: ''}}
@@ -99,7 +102,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
 
             <View className="flex flex-row mt-4 justify-evenly w-full">
                 <View className="flex-row items-center">
-                    <Text className="text-gray-600 text-xl mb-1 mr-1">From</Text>
+                    <Text className="text-gray-600 text-xl mb-1 mr-1">{t('from')}</Text>
                     <View className="rounded-md overflow-hidden">
                         <Pressable
                             android_ripple={{color: ''}}
@@ -133,7 +136,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
                 </View>
 
                 <View className="flex-row items-center">
-                    <Text className="text-gray-600 text-xl mb-1 ml-2 mr-1">To</Text>
+                    <Text className="text-gray-600 text-xl mb-1 ml-2 mr-1">{t('to')}</Text>
                     <View className="rounded-md overflow-hidden">
                         <Pressable
                             android_ripple={{color: ''}}
@@ -170,7 +173,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
 
             {
                 endTime.getHours() - startTime.getHours() > 3 ? <View>
-                                    <Text className="text-gray-600 self-center text-xl mt-3">Desired length of Reservation:</Text>
+                                    <Text className="text-gray-600 self-center text-xl mt-3">{t('desiredLength')}</Text>
 
                                     <View className="flex flex-row gap-x-4 items-center justify-center mt-2">
                                         <Pressable className={numOfHours == 1 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(1)}><Text className="text-center text-2xl font-semibold">1h</Text></Pressable>
@@ -188,7 +191,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
                                             className="w-28 py-2 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
                                             android_ripple={{color: ''}}
                                         >
-                                        CONFIRM
+                                        {t('confirm')}
                                     </CustomButton>
                                     : <></>
                 }
@@ -200,7 +203,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
                     className="w-28 py-2 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
                     android_ripple={{color: ''}}
                 >
-                    CANCEL
+                    {t('cancel')}
                 </CustomButton>
             </View>
             

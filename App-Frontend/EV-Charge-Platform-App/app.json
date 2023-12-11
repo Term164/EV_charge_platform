@@ -4,10 +4,10 @@
     "slug": "EV-Charge-Platform-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/Logo/Charge-Mate-Logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/Logo/Charge-Mate-Logo-Full.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

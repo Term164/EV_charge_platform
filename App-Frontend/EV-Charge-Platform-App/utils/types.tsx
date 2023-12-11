@@ -1,5 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from '@expo/vector-icons';
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
 type HomeTabParamList = {
     Dashboard: undefined;
@@ -39,6 +40,21 @@ type IoniconIconName = React.ComponentProps<typeof Ionicons>['name'];
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignInScreen'>
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpScreen'>
+type NoReservationsPageProps = BottomTabScreenProps<HomeTabParamList, 'Dashboard'>
+
+type ProfilePageProps = {
+  exitModal: () => void;
+}
+
+type MakeReservationPageProps = {
+  exitModal: () => void
+  building: Building
+}
+
+type EditReservationPageProps = {
+  exitModal: () => void
+  reservation: Reservation;
+}
 
 // Station types
 
@@ -90,20 +106,6 @@ type Reservation = {
   reservation_status: ReservationStatus
 }
 
-type ProfilePageProps = {
-  exitModal: () => void;
-}
-
-type MakeReservationPageProps = {
-  exitModal: () => void
-  building: Building
-}
-
-type EditReservationPageProps = {
-  exitModal: () => void
-  reservation: Reservation;
-}
-
 const mapStyle = [
     {
       "featureType": "administrative",
@@ -141,9 +143,17 @@ const mapStyle = [
     }
   ]
 
+type Response = {
+  status: number,
+  message: string,
+  error: string,
+  data: object
+}
+
 export {
     SignInScreenProps,
     SignUpScreenProps,
+    NoReservationsPageProps,
     AppState,
     StateAction,
     StateActionKind,

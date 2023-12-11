@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, Modal } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect } from "react";
@@ -6,9 +6,9 @@ import CustomButton from "../components/CustomButton";
 import { AuthContext } from "../utils/GlobalStateContext";
 import { TextInputWithTitle } from "../components/TextInputWithTitle";
 import { Pressable } from "react-native";
-import { ViewBase } from "react-native";
 import { useToast } from 'react-native-toast-notifications'
 import { ProfilePageProps } from "../utils/types";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -17,6 +17,8 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
     const [email, setEmail] = useState('');
     const [rfid, setRfid] = useState(null);
     const [isEditable, setIsEditable] = useState(false)
+
+    const { t } = useTranslation();
 
     const toast = useToast();
 
@@ -30,7 +32,7 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
             <Ionicons name={'person-circle-outline'} size={120}/>
 
             <TextInputWithTitle
-                title="Username"
+                title={t('usernameInputPlaceholder')}
                 titleClassNames="text-gray-600 text-xl mb-1"
                 innerViewClassNames="shadow-xl shadow-black border-transparent"
                 mainViewClassNames="w-full"
@@ -41,7 +43,7 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
             />
 
             <TextInputWithTitle
-                title="Email"
+                title={t('emailInputPlaceholder')}
                 titleClassNames="text-gray-600 text-xl mb-1"
                 innerViewClassNames="shadow-xl shadow-black border-transparent"
                 mainViewClassNames="w-full mt-5"
@@ -55,7 +57,7 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
                 <View className="flex-col">
                     <Text className="text-gray-600 text-xl">RFID: </Text>
                     <View className="flex-row items-center">
-                        <Text className="text-black text-xl">{rfid === null ? 'Not Assigned' : 'Assigned'}</Text>
+                        <Text className="text-black text-xl">{rfid === null ? t('notAssigned') : t('assigned')}</Text>
                         <Pressable className="mt-1 ml-2" 
                             onPress={() => toast.show('Contact your company administrator to get assigned an RFID.', 
                                 {
@@ -67,9 +69,9 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
                 </View>
 
                 <View className="flex-col">
-                    <Text className="text-gray-600 text-xl">Company: </Text>
+                    <Text className="text-gray-600 text-xl">{t('company')}: </Text>
                     <View className="flex-row items-center">
-                        <Text className="text-black text-xl">{rfid === null ? 'Not Assigned' : rfid}</Text>
+                        <Text className="text-black text-xl">{rfid === null ? t('notAssigned') : rfid}</Text>
                         <Pressable className="mt-1 ml-2"
                             onPress={() => toast.show('Contact your company administrator to get assigned as a company employee.', 
                             {
@@ -103,20 +105,20 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
                     }
                     setIsEditable(!isEditable)
                 }}
-                textStyle="font-bold text-lg text-white"
+                textStyle="font-bold text-lg text-white tracking-widest"
                 className="h-12 w-8/12 text-center items-center justify-center rounded-lg mt-8 bg-blue-500"
                 android_ripple={{color: ''}}>
-                {isEditable ? 'SAVE' : 'EDIT'}
+                {isEditable ? t('save') : t('editButtonText')}
             </CustomButton>
 
             {
                 isEditable ? (<></>) :
                 (<CustomButton
                     onPress={() => {exitModal()}}
-                    textStyle="font-bold text-lg text-white"
+                    textStyle="font-bold text-lg text-white tracking-widest"
                     className="h-12 w-8/12 text-center items-center justify-center rounded-lg mt-4 bg-red-500"
                     android_ripple={{color: ''}}>
-                    CANCEL
+                    {t('cancel')}
                 </CustomButton>)
             }
             

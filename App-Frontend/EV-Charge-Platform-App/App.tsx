@@ -9,11 +9,13 @@ import Stations from './pages/Stations';
 import Settings from './pages/Settings';
 import React, { useReducer } from 'react';
 import { AppStateReducer, AuthContext } from './utils/GlobalStateContext';
-import { AppState, IoniconIconName, RootStackParamList } from './utils/types';
+import { AppState, HomeTabParamList, IoniconIconName, RootStackParamList } from './utils/types';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuthContextFunctions } from './utils/authentication';
 import { ToastProvider } from 'react-native-toast-notifications';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import './translation'
+import { useTranslation } from 'react-i18next';
 
 const startingState: AppState = {
   isLoading: true,
@@ -22,12 +24,12 @@ const startingState: AppState = {
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<HomeTabParamList>();
 
 export default function App() {
   const [state, dispatch] = useReducer(AppStateReducer, startingState);
   const authContext = getAuthContextFunctions(dispatch);
-
+  const { t } = useTranslation();
 
   return(
     
@@ -43,13 +45,13 @@ export default function App() {
                   tabBarIcon: ({ focused, color, size }) => {
                     let iconName: IoniconIconName = 'close-circle-outline';
 
-                    if (route.name === 'Dashboard') {
+                    if (route.name === t('dashboard')) {
                       iconName = focused ? 'home' : 'home-outline';
-                    } else if (route.name === 'Map') {
+                    } else if (route.name === t('map')) {
                       iconName = focused ? 'map' : 'map-outline';
-                    } else if (route.name === 'Stations') {
+                    } else if (route.name === t('stations')) {
                       iconName = focused ? 'battery-charging' : 'battery-charging-outline';
-                    } else if (route.name === 'Settings') {
+                    } else if (route.name === t('settings')) {
                       iconName = focused ? 'settings' : 'settings-outline';
                     }
                     // You can return any component that you like here!
@@ -58,10 +60,10 @@ export default function App() {
                   tabBarInactiveTintColor: 'gray',
                 })}
               >
-                <Tab.Screen name='Dashboard' component={Dashboard}/>
-                <Tab.Screen name='Map' component={Map}/>
-                <Tab.Screen name='Stations' component={Stations}/>
-                <Tab.Screen name='Settings' component={Settings}/>
+                <Tab.Screen name={t('dashboard')} component={Dashboard}/>
+                <Tab.Screen name={t('map')} component={Map}/>
+                <Tab.Screen name={t('stations')} component={Stations}/>
+                <Tab.Screen name={t('settings')} component={Settings}/>
               </Tab.Navigator>
               ) : (
                 <Stack.Navigator

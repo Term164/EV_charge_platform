@@ -12,6 +12,7 @@ import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet
 import { customStyle } from "../utils/styles";
 import CustomBackdrop from "../components/CustomBackdrop";
 import NoStationsPage from "./NoStationsPage";
+import { useTranslation } from "react-i18next";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -26,6 +27,8 @@ function getTextColorBasedOnAvailability(availability: number) {
 export default function StationsPage() {
     const [buildings, setBuildings] = useState(markers);
     const [selectedBuilding, setSelectedBuilding] = useState(markers[0]);
+
+    const { t } = useTranslation();
 
     const filterBuildings = (searchWord: string) => {
         setBuildings(searchBuildingsByName(searchWord, markers));
@@ -55,7 +58,7 @@ export default function StationsPage() {
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
             <BottomSheetModalProvider>
-                <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 20}} placeholderTextColor="#9ca3af" placeholder="Search here"/>
+                <SearchBar onChangeText={(text) => filterBuildings(text)} className="m-3 w-11/12 h-12" textInputStyle={{fontSize: 20}} placeholderTextColor="#9ca3af" placeholder={t('searchHere')}/>
                 <ScrollView 
                     className="w-full h-full"
                 >
@@ -79,14 +82,14 @@ export default function StationsPage() {
                                                             {getConnectorIcon(Connector.chargingType)}
                                                             <Text className="ml-1 font-semibold text-lg text-gray-800">{Connector.watts} kW</Text>
                                                         </View>
-                                                        <Text className="font-semibold text-gray-500 ml-1">{Connector.numberOfConnectors} {Connector.numberOfConnectors > 1 ? 'Connectors' : 'Connector'}</Text>
+                                                        <Text className="font-semibold text-gray-500 ml-1">{Connector.numberOfConnectors} {Connector.numberOfConnectors > 1 ? t('connectors') : t('connector')}</Text>
                                                     </View>
                                                 )
                                             })
                                         }
                                     </ScrollView>
                                     <View className="flex-row justify-between items-center px-2 mt-2">
-                                        <Text className="font-semibold text-lg text-gray-800">Availability at <Text className={getTextColorBasedOnAvailability(marker.availability)}>{marker.availability}</Text>%</Text>
+                                        <Text className="font-semibold text-lg text-gray-800">{t('availabilityStatusShort')} <Text className={getTextColorBasedOnAvailability(marker.availability)}>{marker.availability}</Text>%</Text>
                                         <CustomButton
                                             onPress={() => {
                                                 setSelectedBuilding(marker);
@@ -96,7 +99,7 @@ export default function StationsPage() {
                                             className="w-36 h-12 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg"
                                             android_ripple={{color: ''}}
                                         >
-                                            RESERVE NOW
+                                            {t('reserveNowCTA')}
                                         </CustomButton>
                                     </View>
                                 </View>

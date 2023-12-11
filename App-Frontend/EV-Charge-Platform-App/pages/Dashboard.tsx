@@ -3,7 +3,7 @@ import { reservations } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
-import { Connector, Reservation, ReservationStatus } from "../utils/types";
+import { Connector, NoReservationsPageProps, Reservation, ReservationStatus } from "../utils/types";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +18,7 @@ import {
   } from '@gorhom/bottom-sheet';
 import CustomBackdrop from "../components/CustomBackdrop";
 import NoReservationsPage from "./NoReservationsPage";
+import { useTranslation } from "react-i18next";
 
 function ordinal_suffix_of(i: number) {
     var j = i % 10,
@@ -34,10 +35,12 @@ function ordinal_suffix_of(i: number) {
     return i + "th";
 }
 
-export default function DashboardPage() {
+export default function DashboardPage({ route, navigation }: NoReservationsPageProps) {
 
     const [cancelModalVisible, setCancelModalVisible] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState(reservations[0]);
+
+    const { t } = useTranslation();
 
     const toast = useToast();
 
@@ -61,22 +64,22 @@ export default function DashboardPage() {
         switch (reservation.reservation_status) {
             case ReservationStatus.CHARGING: 
             return (
-                <Text className="bg-sky-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">Charging</Text>
+                <Text className="bg-sky-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">{t('charging')}</Text>
         );
             case ReservationStatus.RESERVED:
                 return (
-                        <Text className="bg-green-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">Reserved</Text>
+                        <Text className="bg-green-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">{t('reserved')}</Text>
                 );
             case ReservationStatus.ALLOCATED:
                 return (
                     <View className="flex-row items-center">
-                        <Text className="bg-yellow-300 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2 mr-2">Allocated</Text>
+                        <Text className="bg-yellow-300 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2 mr-2">{t('allocated')}</Text>
                     </View>
                 );
             case ReservationStatus.INQUEUE:
                 return (
                 <View>
-                    <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {ordinal_suffix_of(reservation.queueNumber)} In Queue</Text>
+                    <Text className="bg-red-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2"> {ordinal_suffix_of(reservation.queueNumber)} {t('queue')}</Text>
                 </View>);
         }
     }
@@ -96,7 +99,7 @@ export default function DashboardPage() {
 
     if (reservations.length == 0) {
         return(
-            <NoReservationsPage/>
+            <NoReservationsPage route={route} navigation={navigation}/>
         );
     }
 
@@ -125,15 +128,15 @@ export default function DashboardPage() {
                 >
                     <BlurView intensity={20} className="flex-1 justify-center items-center">
                         <View className="bg-slate-200 rounded-lg shadow-lg shadow-black w-72 p-3 justify-center">
-                            <Text className="text-2xl font-bold self-center text-gray-800">Cancel reservation ?</Text>
-                            <Text className="py-4 text-center text-base font-medium self-center leading-4 text-gray-600">You are about to cancel your reservation. This action is not reversable and you will lose your spot at the specific building.</Text>
+                            <Text className="text-2xl font-bold self-center text-gray-800">{t('Cancel reservation ?')}</Text>
+                            <Text className="py-4 text-center text-base font-medium self-center leading-4 text-gray-600">{t('cancelReservationSupportText')}</Text>
                             <View className="flex-row justify-between items-center px-2">
                                 <CustomButton
                                     textStyle="font-bold text-lg text-white"
                                     className="w-24 h-10 bg-red-500 text-center rounded-lg justify-center items-center border border-red-800 shadow-lg"
                                     android_ripple={{color: ''}}
                                 >
-                                    CANCEL
+                                    {t('cancelReservationCofirm')}
                                 </CustomButton>
 
                                 <CustomButton
@@ -142,7 +145,7 @@ export default function DashboardPage() {
                                     className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
                                     android_ripple={{color: ''}}
                                 >
-                                    GO BACK
+                                    {t('cancelReservationExit')}
                                 </CustomButton>
                             </View>
                         </View>
@@ -154,13 +157,13 @@ export default function DashboardPage() {
                             let toastInfo: string;
                             switch (reservation.reservation_status) {
                                 case ReservationStatus.ALLOCATED:
-                                    toastInfo = 'You have been allocated a certain time but this might still change.'
+                                    toastInfo = t('toastAllocatedInfo')
                                     break;
                                 case ReservationStatus.INQUEUE:
-                                    toastInfo = `We could not find a spot for you yet. You are ${ordinal_suffix_of(reservation.queueNumber)} in queue.`
+                                    toastInfo = `${t('toastInQueueInfo')} ${ordinal_suffix_of(reservation.queueNumber)} ${t('toastInQueueInfo2')}`
                                     break;
                                 case ReservationStatus.RESERVED:
-                                    toastInfo = 'Your reservation has been set and it will not change unless edited.'
+                                    toastInfo = t('toastReservedInfo')
                                     break;
                             }
 
@@ -185,14 +188,14 @@ export default function DashboardPage() {
 
                                     {
                                         reservation.allocated_from && reservation.allocated_to ?
-                                            <Text className="text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.allocated_from)}:{getTimeFromDate(reservation.allocated_to)}</Text></Text>
+                                            <Text className="text-lg font-semibold text-gray-500">{t('reservationTime')} <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.allocated_from)}:{getTimeFromDate(reservation.allocated_to)}</Text></Text>
                                         : <></>
                                     }
                                     {
                                         reservation.reservation_status != ReservationStatus.CHARGING ? 
                                         <View>
-                                            <Text className="text-lg font-semibold text-gray-500">Desired time range: <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.desired_from)}-{getTimeFromDate(reservation.desired_to)}</Text></Text>
-                                            <Text className="pb-2 text-lg font-semibold text-gray-700">Reservation for maxium of {reservation.charging_time} {reservation.charging_time == 1 ? 'hour' : 'hours'}</Text>
+                                            <Text className="text-lg font-semibold text-gray-500">{t('desiredTimedRange')} <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.desired_from)}-{getTimeFromDate(reservation.desired_to)}</Text></Text>
+                                            <Text className="pb-2 text-lg font-semibold text-gray-700">{t('maxReservationTime')} {reservation.charging_time} {reservation.charging_time == 1 ? t('hour') : t('hours')}</Text>
                                             <View className="flex-row justify-end items-center px-2">
                                                 <CustomButton
                                                     onPress={() => {setSelectedReservation(reservation); handlePresentModalPress()}}
@@ -200,7 +203,7 @@ export default function DashboardPage() {
                                                     className="w-24 h-10 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
                                                     android_ripple={{color: ''}}
                                                 >
-                                                    <FontAwesomeIcon icon={faPen} color="white" /> EDIT
+                                                    <FontAwesomeIcon icon={faPen} color="white" /> {t('editButtonText')}
                                                 </CustomButton>
 
                                                 <CustomButton
@@ -209,7 +212,7 @@ export default function DashboardPage() {
                                                     className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
                                                     android_ripple={{color: ''}}
                                                 >
-                                                    CANCEL
+                                                    {t('cancelButtonText')}
                                                 </CustomButton>
                                             </View>
                                         </View>
