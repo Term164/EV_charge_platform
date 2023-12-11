@@ -1,10 +1,8 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ChargingType, MakeReservationPageProps } from "../utils/types";
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import CustomButton from "../components/CustomButton";
 import { useState } from "react";
-import { View } from "react-native";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import DropDownPicker from "react-native-dropdown-picker";
 import { getConnectorIcon, getTimeFromDate } from "../utils/utils";

@@ -1,12 +1,11 @@
 import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal } from "react-native";
 import MapView, {Callout, MapMarker} from "react-native-maps";
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { markers } from "../utils/markers";
 import { Building, mapStyle } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
 import { searchBuildingsByName } from "../utils/search";
 import { BackHandler } from "react-native";
-import { BlurView } from "expo-blur";
 import MakeReservationPage from "./MakeReservation";
 import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { customStyle } from "../utils/styles";
@@ -23,8 +22,8 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATION;
 
 const region = {
-    latitude: markers[0].coordinate.latitude,
-    longitude: 	markers[0].coordinate.longitude,
+    latitude: markers[0] ? markers[0].coordinate.latitude : LATITUDE,
+    longitude: markers[0] ? markers[0].coordinate.longitude : LONGITUDE,
     latitudeDelta: LATITUDE_DELTA,
     longitudeDelta: LONGITUDE_DELTA
 }
@@ -49,7 +48,7 @@ export default class MapScreen extends React.Component<any, any> {
             searching: false,
             selectedBuilding: markers[0],
             bottomSheetModalRef: React.createRef(),
-            isItemSelected: true,
+            isItemSelected: markers.length == 0 ? false : true,
             ModalShowing: false
         };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);

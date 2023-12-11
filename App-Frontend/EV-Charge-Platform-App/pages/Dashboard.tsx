@@ -17,6 +17,7 @@ import {
     BottomSheetModalProvider,
   } from '@gorhom/bottom-sheet';
 import CustomBackdrop from "../components/CustomBackdrop";
+import NoReservationsPage from "./NoReservationsPage";
 
 function ordinal_suffix_of(i: number) {
     var j = i % 10,
@@ -91,6 +92,12 @@ export default function DashboardPage() {
         } else {
             return <></>
         }
+    }
+
+    if (reservations.length == 0) {
+        return(
+            <NoReservationsPage/>
+        );
     }
 
     return (

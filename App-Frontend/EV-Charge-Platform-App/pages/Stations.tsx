@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { customStyle } from "../utils/styles";
 import CustomBackdrop from "../components/CustomBackdrop";
+import NoStationsPage from "./NoStationsPage";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -44,7 +45,12 @@ export default function StationsPage() {
     const handleCloseModalPress = useCallback(() => {
         bottomSheetModalRef.current?.dismiss();
     }, [])
-    
+
+    if (markers.length == 0) {
+        return (
+            <NoStationsPage/>
+        );
+    }
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center">
