@@ -71,6 +71,7 @@ type Building = {
 }
 
 enum ReservationStatus {
+  CHARGING = 'Charging',
   RESERVED = 'Reserved',
   ALLOCATED = 'Allocated',
   INQUEUE = 'In Queue',

@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Pressable, Modal } from "react-native";
 import { reservations } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getConnectorIcon } from "../utils/utils";
+import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
 import { Connector, Reservation, ReservationStatus } from "../utils/types";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
@@ -58,6 +58,10 @@ export default function DashboardPage() {
 
     const getReservationStatus = (reservation: Reservation) => {
         switch (reservation.reservation_status) {
+            case ReservationStatus.CHARGING: 
+            return (
+                <Text className="bg-sky-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">Charging</Text>
+        );
             case ReservationStatus.RESERVED:
                 return (
                         <Text className="bg-green-400 rounded-xl font-semibold text-base w-28 text-center text-gray-800 p-2">Reserved</Text>
@@ -157,42 +161,54 @@ export default function DashboardPage() {
                                 <View key={index} className="bg-slate-50 my-2 mx-1 p-3 rounded-xl shadow-xl shadow-black">
                                     <View className="flex-row justify-between ">
                                         <Text className="font-bold text-base text-gray-700 uppercase">{reservation.building.name}</Text>
-                                        <Pressable
-                                            onPress={() => toast.show(toastInfo)}>
-                                                    <Ionicons name={'information-circle-outline'} size={30} color={'#64748b'} />
-                                        </Pressable>
+                                        {
+                                            reservation.reservation_status != ReservationStatus.CHARGING ? 
+                                            <Pressable
+                                                onPress={() => toast.show(toastInfo)}>
+                                                        <Ionicons name={'information-circle-outline'} size={30} color={'#64748b'} />
+                                            </Pressable>
+                                            : <></>
+                                        }
                                     </View>
                                     <Text className="font-bold text-base text-gray-500 mb-2">{reservation.building.address}</Text>
-                                    <View className="flex-row items-center">
+                                    <View className="flex-row items-center mb-2">
                                         {getReservationStatus(reservation)}
                                         {getConnectorInfo(reservation.allocated_connector)}
                                     </View>
 
                                     {
                                         reservation.allocated_from && reservation.allocated_to ?
-                                            <Text className="pb-4 text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{reservation.allocated_from?.getHours()}:{reservation.allocated_from?.getMinutes()} - {reservation.allocated_to?.getHours()}:{reservation.allocated_to?.getMinutes()}</Text></Text>
+                                            <Text className="text-lg font-semibold text-gray-500">Reservation time: <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.allocated_from)}:{getTimeFromDate(reservation.allocated_to)}</Text></Text>
                                         : <></>
                                     }
-                                    
-                                    <View className="flex-row justify-end items-center px-2">
-                                        <CustomButton
-                                            onPress={() => {setSelectedReservation(reservation); handlePresentModalPress()}}
-                                            textStyle="font-bold text-lg text-white"
-                                            className="w-20 h-10 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
-                                            android_ripple={{color: ''}}
-                                        >
-                                            <FontAwesomeIcon icon={faPen} color="white" /> EDIT
-                                        </CustomButton>
+                                    {
+                                        reservation.reservation_status != ReservationStatus.CHARGING ? 
+                                        <View>
+                                            <Text className="text-lg font-semibold text-gray-500">Desired time range: <Text className="text-lg font-semibold text-gray-800">{getTimeFromDate(reservation.desired_from)}-{getTimeFromDate(reservation.desired_to)}</Text></Text>
+                                            <Text className="pb-2 text-lg font-semibold text-gray-700">Reservation for maxium of {reservation.charging_time} {reservation.charging_time == 1 ? 'hour' : 'hours'}</Text>
+                                            <View className="flex-row justify-end items-center px-2">
+                                                <CustomButton
+                                                    onPress={() => {setSelectedReservation(reservation); handlePresentModalPress()}}
+                                                    textStyle="font-bold text-lg text-white tracking-widest"
+                                                    className="w-24 h-10 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
+                                                    android_ripple={{color: ''}}
+                                                >
+                                                    <FontAwesomeIcon icon={faPen} color="white" /> EDIT
+                                                </CustomButton>
 
-                                        <CustomButton
-                                            onPress={() => setCancelModalVisible(true)}
-                                            textStyle="font-bold text-lg text-gray-800"
-                                            className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
-                                            android_ripple={{color: ''}}
-                                        >
-                                            CANCEL
-                                        </CustomButton>
-                                    </View>
+                                                <CustomButton
+                                                    onPress={() => setCancelModalVisible(true)}
+                                                    textStyle="font-bold text-lg text-gray-800 tracking-widest"
+                                                    className="w-24 h-10 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
+                                                    android_ripple={{color: ''}}
+                                                >
+                                                    CANCEL
+                                                </CustomButton>
+                                            </View>
+                                        </View>
+                                        : <></>
+                                    }
+
                                 </View>
                             )
                         })

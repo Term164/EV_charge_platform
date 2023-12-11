@@ -86,8 +86,8 @@ export default function StationsPage() {
                                                 setSelectedBuilding(marker);
                                                 handlePresentModalPress();
                                             }}
-                                            textStyle="font-bold text-lg text-white"
-                                            className="w-5/12 h-12 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg"
+                                            textStyle="font-bold text-lg text-white tracking-widest"
+                                            className="w-36 h-12 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg"
                                             android_ripple={{color: ''}}
                                         >
                                             RESERVE NOW

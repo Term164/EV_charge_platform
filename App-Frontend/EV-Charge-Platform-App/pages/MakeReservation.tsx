@@ -7,7 +7,7 @@ import { useState } from "react";
 import { View } from "react-native";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import DropDownPicker from "react-native-dropdown-picker";
-import { getConnectorIcon } from "../utils/utils";
+import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -47,10 +47,6 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
     const selectedHourStyle = "basis-4/12 bg-blue-200 py-4 rounded-md shadow-lg shadow-black";
     const hourStyle = "basis-3/12 bg-gray-200 py-2 rounded-md shadow-lg";
-
-    const getTimeFromDate = (date: Date) => {
-        return `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)} `
-    }
 
     return(
         <View className="flex-1 p-5 bg-slate-100">

@@ -18,3 +18,8 @@ export function getConnectorIcon(connectorType: ChargingType) {
             return <TeslaSVG width={25} height={25} fill={'#1e293b'}/>
     }
 }
+
+
+export function getTimeFromDate(date: Date) {
+    return `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)} `
+}

@@ -104,7 +104,7 @@ export default function SignInScreen() {
             </View>
 
              <CustomButton
-                    textStyle="font-bold text-lg text-white"
+                    textStyle="font-bold text-lg text-white tracking-widest"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500" 
                     android_ripple={{color: ''}}>SIGN UP</CustomButton>
             
