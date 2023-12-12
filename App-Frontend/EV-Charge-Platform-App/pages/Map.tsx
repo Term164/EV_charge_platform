@@ -2,7 +2,7 @@ import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal }
 import MapView, {Callout, MapMarker} from "react-native-maps";
 import React from 'react';
 import { markers } from "../utils/markers";
-import { Building, mapStyle } from "../utils/types";
+import { Building, mapStyle, mapStyleDark } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
 import { searchBuildingsByName } from "../utils/search";
 import { BackHandler } from "react-native";
@@ -12,7 +12,8 @@ import { customStyle } from "../utils/styles";
 import CustomBackdrop from "../components/CustomBackdrop";
 import * as Animatable from 'react-native-animatable';
 import CustomButton from "../components/CustomButton";
-import { useTranslation, withTranslation } from "react-i18next";
+import { withTranslation } from "react-i18next";
+import { useCurrentSettings } from "../utils/GlobalStateContext";
 
 const {width, height} = Dimensions.get('window');
 
@@ -50,12 +51,12 @@ class MapScreen extends React.Component<any, any> {
             selectedBuilding: markers[0],
             bottomSheetModalRef: React.createRef(),
             isItemSelected: markers.length == 0 ? false : true,
-            ModalShowing: false
+            ModalShowing: false,
         };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
-
+    
     componentWillUnmount(): void {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
@@ -150,7 +151,6 @@ class MapScreen extends React.Component<any, any> {
         } else {
             makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         }
-
         return (
             <View className="justify-center items-center flex-1">
                 <BottomSheetModalProvider>
@@ -162,7 +162,7 @@ class MapScreen extends React.Component<any, any> {
                         showsCompass={false}
                         showsBuildings={false}
                         showsIndoors={false}
-                        customMapStyle={mapStyle}
+                        customMapStyle={this.props.route.params.theme === 'light' ? mapStyle : mapStyleDark}
                         onPanDrag={() => {if(this.state.isItemSelected)this.setState({isItemSelected: false});}}
                     >
         

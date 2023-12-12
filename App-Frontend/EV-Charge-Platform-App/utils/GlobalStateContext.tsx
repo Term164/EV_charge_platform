@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { AppState, StateAction, StateActionKind } from './types';
+
+type userSettingsContext = {
+  colorScheme: string
+  toggleColorScheme: () => void
+}
 
 type authContextFunctions = {
   signIn: (username: string, password: string) => Promise<void>,
   signOut: () => void,
   signUp: (_data: string) => Promise<void>
 }
-  
-export const AuthContext = React.createContext<authContextFunctions>({
-  signIn: async (username, password) => {},
-  signOut: () => {},
-  signUp: async (test) => {},
-});
+
+export const SettingsContext = React.createContext<userSettingsContext | null>(null);
+export const AuthContext = React.createContext<authContextFunctions | null>(null);
+
+export const useCurrentSettings  = () => {
+  const currentSettings = useContext(SettingsContext);
+
+  if (!currentSettings) {
+    throw new Error("useCurrentSettings has to be used within <SettingsContext.Provider>");
+  }
+
+  return currentSettings;
+}
+
+export const useCurrentAuth = () => {
+  const currentAuthContext = useContext(AuthContext);
+
+  if (!currentAuthContext) {
+    throw new Error("useCurrentAuth has to be used within <AuthContext.Provider>");
+  }
+
+  return currentAuthContext;
+}
 
 export function AppStateReducer(prevState: AppState, action: StateAction) {
   switch (action.type) {
