@@ -4,10 +4,10 @@
     "slug": "EV-Charge-Platform-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Logo/Charge-Mate-Logo.png",
+    "icon": "./assets/logo/Charge-Mate-Logo.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/Logo/Charge-Mate-Logo-Full.png",
+      "image": "./assets/logo/Charge-Mate-Logo-Full.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo/Charge-Mate-Logo.png",
         "backgroundColor": "#ffffff"
       }
     },

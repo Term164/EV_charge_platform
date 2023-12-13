@@ -18,6 +18,7 @@ import './translation'
 import { useTranslation } from 'react-i18next';
 import { getUserSettingsContext } from './utils/userSettings';
 import { DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 const startingState: AppState = {
   isLoading: true,
@@ -37,6 +38,7 @@ export default function App() {
   return(
     
       <ToastProvider>
+        <StatusBar style={settingsContext.colorScheme === 'dark' ? 'light' : 'dark'}/>
         <GestureHandlerRootView style={{flex: 1}}>
           <SettingsContext.Provider value={settingsContext}>
             <AuthContext.Provider value={authContext}>

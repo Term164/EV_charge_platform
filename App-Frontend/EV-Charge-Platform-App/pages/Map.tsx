@@ -13,7 +13,6 @@ import CustomBackdrop from "../components/CustomBackdrop";
 import * as Animatable from 'react-native-animatable';
 import CustomButton from "../components/CustomButton";
 import { withTranslation } from "react-i18next";
-import { useCurrentSettings } from "../utils/GlobalStateContext";
 
 const {width, height} = Dimensions.get('window');
 
@@ -72,10 +71,10 @@ class MapScreen extends React.Component<any, any> {
 
     getColorBasedOnAvailability(availability: number) {
         let colorStyle;
-        if (availability < 10) colorStyle = 'bg-gray-300/60 border-gray-600';
-        else if (availability >= 10 && availability < 33.3) colorStyle = 'bg-red-300/60 border-red-600';
-        else if (availability >= 33.3 && availability < 66.6) colorStyle = 'bg-yellow-300/60 border-yellow-600';
-        else colorStyle = 'bg-green-300/60 border-green-600';
+        if (availability < 10) colorStyle = 'bg-gray-300/60 border-gray-600 bg-gray-300/80';
+        else if (availability >= 10 && availability < 33.3) colorStyle = 'bg-red-300/60 border-red-600 bg-red-300/80';
+        else if (availability >= 33.3 && availability < 66.6) colorStyle = 'bg-yellow-300/60 border-yellow-600 dark:bg-yellow-300/80';
+        else colorStyle = 'bg-green-300/60 border-green-600 dark:bg-green-300/80';
         return colorStyle;
     }
 
@@ -101,14 +100,14 @@ class MapScreen extends React.Component<any, any> {
         let searchWindow;
 
         if (this.state.filteredBuildings) {
-            searchWindow = <ScrollView className="mt-20 w-full h-full">
+            searchWindow = <ScrollView className="mt-24 w-full h-full">
                 {
                     this.state.filteredBuildings.map((building: Building, index: number) => {
                         return(
                             <Pressable key={index} android_ripple={{color: '#9ca3af'}}>
                                 <View className="px-3 pt-3">
-                                    <Text className="font-semibold text-base text-gray-800" >{building.name}</Text>
-                                    <Text className="text-gray-500 text-base">{building.address}</Text>
+                                    <Text className="font-semibold text-base text-gray-800 dark:text-slate-300" >{building.name}</Text>
+                                    <Text className="text-gray-500 dark:text-slate-400 text-base">{building.address}</Text>
                                 </View>
                                 <View style={{borderBottomWidth: 1}} className="border-gray-600/50 mt-2 pt-3"></View>
                             </Pressable>
@@ -146,10 +145,10 @@ class MapScreen extends React.Component<any, any> {
 
         let makeReservationButton;
 
-        if (this.state.isItemSelected) {
-            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideInUp"><CustomButton onPress={handlePresentModalPress} textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
+        if (this.state.isItemSelected && !this.state.searchBarSelected) {
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideInUp"><CustomButton onPress={handlePresentModalPress} textStyle="font-bold text-lg text-white dark:text-slate-200 tracking-widest" className="w-60 h-14 bg-sky-500 dark:bg-sky-800 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         } else {
-            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white tracking-widest" className="w-60 h-14 bg-sky-500 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
+            makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white dark:text-slate-200 tracking-widest" className="w-60 h-14 bg-sky-500 dark:bg-sky-800 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         }
         return (
             <View className="justify-center items-center flex-1">
@@ -177,7 +176,7 @@ class MapScreen extends React.Component<any, any> {
                                 }
 
                                 const opacityStlye = {
-                                    opacity: this.state.index === index ? 1 : 0.35
+                                    opacity: this.state.index === index ? 1 : this.props.route.params.theme === 'light' ? 0.35 : 0.5
                                 }
 
                                 const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(marker.availability);
@@ -205,10 +204,10 @@ class MapScreen extends React.Component<any, any> {
                                             onPress={handlePresentModalPress}
                                             className="w-56 pb-3"
                                         >
-                                            <View className="bg-white rounded-lg w-full h-full p-2 border border-slate-300">
-                                                <Text className="text-gray-800 text-sm">{marker.name}</Text>
+                                            <View className="bg-white dark:bg-slate-700 rounded-lg w-full h-full p-2 border border-slate-300 dark:border-slate-900">
+                                                <Text className="text-gray-800 dark:text-slate-300 text-sm">{marker.name}</Text>
                                                 <View className="flex-row justify-between items-center">
-                                                    <Text className="text-gray-500 text-xs">{marker.address}</Text>
+                                                    <Text className="text-gray-500 dark:text-slate-400 text-xs">{marker.address}</Text>
                                                     <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(marker.availability)}>{marker.availability} %</Text>
                                                 </View>
                                             </View>
@@ -223,10 +222,11 @@ class MapScreen extends React.Component<any, any> {
                         // Search bar visible logic
                         !this.state.ModalShowing ? 
                         <SearchBar
-                            className="absolute top-8 m-3 w-11/12 h-12 z-10" 
+                            className="absolute top-8 m-3 w-11/12 h-12 z-10 dark:bg-slate-700" 
                             fontSize={20}
-                            placeholderTextColor="#9ca3af"
+                            placeholderTextColor={this.props.route.params.theme === 'light' ? "#9ca3af" : '#cbd5e1'}
                             spinnerVisibility={this.state.searching}
+                            darkMode={this.props.route.params.theme === 'dark'}
                             placeholder={t('searchHere')}
                             onClearPress={() => {this.setState({searchBarSelected: false})}}
                             onChangeText={(text) => {
@@ -241,7 +241,7 @@ class MapScreen extends React.Component<any, any> {
                     {
                         // Search bar modal visible logic
                         this.state.searchBarSelected ? 
-                            <View className="absolute pt-2 left-0 top-0 z-0 w-full h-full bg-slate-100">
+                            <View className="absolute pt-2 left-0 top-0 z-0 w-full h-full bg-slate-100 dark:bg-slate-800">
                                 {searchWindow}
                             </View> 
                             : <></>
