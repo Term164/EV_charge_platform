@@ -88,6 +88,7 @@ class MapScreen extends React.Component<any, any> {
     }
 
     render(): React.ReactNode {
+        
         const { t } = this.props;
         const filterBuildings = async (searchWord: string) => {
             if (!this.state.searchBarSelected)
@@ -150,6 +151,7 @@ class MapScreen extends React.Component<any, any> {
         } else {
             makeReservationButton = <Animatable.View className="absolute bottom-11" useNativeDriver={true} duration={500} easing={"ease-out-cubic"} animation="slideOutDown"><CustomButton textStyle="font-bold text-lg text-white dark:text-slate-200 tracking-widest" className="w-60 h-14 bg-sky-500 dark:bg-sky-800 text-center rounded-lg justify-center items-center border border-black shadow-lg mr-4" android_ripple={{color: '#0369a1'}} >{t('makeReservationButtonText')}</CustomButton></Animatable.View>
         }
+
         return (
             <View className="justify-center items-center flex-1">
                 <BottomSheetModalProvider>
@@ -161,7 +163,7 @@ class MapScreen extends React.Component<any, any> {
                         showsCompass={false}
                         showsBuildings={false}
                         showsIndoors={false}
-                        customMapStyle={this.props.route.params.theme === 'light' ? mapStyle : mapStyleDark}
+                        customMapStyle={this.props.cs === 'light' ? mapStyle : mapStyleDark}
                         onPanDrag={() => {if(this.state.isItemSelected)this.setState({isItemSelected: false});}}
                     >
         
@@ -176,7 +178,7 @@ class MapScreen extends React.Component<any, any> {
                                 }
 
                                 const opacityStlye = {
-                                    opacity: this.state.index === index ? 1 : this.props.route.params.theme === 'light' ? 0.35 : 0.5
+                                    opacity: this.state.index === index ? 1 : this.props.cs === 'light' ? 0.35 : 0.5
                                 }
 
                                 const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(marker.availability);
@@ -224,9 +226,9 @@ class MapScreen extends React.Component<any, any> {
                         <SearchBar
                             className="absolute top-8 m-3 w-11/12 h-12 z-10 dark:bg-slate-700" 
                             fontSize={20}
-                            placeholderTextColor={this.props.route.params.theme === 'light' ? "#9ca3af" : '#cbd5e1'}
+                            placeholderTextColor={this.props.cs === 'light' ? "#9ca3af" : '#cbd5e1'}
                             spinnerVisibility={this.state.searching}
-                            darkMode={this.props.route.params.theme === 'dark'}
+                            darkMode={this.props.cs === 'dark'}
                             placeholder={t('searchHere')}
                             onClearPress={() => {this.setState({searchBarSelected: false})}}
                             onChangeText={(text) => {
@@ -250,8 +252,8 @@ class MapScreen extends React.Component<any, any> {
                             ref={this.state.bottomSheetModalRef}
                             index={1}
                             snapPoints={snapPoints}
-                            backgroundStyle={customStyle.reservationModalHandle}
-                            handleStyle={customStyle.reservationModalHandle}
+                            backgroundStyle={this.props.cs === 'light' ? customStyle.reservationModalHandle : customStyle.reservationModalHandleDark}
+                            handleStyle={this.props.cs === 'light' ? customStyle.reservationModalHandle : customStyle.reservationModalHandleDark}
                             backdropComponent={CustomBackdrop}
                             handleIndicatorStyle={{backgroundColor: 'white'}}
                             onDismiss={() => {this.setState({ModalShowing: false})}}

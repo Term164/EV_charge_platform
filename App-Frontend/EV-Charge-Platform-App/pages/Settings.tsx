@@ -8,13 +8,15 @@ import { Text, View, Pressable, ScrollView, Modal } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
-import { AuthContext } from "../utils/GlobalStateContext";
+import { AuthContext, useCurrentAuth, useCurrentSettings } from "../utils/GlobalStateContext";
 import Profile from '../pages/Profile';
 import { useTranslation } from "react-i18next";
+import { customStyle } from "../utils/styles";
 
 
 export default function SettingsPage() {
-    const [darkMode, setDarkMode] = useState(false);
+    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const [darkMode, setDarkMode] = useState(colorScheme === 'dark');
     const [notifications, setNotifications] = useState(false);
     const [editProfile, setEditProfile] = useState(false);
 
@@ -28,9 +30,9 @@ export default function SettingsPage() {
     const { t } = useTranslation();
 
     // Auth context
-    const { signOut } = React.useContext(AuthContext);
+    const { signOut } = useCurrentAuth()
     return (
-        <SafeAreaView className="flex-1">
+        <SafeAreaView className="flex-1 dark:bg-slate-950">
             
             <Modal
                 animationType="slide"
@@ -41,41 +43,41 @@ export default function SettingsPage() {
             </Modal>
 
             <ScrollView className="w-full h-full" contentContainerStyle={{flexGrow: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">Account</Text>
+                <Text className="w-11/12 text-gray-500/70 dark:text-slate-400 text-base font-medium mb-3">Account</Text>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl">
                     <Pressable 
                         onPress={() => setEditProfile(true)}
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="person-circle-outline" size={32} color={'#374151'}/>
+                            <Ionicons name="person-circle-outline" size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">{t('personalInfo')}</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">{t('editProfile')}</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800 dark:text-slate-300">{t('personalInfo')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500 dark:text-slate-400">{t('editProfile')}</Text>
                             </View>
                         </View>
-                        <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
+                        <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     </Pressable>
                 </View>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl mt-3">
                     <Pressable 
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                         onPress={() => {setNotifications(!notifications)}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name={notifications ? 'notifications-circle-outline' : 'notifications-off-circle-outline'} size={32} color={'#374151'}/>
+                            <Ionicons name={notifications ? 'notifications-circle-outline' : 'notifications-off-circle-outline'} size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">{t('notifications')}</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">{notifications ? t('on') : t('off')}</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800 dark:text-slate-300">{t('notifications')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500 dark:text-slate-400">{notifications ? t('on') : t('off')}</Text>
                             </View>
                         </View>
                         <ToggleSwitch
                             isOn={notifications}
-                            onColor={'#3b82f6'}
+                            onColor={colorScheme === 'light' ? '#3b82f6' : '#166534'}
                             offColor={'#9ca3af'}
                             onToggle={isOn => {setNotifications(isOn)}}
                         />
@@ -83,36 +85,37 @@ export default function SettingsPage() {
                 </View>
 
                 <View style={{borderBottomWidth: 1.2}} className="border-gray-600/50 my-5 w-11/12"/>
-                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">{t('interface')}</Text>
+                <Text className="w-11/12 text-gray-500/70 dark:text-slate-400 text-base font-medium mb-3">{t('interface')}</Text>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl">
                     <Pressable 
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
-                        onPress={() => {setDarkMode(!darkMode)}}
+                        onPress={() => {setDarkMode(!darkMode); toggleColorScheme()}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name='contrast-outline' size={32} color={'#374151'}/>
+                            <Ionicons name='contrast-outline' size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
                             <View>
-                                <Text className="text-base font-medium ml-4 text-gray-800">{t('theme')}</Text>
-                                <Text className="text-sm font-medium ml-4 text-gray-500">{darkMode ? t('dark') : t('light')}</Text>
+                                <Text className="text-base font-medium ml-4 text-gray-800 dark:text-gray-300">{t('theme')}</Text>
+                                <Text className="text-sm font-medium ml-4 text-gray-500 dark:text-slate-400">{darkMode ? t('dark') : t('light')}</Text>
                             </View>
                         </View>
                         <ToggleSwitch
                             isOn={darkMode}
-                            onColor={'#3b82f6'}
+                            onColor={colorScheme === 'light' ? '#3b82f6' : '#166534'}
                             offColor={'#9ca3af'}
-                            onToggle={isOn => {setDarkMode(isOn)}}
+                            onToggle={isOn => {setDarkMode(isOn); toggleColorScheme()}}
                         />
                     </Pressable>
                 </View>
 
-                <View className="w-11/12 h-16 bg-gray-300/70 rounded-2xl mt-3 z-10 relative">
-                    <Text className="text-base font-medium ml-4 text-gray-800 absolute left-10 top-2">{t('language')}</Text>
+                <View className="w-11/12 h-16 bg-gray-300/70 dark:bg-slate-800 rounded-2xl mt-3 z-10 relative">
+                    <Text className="text-base font-medium ml-4 text-gray-800 dark:text-slate-300 absolute left-10 top-2">{t('language')}</Text>
                     <DropDownPicker
                         open={open}
                         value={value}
                         items={items}
+                        theme={colorScheme.toUpperCase()}
                         setOpen={setOpen}
                         setValue={setValue}
                         setItems={setItems}
@@ -120,53 +123,54 @@ export default function SettingsPage() {
                         showArrowIcon={true}
                         itemSeparator={true}
                         listMode="MODAL"
-                        ArrowUpIconComponent={({style}) => <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />}
-                        ArrowDownIconComponent={({style}) => <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />}
+                        ArrowUpIconComponent={({style}) => <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />}
+                        ArrowDownIconComponent={({style}) => <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />}
                         iconContainerStyle={{}}
+                        listChildContainerStyle={{backgroundColor: 'red'}}
                         style={{borderWidth: 0, padding: 0, margin: 0, minHeight: 0, height: 64, backgroundColor:'transparent'}}
                         containerStyle={{padding: 0, margin: 0}}
-                        labelStyle={{padding: 0, margin: 0, left: 6, top: 8, color:'rgb(107 114 128)', fontWeight: '500', fontSize: 14, lineHeight: 20,}}/>
+                        labelStyle={{padding: 0, margin: 0, left: 6, top: 8, color: colorScheme === 'light' ? 'rgb(107 114 128)' : '#94a3b8', fontWeight: '500', fontSize: 14, lineHeight: 20,}}/>
                 </View>
 
                 <View style={{borderBottomWidth: 1.2}} className="border-gray-600/50 my-5 w-11/12"/>
-                <Text className="w-11/12 text-gray-500/70 text-base font-medium mb-3">{t('service')}</Text>
+                <Text className="w-11/12 text-gray-500/70 dark:text-slate-400 text-base font-medium mb-3">{t('service')}</Text>
 
                 <View className="w-11/12 overflow-hidden rounded-2xl">
                     <Pressable 
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="lock-closed-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('pp')}</Text>
+                            <Ionicons name="lock-closed-outline" size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
+                            <Text className="text-xl font-medium ml-4 text-gray-800 dark:text-slate-300">{t('pp')}</Text>
                         </View>
-                        <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
+                        <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     </Pressable>
                 </View>
 
                 <View className="w-11/12 overflow-hidden rounded-2xl mt-3">
                     <Pressable 
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="help-circle-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('help')}</Text>
+                            <Ionicons name="help-circle-outline" size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
+                            <Text className="text-xl font-medium ml-4 text-gray-800 dark:text-slate-300">{t('help')}</Text>
                         </View>
-                        <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
+                        <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     </Pressable>
                 </View>
 
                 <View className="w-11/12 overflow-hidden rounded-2xl mt-3">
                     <Pressable 
-                        className="flex-row items-center justify-between bg-gray-300/70 p-2 h-16 rounded-2xl"
+                        className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="information-circle-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('about')}</Text>
+                            <Ionicons name="information-circle-outline" size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
+                            <Text className="text-xl font-medium ml-4 text-gray-800 dark:text-slate-300">{t('about')}</Text>
                         </View>
-                        <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
+                        <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     </Pressable>
                 </View>
 
@@ -179,10 +183,10 @@ export default function SettingsPage() {
                         android_ripple={{color: ''}}
                     >
                         <View className="flex-row items-center">
-                            <Ionicons name="log-out-outline" size={32} color={'#374151'}/>
-                            <Text className="text-xl font-medium ml-4 text-gray-800">{t('logout')}</Text>
+                            <Ionicons name="log-out-outline" size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
+                            <Text className="text-xl font-medium ml-4 text-gray-800 dark:text-slate-300">{t('logout')}</Text>
                         </View>
-                        <FontAwesomeIcon icon={faChevronRight} size={24} color="#374151" />
+                        <FontAwesomeIcon icon={faChevronRight} size={24} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     </Pressable>
                 </View>
             </ScrollView>

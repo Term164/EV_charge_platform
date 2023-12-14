@@ -6,4 +6,10 @@ export const customStyle = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
     },
+
+    reservationModalHandleDark: {
+        backgroundColor: '#1d4ed8',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
 });

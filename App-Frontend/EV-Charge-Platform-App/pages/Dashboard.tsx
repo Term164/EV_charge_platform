@@ -113,8 +113,8 @@ export default function DashboardPage({ route, navigation }: NoReservationsPageP
                         ref={bottomSheetModalRef}
                         index={1}
                         snapPoints={snapPoints}
-                        backgroundStyle={customStyle.reservationModalHandle}
-                        handleStyle={customStyle.reservationModalHandle}
+                        backgroundStyle={colorScheme === 'light' ? customStyle.reservationModalHandle : customStyle.reservationModalHandleDark}
+                        handleStyle={colorScheme === 'light' ? customStyle.reservationModalHandle : customStyle.reservationModalHandleDark}
                         backdropComponent={CustomBackdrop}
                         handleIndicatorStyle={{backgroundColor: 'white'}}
                     >

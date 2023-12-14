@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { getUserSettingsContext } from './utils/userSettings';
 import { DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import WrapedMap from './pages/WrapedMap';
 
 const startingState: AppState = {
   isLoading: true,
@@ -67,7 +68,7 @@ export default function App() {
                   })}
                 >
                   <Tab.Screen name={t('dashboard')} component={Dashboard}/>
-                  <Tab.Screen name={t('map')} component={Map} initialParams={{theme: settingsContext.colorScheme}}/>
+                  <Tab.Screen name={t('map')} component={WrapedMap}/>
                   <Tab.Screen name={t('stations')} component={Stations}/>
                   <Tab.Screen name={t('settings')} component={Settings}/>
                 </Tab.Navigator>

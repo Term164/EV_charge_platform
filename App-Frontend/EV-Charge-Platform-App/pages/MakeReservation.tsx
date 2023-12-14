@@ -7,6 +7,7 @@ import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import DropDownPicker from "react-native-dropdown-picker";
 import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
 import { useTranslation } from "react-i18next";
+import { useCurrentSettings } from "../utils/GlobalStateContext";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -32,6 +33,8 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
     const { t } = useTranslation();
 
+    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+
     const [selectedDate, setSelectedDate] = useState<Date>(tommorow);
     const [startTime, setStartTime] = useState<Date>(startTimeDate);
     const [endTime, setEndTime] = useState<Date>(endTimeDate);
@@ -44,21 +47,23 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
         {label: 'Tesla', value: 'tesla', icon: () => getConnectorIcon(ChargingType.TESLASUC)}
     ]);
 
-    const selectedHourStyle = "basis-4/12 bg-blue-200 py-4 rounded-md shadow-lg shadow-black";
-    const hourStyle = "basis-3/12 bg-gray-200 py-2 rounded-md shadow-lg";
+    const selectedHourStyle = "basis-4/12 bg-blue-200 dark:bg-blue-500 py-4 rounded-md shadow-lg shadow-black";
+    const hourStyle = "basis-3/12 bg-gray-200 dark:bg-slate-600 py-2 rounded-md shadow-lg";
 
     return(
-        <View className="flex-1 p-5 bg-slate-100">
-            <Text className="self-center mb-2 text-gray-500 text-2xl font-semibold">{t('makeReservationTitle')}</Text>
-            <Text className="text-lg font-semibold text-gray-800 uppercase">{building.name}</Text>
-            <Text className="text-base font-medium text-gray-500">{building.address}</Text>
-            <Text className="font-semibold text-lg text-gray-600 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(building.availability)}>{building.availability}</Text>%</Text>
+        <View className="flex-1 p-5 bg-slate-100 dark:bg-slate-800">
+            <Text className="self-center mb-2 text-gray-500 dark:text-slate-400 text-2xl font-semibold">{t('makeReservationTitle')}</Text>
+            <Text className="text-lg font-semibold text-gray-800 dark:text-slate-100 uppercase">{building.name}</Text>
+            <Text className="text-base font-medium text-gray-500 dark:text-slate-300">{building.address}</Text>
+            <Text className="font-semibold text-lg text-gray-600 dark:text-slate-400 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(building.availability)}>{building.availability}</Text>%</Text>
 
-            <Text className="text-gray-600 text-xl mb-1">{t('type')}</Text>
+            <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1">{t('type')}</Text>
             <DropDownPicker
                         placeholder="Charger type"
-                        placeholderStyle={{color: '#6b7280', fontSize: 20}}
+                        placeholderStyle={{color: colorScheme === 'light' ? '#6b7280' : '#e2e8f0', fontSize: 20}}
                         labelStyle={{fontSize: 20}}
+                        style={{backgroundColor: colorScheme === 'dark' ? '#334155' : 'white'}}
+                        theme={colorScheme.toUpperCase()}
                         open={open}
                         value={value}
                         items={items}
@@ -69,7 +74,7 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                         showArrowIcon={true}
                         itemSeparator={true}/>
             <View className="mt-2">
-                <Text className="text-gray-600 text-xl mb-1">{t('date')}</Text>
+                <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1">{t('date')}</Text>
                 <View className="rounded-md overflow-hidden">
                     <Pressable
                         android_ripple={{color: ''}}
@@ -88,13 +93,14 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                     >
                         <TextInputWithIcon
                             editable={false}
-                            className="flex-1 text-center text-lg text-gray-800 font-medium"
+                            className="flex-1 text-center text-lg text-gray-800 dark:text-slate-200 font-medium"
                             iconName="calendar-outline"
                             iconSize={20}
+                            iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                             front={false}
                             placeholder="Select a date"
                             value={String(selectedDate.toLocaleDateString('sl-SI'))}
-                            viewClassNames="stroke-black border rounded-md p-2 bg-white"
+                            viewClassNames="stroke-black border dark:border-white dark:border-1 rounded-md p-2 bg-white dark:bg-slate-700 dark:border-black"
                         />
                     </Pressable>
                     
@@ -104,7 +110,7 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
             <View className="flex flex-row mt-4 justify-evenly w-full">
                 <View className="flex-row items-center">
-                    <Text className="text-gray-600 text-xl mb-1 mr-1">{t('from')}</Text>
+                    <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1 mr-1">{t('from')}</Text>
                     <View className="rounded-md overflow-hidden">
                         <Pressable
                             android_ripple={{color: ''}}
@@ -125,20 +131,21 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                         >
                             <TextInputWithIcon
                                 editable={false}
-                                className="flex-1 text-center text-lg text-gray-800 font-semibold"
+                                className="flex-1 text-center text-lg text-gray-800 dark:text-slate-200 font-semibold"
                                 iconName="time-outline"
                                 iconSize={20}
+                                iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                                 front={false}
                                 placeholder=""
                                 value={getTimeFromDate(startTime)}
-                                viewClassNames="stroke-black border rounded-md w-28 p-1 bg-white"
+                                viewClassNames="stroke-black border dark:border-white dark:border-1 rounded-md w-28 p-1 bg-white dark:bg-slate-700 dark:border-black"
                             />
                         </Pressable>
                     </View>
                 </View>
 
                 <View className="flex-row items-center">
-                    <Text className="text-gray-600 text-xl mb-1 ml-2 mr-1">{t('to')}</Text>
+                    <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1 ml-2 mr-1">{t('to')}</Text>
                     <View className="rounded-md overflow-hidden">
                         <Pressable
                             android_ripple={{color: ''}}
@@ -159,13 +166,14 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
                         >
                             <TextInputWithIcon
                                 editable={false}
-                                className="flex-1 text-center text-lg text-gray-800 font-semibold"
+                                className="flex-1 text-center text-lg text-gray-800 dark:text-slate-200 font-semibold"
                                 iconName="time-outline"
                                 iconSize={20}
+                                iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                                 front={false}
                                 placeholder=""
                                 value={getTimeFromDate(endTime)}
-                                viewClassNames="stroke-black border rounded-md w-28 p-1 bg-white"
+                                viewClassNames="stroke-black border dark:border-white dark:border-1 rounded-md w-28 p-1 bg-white dark:bg-slate-700 dark:border-black"
                             />
                         </Pressable>
                     </View>
@@ -175,12 +183,12 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
             {
                 endTime.getHours() - startTime.getHours() > 3 ? <View>
-                                    <Text className="text-gray-600 self-center text-xl mt-3">{t('desiredLength')}</Text>
+                                    <Text className="text-gray-600 dark:text-slate-400 self-center text-xl mt-3">{t('desiredLength')}</Text>
 
                                     <View className="flex flex-row gap-x-4 items-center justify-center mt-2">
-                                        <Pressable className={numOfHours == 1 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(1)}><Text className="text-center text-2xl font-semibold">1h</Text></Pressable>
-                                        <Pressable className={numOfHours == 2 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(2)}><Text className="text-center text-2xl font-semibold">2h</Text></Pressable>
-                                        <Pressable className={numOfHours == 3 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(3)}><Text className="text-center text-2xl font-semibold">3h</Text></Pressable>
+                                        <Pressable className={numOfHours == 1 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(1)}><Text className="text-center text-2xl font-semibold dark:text-slate-200">1h</Text></Pressable>
+                                        <Pressable className={numOfHours == 2 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(2)}><Text className="text-center text-2xl font-semibold dark:text-slate-200">2h</Text></Pressable>
+                                        <Pressable className={numOfHours == 3 ? selectedHourStyle : hourStyle} onPress={() => setNumOfHours(3)}><Text className="text-center text-2xl font-semibold dark:text-slate-200">3h</Text></Pressable>
                                     </View>
                                 </View>
                                 : <></>
@@ -188,8 +196,8 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
             <View className="flex-row justify-end items-center px-2 self-center mt-4">
                 <CustomButton
-                    textStyle="font-bold text-lg text-white tracking-widest"
-                    className="w-28 py-2 bg-blue-500 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
+                    textStyle="font-bold text-lg text-white dark:text-slate-200 tracking-widest"
+                    className="w-28 py-2 bg-blue-500 dark:bg-blue-700 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
                     android_ripple={{color: ''}}
                 >
                     {t('confirm')}
@@ -197,8 +205,8 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
                 <CustomButton
                     onPress={exitModal}
-                    textStyle="font-bold text-lg text-gray-800 tracking-widest"
-                    className="w-28 py-2 text-center rounded-lg justify-center items-center border border-gray-800 shadow-lg"
+                    textStyle="font-bold text-lg text-gray-800 dark:text-slate-200 tracking-widest"
+                    className="w-28 py-2 text-center rounded-lg justify-center items-center border border-gray-800 dark:border-slate-200 shadow-lg"
                     android_ripple={{color: ''}}
                 >
                     {t('cancel')}
