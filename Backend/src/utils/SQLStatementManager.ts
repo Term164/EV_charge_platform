@@ -2,7 +2,6 @@ import db from './database';
 import { DataTypeOIDs, PreparedStatement } from "postgresql-client";
 import log from './logger';
 
-
 class StatmentManager {
 
     // Admin Service statements
@@ -84,7 +83,12 @@ class StatmentManager {
     getAllNextReservationsStatement: PreparedStatement;
 
     // Reservation statements
-
+    getAllAvailableChargingTypesAtBuildingForPerson: PreparedStatement;
+    getAllReservationsForPerson: PreparedStatement;
+    getSpecificReservation: PreparedStatement;
+    createReservation: PreparedStatement;
+    editReservation: PreparedStatement;
+    cancelReservation: PreparedStatement;
 
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
@@ -445,8 +449,7 @@ class StatmentManager {
         );
 
         this.getAllAvailableChargingStationsStatement = await db.connection.prepare(
-            //`SELECT * FROM get_all_available($1);`,
-            `SELECT * FROM get_all_available_for_building($1,1);`,
+            `SELECT * FROM get_all_available($1);`,
             {paramTypes: [DataTypeOIDs.int4]}
         );
     }
@@ -486,9 +489,9 @@ class StatmentManager {
         );
 
         this.getAllNextReservationsStatement = await db.connection.prepare(
-            `SELECT name, charging_connector_id, allocated_to, rfid
+            `SELECT name, allocated_connector_id, allocated_to, rfid
             FROM Reservations as reservation
-            LEFT JOIN charging_connectors connector ON connector.id = reservation.charging_connector_id
+            LEFT JOIN charging_connectors connector ON connector.id = reservation.allocated_connector_id
             LEFT JOIN charging_stations station ON station.id = connector.charging_station_id
             LEFT JOIN accounts ON accounts.id = reservation.account_id
             WHERE reservation.allocated_from BETWEEN now()::timestamp - interval '10 minutes' AND now()::timestamp + interval '10 minutes'
@@ -497,6 +500,23 @@ class StatmentManager {
         );
     }
 
+    private async prepareReservationStatements() {
+        this.getAllAvailableChargingTypesAtBuildingForPerson = await db.connection.prepare(
+            `SELECT * FROM get_all_available_types_for_building_for_user($1, $2);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4]}
+        );
+
+        this.getSpecificReservation = await db.connection.prepare(
+            `SELECT * FROM reservations WHERE id = $1;`,
+            {paramTypes: [DataTypeOIDs.int4]}
+        );
+
+        this.createReservation = await db.connection.prepare(
+            `SELECT * FROM create_reservation($1, $2, $3, $4, $5, $6);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.timestamp, DataTypeOIDs.timestamp, DataTypeOIDs.int4]}
+        );
+
+    }
 
     public async init() {
         await Promise.all(
@@ -511,7 +531,8 @@ class StatmentManager {
                 this.prepareMiddlewareStatements(),
                 this.prepareChargingStationServiceStatements(),
                 this.prepareChargingTypeServiceStatements(),
-                this.prepareOCPPStatements()
+                this.prepareOCPPStatements(),
+                this.prepareReservationStatements()
             ]
         );
         log.info("All SQL statements have been prepared.");

@@ -118,8 +118,8 @@ async function deleteStation(body: unknown): Promise<APIResponse> {
 }
 
 /** Only for station name or building id
-
-*  Changing connectors has different request */
+ *
+ *  Changing connectors has different request */
 async function editStation(body: unknown): Promise<APIResponse> {
     let data;
     try {

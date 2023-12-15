@@ -81,3 +81,9 @@ INSERT INTO Building_accesses ("account_id", "building_id", "company_admin_id") 
 INSERT INTO Sessions ("account_id", "session_secret", "expiration_time") VALUES
     (3, 'asudbšuba2šouisa', NOW()+ interval '30 minutes'),
     (2, '072d7ndns29jsdn', NOW()+ interval '90 minutes');
+
+INSERT INTO Reservations ("account_id", "allocated_connector_id", "desired_charging_type_id", "creation_time", "charging_time", "desired_from", "desired_to", "allocated_from", "allocated_to", "desired_building_id", "position_in_queue") VALUES
+    (1, 1, null, now(), 3, CURRENT_DATE+interval '8 hours', CURRENT_DATE+interval '16 hours', CURRENT_DATE+interval '8 hours', CURRENT_DATE+interval '11 hours', null, null),
+    (2, 1, null, now(), 3, CURRENT_DATE+interval '8 hours', CURRENT_DATE+interval '16 hours', CURRENT_DATE+interval '11 hours', CURRENT_DATE+interval '14 hours', null, null);
+
+

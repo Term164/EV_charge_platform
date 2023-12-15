@@ -1,6 +1,6 @@
 -- PROCEDURES.SQL
 -- Creates procedures or functions that the backend needs.
--- These procedures are mainly transactions or very complex queries
+-- These procedures/functions are mainly transactions or very complex queries
 --
 -- MEANT TO BE RUN ONCE
 
@@ -70,7 +70,7 @@ $$;
 -- edit_station(user_id)
 CREATE OR REPLACE FUNCTION get_all_available(user_id int)
 RETURNS TABLE (connector_id int, station_id int, station_name text, type_id int, charging_type text, building_id int, building_name text, building_location text,
-              company_id int, company_name text, serial_number int)
+              company_id int, company_name text, serial_number int, power_output int, building_longitude real, building_latitude real)
 AS $$
 DECLARE
     ids_array int[];
@@ -106,7 +106,8 @@ BEGIN
     FOR rt IN (
       SELECT cc.id as connector_id, cs.id as station_id, cs.name as station_name,
       cc.charging_type_id as type_id, ct.type as charging_type,
-      cs.building_id, b.building_name, b.building_location, cs.company_id, null, cc.serial_number
+      cs.building_id, b.building_name, b.building_location, cs.company_id, null, cc.serial_number, cc.power_output,
+      b.longitude, b.latitude
       FROM Charging_stations cs LEFT JOIN Charging_connectors cc ON cc.charging_station_id = cs.id
       LEFT JOIN Charging_types ct ON cc.charging_type_id = ct.id 
       LEFT JOIN Buildings b ON cs.building_id = b.id 
@@ -125,6 +126,9 @@ BEGIN
       company_id := rt.company_id;
       company_name := null;
       serial_number := rt.serial_number;
+      power_output := rt.power_output;
+      building_longitude := rt.longitude;
+      building_latitude := rt.latitude;
       RETURN NEXT;
     END LOOP;
     
@@ -244,3 +248,109 @@ BEGIN
     WHERE id = id_of_connector;
 END
 $$;
+
+-- ========================= RESERVATIONS =============================================
+
+-- --------------- create_reservation ---------------
+-- Creates a reservations, or tries to. If it doesn't find a full reservation, it puts it into a queue.
+-- create_reservation(user_id_in int, desired_building_id_in int, charging_time_in int, desired_from_in timestamp, desired_to_in timestamp, desired_charging_type_id_in int)
+
+-- Type is a table that gets returned. All paths return this table, while some values could be null.
+CREATE TYPE reservation_info as (allocated_connector_id int, allocated_from timestamp, allocated_to timestamp, charging_time int, position_in_queue int);
+CREATE OR REPLACE FUNCTION create_reservation(user_id_in int, desired_building_id_in int, charging_time_in int, desired_from_in timestamp, desired_to_in timestamp, desired_charging_type_id_in int)
+RETURNS reservation_info
+AS $$
+DECLARE
+  connector_array int[];
+  current_connector_id int;
+  result_record record;
+  dz timestamp;
+  dk timestamp;
+  current_charging_time int;
+  current_position_in_queue int;
+  rt reservation_info;
+BEGIN
+  -- Get all possible connectors available to a person (for a building)
+  SELECT * FROM get_all_available_for_building(user_id_in, desired_building_id_in) INTO connector_array;
+  RAISE INFO 'Connectors: %', connector_array;
+  
+  -- Set current_position_in_queue in case we're gonna need it. This position doesn't change depending on our reservation.
+  current_position_in_queue := (SELECT COALESCE(MAX(position_in_queue)+1, 1) FROM Reservations r_nest WHERE r_nest.desired_building_id = desired_building_id_in);
+  current_charging_time := charging_time_in;
+  -- Loop through charging times (from desired down to 1)
+  WHILE current_charging_time > 0 
+  LOOP
+    RAISE INFO 'Now checking for charging time of % hours', current_charging_time;
+    -- Loop through all connectors
+    FOR current_connector_id IN SELECT UNNEST(connector_array)
+    LOOP
+      -- Check if desired charging type matches
+      IF desired_charging_type_id_in IS NOT NULL THEN
+        IF (SELECT charging_type_id FROM charging_connectors WHERE id=current_connector_id) != desired_charging_type_id_in THEN
+          RAISE INFO 'Connectors type % does not match desired. Skipping.', (SELECT charging_type_id FROM charging_connectors WHERE id=current_connector_id);
+          CONTINUE;
+        END IF;
+      END IF;
+      -- Set "time window"
+      dz := desired_from_in;
+      dk := dz + INTERVAL '1 hour' * current_charging_time;
+      RAISE INFO 'Now checking connector %', current_connector_id;
+      -- Loop through all hours of a connector, moving time window an hour
+      WHILE dk <= desired_to_in
+      LOOP
+        RAISE INFO 'Checking % to %', dz, dk;
+        SELECT r.allocated_from, r.allocated_to FROM Reservations r
+        INTO  result_record
+        WHERE r.allocated_connector_id = current_connector_id  AND
+        ((dz >= r.allocated_from  AND dz <  r.allocated_to)  OR
+        (dk >  r.allocated_from  AND dk <= r.allocated_to));
+        
+        -- If clash isn't found, that means that a slot is possible
+        IF NOT FOUND THEN
+          RAISE NOTICE 'Slot found. Creating a reservation for % - %', dz, dk;
+          -- If a slot with full charging_time hours was found, save normally, otherwise as queued
+          IF current_charging_time = charging_time_in THEN  
+            INSERT INTO reservations (
+    	        account_id, allocated_connector_id, desired_charging_type_id, creation_time, charging_time, desired_from, desired_to, allocated_from, allocated_to, desired_building_id)
+    	      VALUES (
+    	        user_id_in, current_connector_id, desired_charging_type_id_in, now(), current_charging_time, desired_from_in, desired_to_in, dz, dk, desired_building_id_in
+  	        );
+            SELECT current_connector_id, dz, dk, current_charging_time, null INTO rt;
+            RETURN rt;
+          ELSE
+            INSERT INTO reservations (
+    	        account_id, allocated_connector_id, desired_charging_type_id, creation_time, charging_time, desired_from, desired_to, allocated_from, allocated_to, desired_building_id, position_in_queue)
+    	      VALUES (
+    	        user_id_in, current_connector_id, desired_charging_type_id_in, now(), current_charging_time, desired_from_in, desired_to_in, dz, dk, desired_building_id_in, current_position_in_queue
+    	      );
+            SELECT current_connector_id, dz, dk, current_charging_time, current_position_in_queue INTO rt;
+            RETURN rt;
+          END IF;
+        END IF;
+        -- Move the time window
+        dz := dz + INTERVAL '1 hour';
+        dk := dk + INTERVAL '1 hour';
+      END LOOP;
+    END LOOP;
+    current_charging_time := current_charging_time - 1;
+  END LOOP;
+  
+  RAISE NOTICE 'No suitable slots found. Putting in queue.';
+  INSERT INTO reservations (
+    account_id, allocated_connector_id, desired_charging_type_id, creation_time, charging_time, desired_from, desired_to, desired_building_id, position_in_queue)
+  VALUES (
+    user_id_in, null, desired_charging_type_id_in, now(), charging_time_in, desired_from_in, desired_to_in, desired_building_id_in, current_position_in_queue
+  );
+  
+  SELECT null,null,null,charging_time_in, current_position_in_queue INTO rt;
+  RETURN rt;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- 
+
+
+
+
+

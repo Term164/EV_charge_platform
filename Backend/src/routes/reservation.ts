@@ -10,6 +10,12 @@ router.get('/get/all', asyncHandler(async (req, res) => {
         .send(response);
 }));
 
+router.get('/get/reservation', asyncHandler(async (req, res) => {
+    const response = await reservationService.getSpecificReservation(req.body);
+    res.status(response.status)
+        .send(response);
+}));
+
 router.patch('/patch/edit', asyncHandler(async (req, res) => {
     const response = await reservationService.editReservation(req.body);
     res.status(response.status)
@@ -28,8 +34,8 @@ router.post('/post/new', asyncHandler(async (req, res) => {
         .send(response);
 }));
 
-router.get('/get/stationType', asyncHandler(async (req, res) => {
-    const response = await reservationService.getAllTypesAtBuilding(req.body);
+router.get('/get/availableTypesForReservation', asyncHandler(async (req, res) => {
+    const response = await reservationService.getAllAvailableChargingTypesAtBuildingForPerson(req.body);
     res.status(response.status)
         .send(response);
 }));

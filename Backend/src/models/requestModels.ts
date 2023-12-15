@@ -157,11 +157,11 @@ interface CancelReservationRequest {
 
 interface CreateReservationRequest {
     userID: number;
-    buildingID: number;
+    desiredBuildingID: number;
     chargingTime: number;
-    chargingTypeID: number | null;
-    desiredFrom: EpochTimeStamp;
-    desiredTo: EpochTimeStamp;
+    desiredChargingTypeID: number | null;
+    desiredFrom: Date;
+    desiredTo: Date;
 }
 
 
