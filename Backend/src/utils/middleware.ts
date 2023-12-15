@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import log from './logger';
+import { APILogger } from './logger';
 import config from './config';
-import asyncHanlder from 'express-async-handler';
+import asyncHandler from 'express-async-handler';
 import { SQLStatementManager } from './SQLStatementManager';
+import { readFileSync } from 'fs';
 
 const requestLogger = (request: Request, _response: Response, next: NextFunction): void => {
-    log.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
+    APILogger.info('Request: ', {'Method': request.method, 'Path': request.path}, 'Body:', request.body);
     next();
 };
 
@@ -19,12 +20,12 @@ const errorHandler = (error: Error, _request: Request, response: Response, next:
     if (config.NODE_ENV == 'production' || config.NODE_ENV == 'test' ) {
         response.status(500).send({status: 500, message: 'An error occured.', error: Error.name, data: null});
     } else {
-        log.trace(error);
+        APILogger.trace(error);
         next(error);
     }
 };
 
-const sessionChecker = asyncHanlder(async (request: Request, response: Response, next: NextFunction) => {
+const sessionChecker = asyncHandler(async (request: Request, response: Response, next: NextFunction) => {
     if (config.NODE_ENV == 'test' && !("sessionTest" in request.body)) {
         next();
         return;
@@ -73,10 +74,79 @@ const sessionChecker = asyncHanlder(async (request: Request, response: Response,
     }
 });
 
+// ================================ AUTHORIZATION MIDDLEWARE ============================
+
+type adminData = {
+    isbadmin: boolean,
+    iscadmin: boolean,
+    ispadmin: boolean
+};
+
+type pathAuthorizationList = {
+    noauth: string[],
+    default: string[],
+    badmin: string[],
+    cadmin: string[],
+    padmin: string[]
+};
+
+const authListRawData = readFileSync('./src/utils/pathAuthorizationList.json', 'utf8');
+const authList = JSON.parse(authListRawData) as pathAuthorizationList;
+
+
+const authorizationChecker = asyncHandler(async (request: Request, response: Response, next: NextFunction) => {
+
+    if (config.NODE_ENV == 'test' && !("sessionTest" in request.body)) {
+        next();
+        return;
+    }
+
+    let splitPath = request.path.split('/');
+    splitPath = splitPath.slice(3);
+    const finalPath = '/' + splitPath.join('/');
+
+
+    if (authList.noauth.includes(finalPath)) {
+        next();
+        return;
+    }
+
+    const data = await SQLStatementManager.checkAdminAuthorizationStatement.execute({params: [request.body.sessionID]});
+
+    if (data.rows == undefined) {
+        response.status(500).send({status: 500, message: 'An error occured and we could not authorize this API call, please contact an administrator.', error: 'Database data not recieved', data: null });
+        return; // Stop execution
+    }
+
+    const adminData: adminData = {
+        isbadmin: data.rows[0][0] as boolean,
+        iscadmin: data.rows[0][1] as boolean,
+        ispadmin: data.rows[0][2] as boolean
+    };
+
+    if (adminData.ispadmin) {
+        next(); // platform admin has access to all API endpoints
+        return;
+    } else if (authList.badmin.includes(finalPath)) {
+        if (!adminData.isbadmin) {
+            APILogger.warn('Unauthorized request to API', request.ip);
+            response.status(403).send({status: 403, message: 'You are not a building administrator and cannot make a request to this API endpoint', error: 'Unauthorized request to API', data: null});
+        } else next();
+        return;
+    } else if (authList.cadmin.includes(finalPath)) {
+        if (!adminData.iscadmin) {
+            APILogger.warn('Unauthorized request to API', request.ip);
+            response.status(403).send({status: 403, message: 'You are not a company administrator and cannot make a request to this API endpoint', error: 'Unauthorized request to API', data: null});
+        } else next();
+        return;
+    } else next();
+});
+
 
 export default {
     requestLogger,
     unknownEndpoints,
     errorHandler,
-    sessionChecker
+    sessionChecker,
+    authorizationChecker
 };

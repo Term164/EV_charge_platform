@@ -57,19 +57,23 @@ interface EditUserProfileRequest {
     username?: string,
     email_account?: string,
     profile_picture?: string,
-    rfid?: number,
+    rfid?: string,
     company_id?: number
 }
 
 interface CreateBuildingRequest {
     buildingName: string;
     buildingLocation: string;
+    buildingLongitude: number;
+    buildingLatitude: number;
 }
 
 interface EditBuildingRequest {
     buildingID: number;
     newBuildingName: string | null;
     newBuildingLocation: string | null;
+    newBuildingLongitude: number | null;
+    newBuildingLatitude: number | null;
 }
 
 interface DeleteBuildingRequest {
@@ -79,6 +83,72 @@ interface DeleteBuildingRequest {
 interface AssignCompanyRequest {
     companyID: number;
     buildingID: number;
+}
+
+interface GetAllStationsRequest {
+    buildingID: number | null;
+}
+
+interface connectorTypeIDAndSerialNumberAndPowerOutput {
+    chargingTypeID: number;
+    serialNumber: number;
+    powerOutput: number;
+}
+
+interface CreateStationRequest {
+    buildingID: number;
+    stationName: string;
+    chargingConnectors: connectorTypeIDAndSerialNumberAndPowerOutput[];
+}
+
+interface DeleteStationRequest {
+    stationID: number;
+}
+
+interface AssignStationToCompanyRequest {
+    stationID: number;
+    companyID: number | null;
+}
+
+// Does not include companyID, different request
+// Does not include connectors, different request
+interface EditStationRequest {
+    stationID: number;
+    newBuildingID: number | null;
+    newStationName: string | null;
+}
+
+interface CreateChargingTypeRequest {
+    chargingType: string;
+}
+
+interface DeleteChargingTypeRequest {
+    chargingTypeID: number;
+}
+
+interface EditChargingTypeRequest {
+    chargingTypeID: number;
+    newChargingType: string;
+}
+
+interface GetAllAvailableStationsRequest {
+    userID: number;
+}
+
+interface AddChargingConnectorRequest {
+    stationID: number;
+    chargingConnector: connectorTypeIDAndSerialNumberAndPowerOutput;
+}
+
+interface ChargingConnectorID {
+    chargingConnectorID: number;
+}
+
+interface EditChargingConnectorRequest {
+    chargingConnectorID: number;
+    chargingTypeID: number | null;
+    serialNumber: number | null;
+    powerOutput: number | null;
 }
 
 export {
@@ -96,5 +166,18 @@ export {
     CreateBuildingRequest,
     EditBuildingRequest,
     DeleteBuildingRequest,
-    AssignCompanyRequest
+    AssignCompanyRequest,
+    GetAllStationsRequest,
+    CreateStationRequest,
+    connectorTypeIDAndSerialNumberAndPowerOutput,
+    DeleteStationRequest,
+    AssignStationToCompanyRequest,
+    EditStationRequest,
+    CreateChargingTypeRequest,
+    DeleteChargingTypeRequest,
+    EditChargingTypeRequest,
+    GetAllAvailableStationsRequest,
+    AddChargingConnectorRequest,
+    ChargingConnectorID,
+    EditChargingConnectorRequest
 };

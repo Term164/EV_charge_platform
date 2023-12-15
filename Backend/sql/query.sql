@@ -2,18 +2,17 @@
 -- 
 -- The list of SQL commands is separated into some parts, which resemble the REST API group endpoints.
 --
--- THIS FILE IS NOT MEANT TO BE RUN! It is only a collection of used
--- statements in the backend. Copy+Paste
+-- THIS FILE IS NOT MEANT TO BE RUN! 
+--
+-- It is only a collection of used statements in the backend. Copy+Paste
 --
 -- The statements are built like this:
 /*
-
 -- DESCRIPTION
 -- ENDPOINT
 -- [ ROLES ]
 -- { PARAMETERS }
 QUERY_STATEMENT;
-
 */
 -- DESCRIPTION:
 -- Loose description of what the statement does. Some other descriptions are in the Documentaion file.
@@ -345,7 +344,6 @@ WHERE ba.id = {selected_building_admin_id};
 
 --=============================== STATION ===============================
 
-
 -- All charging stations
 -- /api/v1/station/get/all (buildingID?) -> WHEN buildingID IS NULL
 SELECT cs.id, name, ct.id type_id, type, b.id building_id, building_name, building_location
@@ -385,11 +383,31 @@ WHERE id = {station_id};
 
 -- TODO:
 -- /api/v1/station/patch/edit (stationID)
+-- > Procedure
+
 -- /api/v1/station/get/allAvailable (userID) complex
+-- If userID is in building_accesses
+
+
+
 
 
 -- What are the endpoints for these??
 
+--=============================== Charging Type ===============================
+-- CRUD operations for Charging Types. SUB GROUP OF 'STATIONS'
+-- /api/v1/station/type/get/all
+SELECT * FROM charging_types;
+-- /api/v1/station/type/patch/edit
+UPDATE charging_types
+        SET type = $1
+        WHERE id = $2;
+-- /api/v1/station/type/delete/type
+DELETE FROM charging_types
+        WHERE id = $1;
+-- /api/v1/station/type/post/new
+INSERT INTO charging_types (type)
+        VALUES ($1);
 --=============================== RESERVATION ===============================
 
 -- All available charging types for some selected building

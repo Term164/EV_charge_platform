@@ -1,14 +1,14 @@
 import helper, { request } from "./helper";
 
 
-let currentUserID: string;
+let currentUserID: number;
 let testCompanyID: number;
 let testBuildingID: number;
 
 describe('assign admin service', () => {
     beforeAll(async () => {
 
-        currentUserID = String(await helper.insertNewUserReturningUserID("Term", "test", "test.com"));
+        currentUserID = await helper.insertNewUserReturningUserID("Term", "test", "test.com");
         testCompanyID = await helper.insertDummyCompanyReturningID('assignAdminTest');
         testBuildingID = await helper.insertDummyBuildingReturningID('assignAdminTest');
     }, 10000);
@@ -16,7 +16,7 @@ describe('assign admin service', () => {
     test('assign new building admin', async () => {
         const data = {
             userID: currentUserID,
-            buildingID: String(testBuildingID)
+            buildingID: testBuildingID
         };
 
         await request.post('/api/v1/user/post/assignBadmin')
@@ -30,7 +30,7 @@ describe('assign admin service', () => {
     test('assign new company admin', async () => {
         const data = {
             userID: currentUserID,
-            companyID: String(testCompanyID)
+            companyID: testCompanyID
         };
 
         await request.post('/api/v1/user/post/assignCadmin')
@@ -45,7 +45,7 @@ describe('assign admin service', () => {
 
         const data = {
             userID: currentUserID,
-            buildingID: String(testBuildingID)
+            buildingID: testBuildingID
         };
 
         await request.post('/api/v1/user/post/assignBadmin')
@@ -58,7 +58,7 @@ describe('assign admin service', () => {
 
         const data = {
             userID: currentUserID,
-            companyID: String(testCompanyID)
+            companyID: testCompanyID
         };
 
         await request.post('/api/v1/user/post/assignCadmin')
@@ -70,8 +70,8 @@ describe('assign admin service', () => {
     test('assign user that does not exist to company admins', async () => {
 
         const data = {
-            userID: '12312312',
-            companyID: String(testCompanyID)
+            userID: 12312312,
+            companyID: testCompanyID
         };
 
         const result = await request.post('/api/v1/user/post/assignCadmin')
@@ -84,8 +84,8 @@ describe('assign admin service', () => {
 
     test('assign user that does not exist to building admins', async () => {
         const data = {
-            userID: '12312312',
-            buildingID: String(testBuildingID)
+            userID: 12312312,
+            buildingID: testBuildingID
         };
 
         const result = await request.post('/api/v1/user/post/assignBadmin')
@@ -99,7 +99,7 @@ describe('assign admin service', () => {
     test('assign user to company admins for company that does not exist', async () => {
         const data = {
             userID: currentUserID,
-            companyID: '11231231'
+            companyID: 11231231
         };
 
         const result = await request.post('/api/v1/user/post/assignCadmin')
@@ -113,7 +113,7 @@ describe('assign admin service', () => {
     test('assign user to building admins for a building that does not exist', async () => {
         const data = {
             userID: currentUserID,
-            buildingID: '11231231'
+            buildingID: 11231231
         };
 
         const result = await request.post('/api/v1/user/post/assignBadmin')

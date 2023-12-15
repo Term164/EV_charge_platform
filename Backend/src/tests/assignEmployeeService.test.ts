@@ -1,7 +1,7 @@
 import helper, { request } from "./helper";
 
 
-let currentUserID: string;
+let currentUserID: number;
 let testBuildingID: number;
 let testAdminID: number;
 let testCompanyID: number;
@@ -9,16 +9,16 @@ let testCompanyID: number;
 describe('assign employee service', () => {
     beforeAll(async () => {
 
-        currentUserID = String(await helper.insertNewUserReturningUserID("Term", "test", "test.com"));
+        currentUserID = await helper.insertNewUserReturningUserID("Term", "test", "test.com");
         testBuildingID = await helper.insertDummyBuildingReturningID('assignEmployeeServiceTest');
         testCompanyID = await helper.insertDummyCompanyReturningID('assignEmployeeServiceTest');
-        testAdminID = await helper.insertDummyCompanyAdminReturningID(currentUserID, String(testCompanyID));
+        testAdminID = await helper.insertDummyCompanyAdminReturningID(currentUserID, testCompanyID);
     }, 10000);
 
     test('assign new employee to company', async () => {
         const data = {
             userID: currentUserID,
-            companyID: String(testCompanyID)
+            companyID: testCompanyID
         };
 
         await request.post('/api/v1/user/post/assignCompany')
@@ -32,9 +32,9 @@ describe('assign employee service', () => {
     test('fail when trying to assign a new employee that does not exist to building', async () => {
 
         const data = {
-            userID: '4123123',
-            buildingID: String(testBuildingID),
-            companyAdminID: String(testAdminID)
+            userID: 4123123,
+            buildingID: testBuildingID,
+            companyAdminID: testAdminID
         };
 
         const result = await request.post('/api/v1/user/post/assignBuilding')
@@ -48,8 +48,8 @@ describe('assign employee service', () => {
 
     test('assign new employee to company', async () => {
         const data = {
-            userID: '45123123',
-            companyID: String(testCompanyID)
+            userID: 45123123,
+            companyID: testCompanyID
         };
 
         const result = await request.post('/api/v1/user/post/assignCompany')
@@ -65,8 +65,8 @@ describe('assign employee service', () => {
 
         const data = {
             userID: currentUserID,
-            buildingID: '1231231',
-            companyAdminID: String(testAdminID)
+            buildingID: 1231231,
+            companyAdminID: testAdminID
         };
 
         const result = await request.post('/api/v1/user/post/assignBuilding')
@@ -81,7 +81,7 @@ describe('assign employee service', () => {
     test('assign new employee to company', async () => {
         const data = {
             userID: currentUserID,
-            companyID: '123123123'
+            companyID: 123123123
         };
 
         const result = await request.post('/api/v1/user/post/assignCompany')
@@ -93,6 +93,7 @@ describe('assign employee service', () => {
         expect(result.body.message).toContain('companyID');
     });
 
+    /* This tests if companyAdminID exists, but we removed that frn key for ease of deletion
     test('fail when trying to assign a new employee that does not exist to building', async () => {
 
         const data = {
@@ -109,12 +110,13 @@ describe('assign employee service', () => {
         expect(result.body.message).toContain('companyAdminID');
 
     });
+    */
 
     test('assign new employee to building', async () => {
         const data = {
             userID: currentUserID,
-            buildingID: String(testBuildingID),
-            companyAdminID: String(testAdminID)
+            buildingID: testBuildingID,
+            companyAdminID: testAdminID
         };
 
         await request.post('/api/v1/user/post/assignBuilding')
@@ -127,8 +129,8 @@ describe('assign employee service', () => {
 
         const data = {
             userID: currentUserID,
-            buildingID: String(testBuildingID),
-            companyAdminID: String(testAdminID)
+            buildingID: testBuildingID,
+            companyAdminID: testAdminID
         };
 
         await request.post('/api/v1/user/post/assignBuilding')
