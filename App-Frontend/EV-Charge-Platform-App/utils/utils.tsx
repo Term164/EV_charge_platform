@@ -3,10 +3,10 @@ import CHAdeMOSVG from "../assets/connector-icons/ev-plug-chademo.svg";
 import TeslaSVG from "../assets/connector-icons/ev-plug-tesla.svg";
 import CSSSVG from "../assets/connector-icons/ev-plug-ccs2.svg";
 import { ChargingType } from "../utils/types";
-import { useCurrentSettings } from "./GlobalStateContext";
+import { useColorScheme } from "nativewind";
 
 export function getConnectorIcon(connectorType: ChargingType) {
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
     switch(connectorType) {
         case ChargingType.TYPE2: 
             return <Type2SVG width={35} height={35} fill={colorScheme === 'light' ? '#1e293b' : '#cbd5e1'} />

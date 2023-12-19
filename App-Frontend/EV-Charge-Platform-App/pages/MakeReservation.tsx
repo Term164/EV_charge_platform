@@ -19,7 +19,7 @@ function getTextColorBasedOnAvailability(availability: number) {
     return colorStyle;
 }
 
-export default function MakeReservationPage({exitModal, building}: MakeReservationPageProps) {
+export default function MakeReservationPage({exitModal, station}: MakeReservationPageProps) {
 
     const today = new Date();
     today.setHours(0,1,0,0);
@@ -53,9 +53,9 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
     return(
         <View className="flex-1 p-5 bg-slate-100 dark:bg-slate-800">
             <Text className="self-center mb-2 text-gray-500 dark:text-slate-400 text-2xl font-semibold">{t('makeReservationTitle')}</Text>
-            <Text className="text-lg font-semibold text-gray-800 dark:text-slate-100 uppercase">{building.name}</Text>
-            <Text className="text-base font-medium text-gray-500 dark:text-slate-300">{building.address}</Text>
-            <Text className="font-semibold text-lg text-gray-600 dark:text-slate-400 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(building.availability)}>{building.availability}</Text>%</Text>
+            <Text className="text-lg font-semibold text-gray-800 dark:text-slate-100 uppercase">{station.building.buildingName}</Text>
+            <Text className="text-base font-medium text-gray-500 dark:text-slate-300">{station.building.buildingLocation}</Text>
+            <Text className="font-semibold text-lg text-gray-600 dark:text-slate-400 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(station.building.availability)}>{station.building.availability}</Text>%</Text>
 
             <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1">{t('type')}</Text>
             <DropDownPicker

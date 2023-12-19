@@ -1,37 +1,34 @@
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import CustomButton from "../components/CustomButton";
 import { TextInputWithTitle } from "../components/TextInputWithTitle";
-import { Pressable } from "react-native";
-import { useToast } from 'react-native-toast-notifications'
 import { ProfilePageProps } from "../utils/types";
 import { useTranslation } from "react-i18next";
-import { useCurrentSettings } from "../utils/GlobalStateContext";
+import { UserDataContext, useCurrentSettings } from "../utils/GlobalStateContext";
+import { serverAddress } from "../utils/Constants";
+import { Toast } from "react-native-toast-notifications";
+import Spinner from "react-native-loading-spinner-overlay";
 
 
 
 export default function ProfilePage({exitModal}: ProfilePageProps) {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [rfid, setRfid] = useState(null);
-    const [isEditable, setIsEditable] = useState(false)
+    const userData = useContext(UserDataContext);
+
+    const [username, setUsername] = useState(userData?.userData.username);
+    const [email, setEmail] = useState(userData?.userData.email_account);
+    const [rfid, setRfid] = useState('');
+    const [isEditable, setIsEditable] = useState(false);
 
     const { t } = useTranslation();
 
     const { colorScheme, toggleColorScheme } = useCurrentSettings();
 
-    const toast = useToast();
-
-    useEffect(() => {
-        setUsername('Term');
-        setEmail('Jani.Bangiev@gmail.com')
-    }, [])
-
     return (
         <SafeAreaView className="flex-1 items-center justify-center p-5 dark:bg-slate-800">
-            <Ionicons name={'person-circle-outline'} color={'#e2e8f0'} size={120}/>
+            
+            <Ionicons name={'person-circle-outline'} color={colorScheme === 'dark' ? '#e2e8f0' : '#1e293b'} size={120}/>
 
             <TextInputWithTitle
                 title={t('usernameInputPlaceholder')}

@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View, Text, Image,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import { useTranslation } from "react-i18next";
-import { useCurrentSettings } from "../utils/GlobalStateContext";
+import { useCurrentAuth } from "../utils/GlobalStateContext";
+import { SignUpScreenProps } from "../utils/types";
+import { useColorScheme } from "nativewind";
 
 
 type Response = {
@@ -14,43 +16,16 @@ type Response = {
     data: object
 }
 
-export default function SignInScreen() {
+export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
     const { t } = useTranslation();
-    // const [data, setData] = useState<Response>();
-    
-    // const testFetch = async () => {
-    //     try {
-    //         const response = await fetch(
-    //           'http://192.168.50.188:3000/api/v1/auth/login',
-    //           {
-    //             method: 'POST',
-    //             headers: {
-    //                 Accept: '*/*',
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 "username": "asd",
-    //                 "password": "test"
-    //             })
-    //           }
-    //         );
-    //         const json = await response.json();
-    //         console.log(json.data['sessionID']);
-    //         setData(json);
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     testFetch();
-    // },[]);
+    const { signUp } = useCurrentAuth();
 
     let logo;
     if (colorScheme === 'dark'){
@@ -68,9 +43,16 @@ export default function SignInScreen() {
             />
     }
 
+    const signUpNewUser = async () => {
+        setIsLoading(true);
+        const switchScreen = await signUp(username, email, password, confirmPassword);
+        setIsLoading(false);
+        if (switchScreen)
+            navigation.navigate('SignInScreen');
+    }
+
     return (
         <SafeAreaView className="flex-1 items-center justify-center dark:bg-slate-800">
-
             {logo}
 
             <Text className="text-gray-800 dark:text-slate-200 font-bold text-4xl mb-10 mt-5 ">{t('createAccount')}</Text>
@@ -81,7 +63,7 @@ export default function SignInScreen() {
                     iconName='person' 
                     iconSize={20}
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
-                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-slate-300" 
                     placeholder={t('usernameInputPlaceholder')}
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newUsername => setUsername(newUsername)}
@@ -92,7 +74,7 @@ export default function SignInScreen() {
                     iconName='mail'
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
-                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-slate-300"
                     placeholder={t('emailInputPlaceholder')}
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newEmail => setEmail(newEmail)}
@@ -105,7 +87,7 @@ export default function SignInScreen() {
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
-                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-slate-300"
                     placeholder={t('passwordInputPlaceholder')}
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newPassword => setPassword(newPassword)}
@@ -118,7 +100,7 @@ export default function SignInScreen() {
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
-                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-slate-300"
                     placeholder={t('confirmPassInputPlaceholder')}
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newConfirmPassword => setConfirmPassword(newConfirmPassword)}
@@ -128,6 +110,7 @@ export default function SignInScreen() {
             </View>
 
              <CustomButton
+                    onPress={signUpNewUser}
                     textStyle="font-bold text-lg text-white tracking-widest"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500 dark:bg-blue-500/80" 
                     android_ripple={{color: ''}}>{t('signUpButtonText')}</CustomButton>

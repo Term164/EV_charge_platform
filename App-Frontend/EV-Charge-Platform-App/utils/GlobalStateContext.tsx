@@ -1,19 +1,30 @@
 import React, { useContext } from 'react';
-import { AppState, StateAction, StateActionKind } from './types';
+import { AppState, Language, StateAction, StateActionKind } from './types';
+import { Profile, Station } from './databaseTypes';
 
 type userSettingsContext = {
-  colorScheme: string
+  colorScheme: string,
+  language: Language,
+  notifications: string,
   toggleColorScheme: () => void
+  setColorScheme: (colorScheme: string) => void,
 }
 
 type authContextFunctions = {
   signIn: (username: string, password: string) => Promise<void>,
   signOut: () => void,
-  signUp: (_data: string) => Promise<void>
+  signUp: (username: string, email: string, password: string, confirmPassword: string) => Promise<boolean>
+}
+
+type userData= {
+  header: object,
+  userData: Profile,
+  stations: Array<Station>
 }
 
 export const SettingsContext = React.createContext<userSettingsContext | null>(null);
 export const AuthContext = React.createContext<authContextFunctions | null>(null);
+export const UserDataContext = React.createContext<userData | null>(null);
 
 export const useCurrentSettings  = () => {
   const currentSettings = useContext(SettingsContext);
@@ -23,6 +34,16 @@ export const useCurrentSettings  = () => {
   }
 
   return currentSettings;
+}
+
+export const useUserData = () => {
+  const currentUserData = useContext(UserDataContext);
+
+  if (!currentUserData) {
+    throw new Error("useCurrentSettings has to be used within <SettingsContext.Provider>");
+  }
+
+  return currentUserData;
 }
 
 export const useCurrentAuth = () => {
@@ -52,6 +73,7 @@ export function AppStateReducer(prevState: AppState, action: StateAction) {
     case StateActionKind.SIGN_OUT:
       return {
         ...prevState,
+        isLoading: false,
         isSignout: true,
         userToken: null
       };

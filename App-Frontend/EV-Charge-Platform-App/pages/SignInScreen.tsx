@@ -1,70 +1,51 @@
 import React, { useState } from "react";
-import { View, Text, Image, Pressable, Alert,} from "react-native";
+import { View, Text, Image, Pressable,} from "react-native";
 import CustomButton from "../components/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import { SignInScreenProps } from "../utils/types";
-import { AuthContext, useCurrentAuth, useCurrentSettings } from "../utils/GlobalStateContext";
+import { useCurrentAuth } from "../utils/GlobalStateContext";
 import { useTranslation } from "react-i18next";
-import { styled, useColorScheme } from "nativewind";
+import Spinner from 'react-native-loading-spinner-overlay';
+import { useColorScheme } from "nativewind";
 
 export default function SignInScreen({ route, navigation }: SignInScreenProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
     const { signIn } = useCurrentAuth();
 
     const { t } = useTranslation();
-
-    // const [data, setData] = useState<Response>();
-    
-    // const testFetch = async () => {
-    //     try {
-    //         const response = await fetch(
-    //           'http://192.168.50.188:3000/api/v1/auth/login',
-    //           {
-    //             method: 'POST',
-    //             headers: {
-    //                 Accept: '*/*',
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 "username": "asd",
-    //                 "password": "test"
-    //             })
-    //           }
-    //         );
-    //         const json = await response.json();
-    //         console.log(json.data['sessionID']);
-    //         setData(json);
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     testFetch();
-    // },[]);
 
     let logo;
     if (colorScheme === 'dark'){
         logo = <Image 
                 source={require('../assets/logo/Charge-Mate-Logo-dark.png')}
                 style={{width: '40%', height: '20%', resizeMode: 'cover'}}
-                className=""
             />
     }
     else {
         logo = <Image 
                 source={require('../assets/logo/Charge-Mate-Logo.png')}
                 style={{width: '40%', height: '20%', resizeMode: 'cover'}}
-                className=""
             />
+    }
+
+    const signInUser = async (username: string, password: string) => {
+        setIsLoading(true);
+        await signIn(username, password);
+        setIsLoading(false);
     }
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center dark:bg-slate-800">
+            <Spinner
+                visible={isLoading}
+                textContent="Logging in..."
+                textStyle={{color: colorScheme === 'dark' ? 'white' : 'black'}}
+            />
             {logo}
             <Text className="text-black dark:text-slate-200 font-bold text-4xl">{t("signInWelcome")}</Text>
             <Text className="text-gray-500 dark:text-slate-300 ml-1 mb-16 font-bold text-lg">{t("signInSubHeader")}</Text>
@@ -88,7 +69,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
-                    className="flex-1 text-center text-lg font-bold text-gray-800" 
+                    className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-slate-300" 
                     placeholder={t("passInputPlaceholder")}
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newPassword => setPassword(newPassword)}
@@ -97,7 +78,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
             </View>
 
              <CustomButton
-                    onPress={() => signIn(username, password)}
+                    onPress={() => signInUser(username, password)}
                     textStyle="font-bold text-lg text-white dark:text-slate-300 tracking-widest"
                     className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 bg-blue-500 dark:bg-blue-500/80" 
                     android_ripple={{color: ''}}>{t('signInButtonText')}</CustomButton>

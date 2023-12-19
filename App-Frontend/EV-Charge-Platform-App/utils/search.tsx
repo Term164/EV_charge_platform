@@ -1,3 +1,4 @@
+import { Station } from "./databaseTypes";
 import { Building } from "./types";
 
 function jaro_distance(s1: string, s2: string) {
@@ -67,13 +68,13 @@ function jaro_Winkler(s1: string, s2: string) {
     return jaro_dist;
 }
 
-function searchBuildingsByName (serachWord: string, buildings: Building[]) {
+function searchBuildingsByName (serachWord: string, stations: Station[]) {
 
-    if (serachWord.length == 0) return buildings;
+    if (serachWord.length == 0) return stations;
 
-    return buildings.filter((building) => {
-        if (jaro_Winkler(serachWord.toLowerCase(), building.name.toLowerCase()) >= 0.7 || jaro_Winkler(serachWord, building.address) >= 0.7)
-            return building;
+    return stations.filter((station) => {
+        if (jaro_Winkler(serachWord.toLowerCase(), station.building.buildingName.toLowerCase()) >= 0.7 || jaro_Winkler(serachWord, station.building.buildingLocation) >= 0.7)
+            return station;
     });
 }
 

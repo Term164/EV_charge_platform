@@ -8,26 +8,52 @@ import { Text, View, Pressable, ScrollView, Modal } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Ionicons } from '@expo/vector-icons';
-import { AuthContext, useCurrentAuth, useCurrentSettings } from "../utils/GlobalStateContext";
+import { useCurrentAuth, useCurrentSettings } from "../utils/GlobalStateContext";
 import Profile from '../pages/Profile';
 import { useTranslation } from "react-i18next";
-import { customStyle } from "../utils/styles";
+import i18n from '../translation'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Language } from "../utils/types";
+import { useColorScheme } from "nativewind";
 
 
 export default function SettingsPage() {
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const { language, notifications  } = useCurrentSettings();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
     const [darkMode, setDarkMode] = useState(colorScheme === 'dark');
-    const [notifications, setNotifications] = useState(false);
+    const [notification, setNotification] = useState(notifications === 'false' ? false : true);
     const [editProfile, setEditProfile] = useState(false);
 
+    console.log(colorScheme);
+
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState('eng');
+    const [value, setValue] = useState(language);
     const [items, setItems] = useState([
-        {label: 'English', value: 'eng', icon: () => <UKIcon width={30} height={32} style={{}} />},
-        {label: 'Slovenščina', value: 'slo', icon: () => <SloveniaIcon width={32} height={30} />}
+        {label: 'English', value: 'en', icon: () => <UKIcon width={30} height={32} style={{}} />},
+        {label: 'Slovenščina', value: 'si', icon: () => <SloveniaIcon width={32} height={30} />}
     ]);
 
     const { t } = useTranslation();
+
+    const saveAndSetNotificaton = async (newNotification: boolean) => {
+        setNotification(newNotification);
+        await AsyncStorage.setItem('notifications', newNotification ? 'true' : 'false');
+    }
+
+    const saveAndSetDarkMode = async (newTheme: boolean) => {
+        setDarkMode(newTheme);
+        await AsyncStorage.setItem('theme', newTheme ? 'dark' : 'light');
+        toggleColorScheme()
+    }
+
+    const saveAndSetLanguage = async (value: Language | undefined) => {
+        console.log(value);
+        if (value != undefined) {
+            i18n.changeLanguage(value);
+            setValue(value);
+            await AsyncStorage.setItem('language', value);
+        }
+    }
 
     // Auth context
     const { signOut } = useCurrentAuth()
@@ -66,7 +92,7 @@ export default function SettingsPage() {
                     <Pressable 
                         className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
-                        onPress={() => {setNotifications(!notifications)}}
+                        onPress={() => {saveAndSetNotificaton(!notifications)}}
                     >
                         <View className="flex-row items-center">
                             <Ionicons name={notifications ? 'notifications-circle-outline' : 'notifications-off-circle-outline'} size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
@@ -76,10 +102,10 @@ export default function SettingsPage() {
                             </View>
                         </View>
                         <ToggleSwitch
-                            isOn={notifications}
+                            isOn={notification}
                             onColor={colorScheme === 'light' ? '#3b82f6' : '#166534'}
                             offColor={'#9ca3af'}
-                            onToggle={isOn => {setNotifications(isOn)}}
+                            onToggle={isOn => {saveAndSetNotificaton(isOn)}}
                         />
                     </Pressable>
                 </View>
@@ -91,7 +117,7 @@ export default function SettingsPage() {
                     <Pressable 
                         className="flex-row items-center justify-between bg-gray-300/70 dark:bg-slate-800 p-2 h-16 rounded-2xl"
                         android_ripple={{color: '#9ca3af'}}
-                        onPress={() => {setDarkMode(!darkMode); toggleColorScheme()}}
+                        onPress={() => {saveAndSetDarkMode(!darkMode)}}
                     >
                         <View className="flex-row items-center">
                             <Ionicons name='contrast-outline' size={32} color={colorScheme === 'dark' ? '#cbd5e1' : '#374151'}/>
@@ -104,7 +130,7 @@ export default function SettingsPage() {
                             isOn={darkMode}
                             onColor={colorScheme === 'light' ? '#3b82f6' : '#166534'}
                             offColor={'#9ca3af'}
-                            onToggle={isOn => {setDarkMode(isOn); toggleColorScheme()}}
+                            onToggle={isOn => {saveAndSetDarkMode(!darkMode)}}
                         />
                     </Pressable>
                 </View>
@@ -118,6 +144,7 @@ export default function SettingsPage() {
                         theme={colorScheme.toUpperCase()}
                         setOpen={setOpen}
                         setValue={setValue}
+                        onSelectItem={(item) => {saveAndSetLanguage(item.value as Language)}}
                         setItems={setItems}
                         showTickIcon={true}
                         showArrowIcon={true}

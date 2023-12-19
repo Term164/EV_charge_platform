@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { Station } from "./databaseTypes";
 
 type HomeTabParamList = {
     Dashboard: undefined;
@@ -48,7 +49,7 @@ type ProfilePageProps = {
 
 type MakeReservationPageProps = {
   exitModal: () => void
-  building: Building
+  station: Station
 }
 
 type EditReservationPageProps = {
@@ -105,6 +106,8 @@ type Reservation = {
   queueNumber: number,
   reservation_status: ReservationStatus
 }
+
+type Language = 'en' | 'si';
 
 const mapStyle = [
   {
@@ -376,13 +379,6 @@ const mapStyleDark = [
   }
 ]
 
-type Response = {
-  status: number,
-  message: string,
-  error: string,
-  data: object
-}
-
 export {
     SignInScreenProps,
     SignUpScreenProps,
@@ -403,4 +399,5 @@ export {
     ProfilePageProps,
     MakeReservationPageProps,
     EditReservationPageProps,
+    Language
   }
