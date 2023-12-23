@@ -20,6 +20,7 @@ import CustomBackdrop from "../components/CustomBackdrop";
 import NoReservationsPage from "./NoReservationsPage";
 import { useTranslation } from "react-i18next";
 import { useCurrentSettings } from "../utils/GlobalStateContext";
+import { useColorScheme } from "nativewind";
 
 function ordinal_suffix_of(i: number) {
     var j = i % 10,
@@ -45,7 +46,7 @@ export default function DashboardPage({ route, navigation }: NoReservationsPageP
 
     const toast = useToast();
 
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
 
     // ref
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -91,7 +92,7 @@ export default function DashboardPage({ route, navigation }: NoReservationsPageP
         if (connector) {
             return (
                 <View className="flex-row items-center pt-1">
-                    {getConnectorIcon(connector.chargingType)}
+                    {getConnectorIcon(connector.chargingType, colorScheme)}
                     <Text className="ml-1 font-semibold text-lg text-gray-800 dark:text-slate-300">{connector.watts} kW</Text>
                 </View>
             );

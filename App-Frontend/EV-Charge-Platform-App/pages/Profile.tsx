@@ -10,11 +10,14 @@ import { UserDataContext, useCurrentSettings } from "../utils/GlobalStateContext
 import { serverAddress } from "../utils/Constants";
 import { Toast } from "react-native-toast-notifications";
 import Spinner from "react-native-loading-spinner-overlay";
+import { APIResponse } from "../utils/databaseTypes";
 
 
 
 export default function ProfilePage({exitModal}: ProfilePageProps) {
     const userData = useContext(UserDataContext);
+
+    console.log(userData?.userData);
 
     const [username, setUsername] = useState(userData?.userData.username);
     const [email, setEmail] = useState(userData?.userData.email_account);
@@ -24,6 +27,33 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
     const { t } = useTranslation();
 
     const { colorScheme, toggleColorScheme } = useCurrentSettings();
+
+    const updateUserData = async () => {
+        try {
+            const response = await fetch(
+                `${serverAddress}/api/v1/user/patch/editProfile`,
+                {
+                method: 'PATCH',
+                headers: userData?.header as HeadersInit,
+                body: JSON.stringify({
+                    userID: userData?.userData.id,
+                    username: username,
+                    email: email
+                })
+                }
+            );
+            const EditProfileResponse = await response.json() as APIResponse
+            console.log(EditProfileResponse);
+            if (EditProfileResponse.status === 200) {
+                Toast.show('Profile updated successfully', {type: 'sucess', duration: 3000})
+            } else {
+                Toast.show('Something went wrong when updating your profile', {type: 'danger', duration: 3000})
+            }
+        }
+        catch(error) {
+            console.log(error);
+        }
+    }
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center p-5 dark:bg-slate-800">
@@ -66,24 +96,24 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
                 </View>
             </View>
             
-            { isEditable ? (
-                <>
-                <CustomButton
-                    onPress={() => {
-                        if (isEditable) {
-                            //TODO: save new info
-                        }
-                        setIsEditable(!isEditable)
-                    }}
-                    textStyle="font-bold text-lg dark:text-slate-200"
-                    className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 border stroke-black dark:border-slate-200 dark:border-2"
-                    android_ripple={{color: ''}}>
-                    Upload new image
-                </CustomButton></> ) : (<></>)}
             <CustomButton
                 onPress={() => {
                     if (isEditable) {
                         //TODO: save new info
+                    }
+                    setIsEditable(!isEditable)
+                }}
+                textStyle="font-bold text-lg dark:text-slate-200"
+                className="h-12 w-8/12 text-center flex-row items-center justify-center rounded-lg mt-8 border stroke-black dark:border-slate-200 dark:border-2"
+                android_ripple={{color: ''}}>
+                Upload new image
+            </CustomButton>
+
+            <CustomButton
+                onPress={() => {
+                    if (isEditable) {
+                        updateUserData()
+                        setIsEditable(!isEditable)
                     }
                     setIsEditable(!isEditable)
                 }}
@@ -93,16 +123,13 @@ export default function ProfilePage({exitModal}: ProfilePageProps) {
                 {isEditable ? t('save') : t('editButtonText')}
             </CustomButton>
 
-            {
-                isEditable ? (<></>) :
-                (<CustomButton
-                    onPress={() => {exitModal()}}
-                    textStyle="font-bold text-lg text-white tracking-widest"
-                    className="h-12 w-8/12 text-center items-center justify-center rounded-lg mt-4 bg-red-500 dark:bg-red-800 dark:text-slate-200"
-                    android_ripple={{color: ''}}>
-                    {t('cancel')}
-                </CustomButton>)
-            }
+            <CustomButton
+                onPress={() => {exitModal()}}
+                textStyle="font-bold text-lg text-white tracking-widest"
+                className="h-12 w-8/12 text-center items-center justify-center rounded-lg mt-4 bg-red-500 dark:bg-red-800 dark:text-slate-200"
+                android_ripple={{color: ''}}>
+                {t('cancel')}
+            </CustomButton>
             
         </SafeAreaView>
     )

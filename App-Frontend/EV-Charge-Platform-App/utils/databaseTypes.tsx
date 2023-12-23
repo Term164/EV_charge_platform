@@ -27,7 +27,7 @@ type StationResponse = {
     data: {Result: Array<Station>}
 } & APIResponse
 
-type Connector = {
+type DBConnector = {
     chargingConnectorID: number,
     chargingConnectorSerialNumber: number,
     chargingConnectorPowerOutput: number,
@@ -47,9 +47,9 @@ type Building = {
 type Station = {
     chargingStationID: number,
     chargingStationName: string,
-    chargingConnectors: Array<Connector>,
+    chargingConnectors: Array<DBConnector>,
     building: Building,
     copmpany: string
 }
 
-export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, Connector}
+export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, DBConnector}

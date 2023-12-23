@@ -6,8 +6,8 @@ import SignUpScreen from './pages/SignUpScreen';
 import Dashboard from './pages/Dashboard';
 import Stations from './pages/Stations';
 import Settings from './pages/Settings';
-import React, { createContext, useReducer, useState } from 'react';
-import { AppStateReducer, AuthContext, SettingsContext, UserDataContext } from './utils/GlobalStateContext';
+import React, { useReducer, useState } from 'react';
+import { AppStateReducer, AuthContext, SettingsContext, UserDataContext, useCurrentSettings, userSettingsContext } from './utils/GlobalStateContext';
 import { AppState, HomeTabParamList, IoniconIconName, RootStackParamList, StateActionKind } from './utils/types';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuthContextFunctions } from './utils/authentication';
@@ -26,6 +26,10 @@ import { serverAddress } from './utils/Constants';
 import { useColorScheme } from 'nativewind';
 import i18n from './translation';
 import { APIResponse, Profile, ProfileResponse, Station, StationResponse } from './utils/databaseTypes';
+import { parseStations } from './utils/utils';
+import ForgotPasswordScreen from './pages/ForgotPasswordScreen';
+import VerifyPasswordScreen from './pages/VerifyPasswordScreen';
+import ResetPasswordScreen from './pages/ResetPasswordScreen';
 
 const startingState: AppState = {
   isLoading: true,
@@ -45,12 +49,14 @@ export default function App() {
   const [stations, setStations] = useState<Array<Station>>([]);
   const { t } = useTranslation();
 
+  const updateSettingsContext = (settingsContext: userSettingsContext) => setSettingsContext(settingsContext);
+
    React.useEffect(() => {
 
     const bootstrapAsync = async () => {
 
       try {
-        const test = await getUserSettingsContext(colorScheme, toggleColorScheme);
+        const test = await getUserSettingsContext(colorScheme, toggleColorScheme, updateSettingsContext);
         setSettingsContext(test);
         i18n.changeLanguage(test.language);
         if (test.colorScheme != colorScheme) toggleColorScheme();
@@ -176,7 +182,7 @@ export default function App() {
         <GestureHandlerRootView style={{flex: 1}}>
           <SettingsContext.Provider value={settingsContext}>
             <AuthContext.Provider value={authContext}>
-              <UserDataContext.Provider value={{header: {Accept: '*/*', 'Content-Type': 'application/json','sessionid': state.userToken}, userData: user as Profile, stations: stations as Array<Station>}}>
+              <UserDataContext.Provider value={{header: {Accept: '*/*', 'Content-Type': 'application/json','sessionid': state.userToken}, userData: user as Profile, buildings: parseStations(stations, settingsContext.selectedChargingTypes)}}>
                 <NavigationContainer theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                   { state.userToken != null ? (
                   <Tab.Navigator
@@ -212,7 +218,10 @@ export default function App() {
                       initialRouteName='SignInScreen'
                     >
                       <Stack.Screen name='SignInScreen' component={SignInScreen} options={{animationTypeForReplace: state.isSignout ? 'pop' : 'push'}}/>
-                      <Stack.Screen name='SignUpScreen' component={SignUpScreen}/>    
+                      <Stack.Screen name='SignUpScreen' component={SignUpScreen}/>
+                      <Stack.Screen name='ForgotPasswordScreen' component={ForgotPasswordScreen}/>
+                      <Stack.Screen name='VerifyCodeScreen' component={VerifyPasswordScreen} />
+                      <Stack.Screen name='ResetPasswordScreen' component={ResetPasswordScreen}/>
                     </Stack.Navigator>
                   )}
                 </NavigationContainer>

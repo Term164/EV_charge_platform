@@ -13,6 +13,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { signIn } = useCurrentAuth();
@@ -65,7 +66,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
 
                 <TextInputWithIcon 
                     viewClassNames="stroke-black border dark:border-white dark:border-2 rounded-full w-72 p-2 mb-4"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
@@ -74,6 +75,11 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newPassword => setPassword(newPassword)}
                     defaultValue={password}
+                    iconBackName={showPassword ? "eye-outline" : "eye-off-outline"}
+                    iconBackSize={25}
+                    iconBackColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
+                    iconBackPressable={true}
+                    onIconBackPress={() => setShowPassword(!showPassword)}
                 />
             </View>
 
@@ -91,7 +97,7 @@ export default function SignInScreen({ route, navigation }: SignInScreenProps) {
             </Pressable>
 
             <Pressable 
-                    onPress={toggleColorScheme}
+                    onPress={() => navigation.navigate('ForgotPasswordScreen')}
                     className="justify-center mt-5"
                 >
                     <Text className="text-gray-500 dark:text-slate-400 text-sm">{t('forgotPassword')}</Text>

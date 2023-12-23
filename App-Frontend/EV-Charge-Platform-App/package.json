@@ -34,6 +34,7 @@
     "react-native-animatable": "^1.4.0",
     "react-native-animated-spinkit": "^1.5.2",
     "react-native-bouncy-checkbox": "^3.0.7",
+    "react-native-confirmation-code-field": "^7.3.2",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-dynamic-search-bar": "github:WrathChaos/react-native-dynamic-search-bar#expo",
     "react-native-gesture-handler": "~2.12.0",

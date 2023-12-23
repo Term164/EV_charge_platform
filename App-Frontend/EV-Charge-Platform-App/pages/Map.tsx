@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal } from "react-native";
+import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal, ActivityIndicator } from "react-native";
 import MapView, {Callout, MapMarker} from "react-native-maps";
 import React from 'react';
 import { markers } from "../utils/markers";
@@ -47,7 +47,7 @@ class MapScreen extends React.Component<any, any> {
             searchBarSelected: false,
             filteredBuildings: markers,
             searching: false,
-            selectedBuilding: markers[0],
+            selectedBuilding: null,
             bottomSheetModalRef: React.createRef(),
             isItemSelected: markers.length == 0 ? false : true,
             ModalShowing: false,
@@ -88,13 +88,14 @@ class MapScreen extends React.Component<any, any> {
     }
 
     render(): React.ReactNode {
-        
+        const buildings = this.props.buildings as Array<Building>;
+
         const { t } = this.props;
         const filterBuildings = async (searchWord: string) => {
             if (!this.state.searchBarSelected)
                 this.setState({searchBarSelected: true})
             this.setState({searching: true});
-            this.setState({filteredBuildings: searchBuildingsByName(searchWord, markers)});
+            this.setState({filteredBuildings: searchBuildingsByName(searchWord, buildings)});
             this.setState({searching: false});
         }
 
@@ -154,6 +155,7 @@ class MapScreen extends React.Component<any, any> {
 
         return (
             <View className="justify-center items-center flex-1">
+                {buildings.length === 0 ? <ActivityIndicator className="absolute w-1/2 h-1/2 z-10" size='large'/> : <></>}
                 <BottomSheetModalProvider>
                     <MapView
                         ref={map => this.map = map}
@@ -168,7 +170,7 @@ class MapScreen extends React.Component<any, any> {
                     >
         
                         {
-                            markers.map((marker, index) => {
+                            buildings.map((building, index) => {
                                 const scaleStyle = {
                                     transform: [
                                         {
@@ -181,8 +183,8 @@ class MapScreen extends React.Component<any, any> {
                                     opacity: this.state.index === index ? 1 : this.props.cs === 'light' ? 0.35 : 0.5
                                 }
 
-                                const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(marker.availability);
-                                const markerStyle = "w-2 h-2 rounded-full absolute " + this.getDeepColorBasedOnAvailability(marker.availability);
+                                const ringStyle = "w-6 h-6 border rounded-full items-center justify-center " + this.getColorBasedOnAvailability(building.availability);
+                                const markerStyle = "w-2 h-2 rounded-full absolute " + this.getDeepColorBasedOnAvailability(building.availability);
 
                                 return (
                                     <MapMarker
@@ -190,11 +192,11 @@ class MapScreen extends React.Component<any, any> {
                                             if (this.state.index === index)
                                                 this.firstMarker = marker;
                                         }}
-                                        onPress={() => {this.setState({index: index, selectedBuilding: marker, isItemSelected: true})}}
+                                        onPress={() => {this.setState({index: index, selectedBuilding: building, isItemSelected: true})}}
                                         key={index} 
-                                        coordinate={marker.coordinate}
-                                        title={marker.name}
-                                        description={marker.address}
+                                        coordinate={building.coordinate}
+                                        title={building.name}
+                                        description={building.address}
                                     >
                                         <Animated.View className="w-9 h-9 items-center justify-center" style={opacityStlye}>
                                             <Animated.View className={ringStyle} style={scaleStyle} />
@@ -207,10 +209,10 @@ class MapScreen extends React.Component<any, any> {
                                             className="w-56 pb-3"
                                         >
                                             <View className="bg-white dark:bg-slate-700 rounded-lg w-full h-full p-2 border border-slate-300 dark:border-slate-900">
-                                                <Text className="text-gray-800 dark:text-slate-300 text-sm">{marker.name}</Text>
+                                                <Text className="text-gray-800 dark:text-slate-300 text-sm">{building.name}</Text>
                                                 <View className="flex-row justify-between items-center">
-                                                    <Text className="text-gray-500 dark:text-slate-400 text-xs">{marker.address}</Text>
-                                                    <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(marker.availability)}>{marker.availability} %</Text>
+                                                    <Text className="text-gray-500 dark:text-slate-400 text-xs">{building.address}</Text>
+                                                    <Text className={"px-2 py-1 rounded-full font-semibold text-gray-800 " + this.getColorBasedOnAvailability(building.availability)}>{building.availability} %</Text>
                                                 </View>
                                             </View>
                                         </Callout>

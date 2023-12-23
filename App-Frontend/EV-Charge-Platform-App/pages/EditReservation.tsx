@@ -5,7 +5,7 @@ import CustomButton from "../components/CustomButton";
 import { useState } from "react";
 import { View } from "react-native";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
-import DropDownPicker from "react-native-dropdown-picker";
+import DropDownPicker, { ThemeNameType } from "react-native-dropdown-picker";
 import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
 import { useTranslation } from "react-i18next";
 import { useCurrentSettings } from "../utils/GlobalStateContext";
@@ -30,8 +30,11 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(reservation.desired_type);
     const [items, setItems] = useState([
-        {label: 'Type 2', value: 'TYPE2', icon: () => getConnectorIcon(ChargingType.TYPE2)},
-        {label: 'Tesla', value: 'tesla', icon: () => getConnectorIcon(ChargingType.TESLASUC)}
+        {label: 'Type 1', value: 'TYPE1', icon: () => getConnectorIcon(ChargingType.TYPE1, colorScheme)},
+        {label: 'Type 2', value: 'TYPE2', icon: () => getConnectorIcon(ChargingType.TYPE2, colorScheme)},
+        {label: 'CHAdeMO', value: 'CHAdeMO', icon: () => getConnectorIcon(ChargingType.CHAdeMO, colorScheme)},
+        {label: 'CCS', value: 'CCS', icon: () => getConnectorIcon(ChargingType.CCS, colorScheme)},
+        {label: 'TESLA', value: 'TESLASUC', icon: () => getConnectorIcon(ChargingType.TESLASUC, colorScheme)},
     ]);
 
     const { t } = useTranslation();
@@ -58,7 +61,7 @@ export default function EditReservationPage({exitModal, reservation}: EditReserv
                         placeholderStyle={{color: colorScheme === 'light' ? '#6b7280' : '#e2e8f0', fontSize: 20}}
                         labelStyle={{fontSize: 20}}
                         style={{backgroundColor: colorScheme === 'dark' ? '#334155' : 'white'}}
-                        theme={colorScheme.toUpperCase()}
+                        theme={colorScheme.toUpperCase() as ThemeNameType}
                         open={open}
                         value={value}
                         items={items}

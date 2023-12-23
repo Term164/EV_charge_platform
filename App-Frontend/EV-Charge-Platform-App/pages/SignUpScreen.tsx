@@ -7,14 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useCurrentAuth } from "../utils/GlobalStateContext";
 import { SignUpScreenProps } from "../utils/types";
 import { useColorScheme } from "nativewind";
+import Spinner from "react-native-loading-spinner-overlay";
 
-
-type Response = {
-    status: number,
-    message: string,
-    error: string,
-    data: object
-}
 
 export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
     const [username, setUsername] = useState('');
@@ -22,6 +16,8 @@ export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { t } = useTranslation();
@@ -53,6 +49,11 @@ export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center dark:bg-slate-800">
+            <Spinner
+                visible={isLoading}
+                textContent="Signing you up! ..."
+                textStyle={{color: colorScheme === 'dark' ? 'white' : 'black'}}
+            />
             {logo}
 
             <Text className="text-gray-800 dark:text-slate-200 font-bold text-4xl mb-10 mt-5 ">{t('createAccount')}</Text>
@@ -83,7 +84,7 @@ export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
 
                 <TextInputWithIcon 
                     viewClassNames="stroke-black border dark:border-white dark:border-2 rounded-full w-9/12 p-2 mb-4"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
@@ -92,11 +93,16 @@ export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newPassword => setPassword(newPassword)}
                     defaultValue={password}
+                    iconBackName={showPassword ? "eye-outline" : "eye-off-outline"}
+                    iconBackSize={25}
+                    iconBackColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
+                    iconBackPressable={true}
+                    onIconBackPress={() => setShowPassword(!showPassword)}
                 />
 
                 <TextInputWithIcon 
                     viewClassNames="stroke-black border dark:border-white dark:border-2 rounded-full w-9/12 p-2 mb-4"
-                    secureTextEntry
+                    secureTextEntry={!showConfirmPassword}
                     iconName='lock-closed' 
                     iconSize={20} 
                     iconColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
@@ -105,6 +111,11 @@ export default function SignInScreen({ route, navigation }: SignUpScreenProps) {
                     placeholderTextColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
                     onChangeText={newConfirmPassword => setConfirmPassword(newConfirmPassword)}
                     defaultValue={confirmPassword}
+                    iconBackName={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                    iconBackSize={25}
+                    iconBackColor={colorScheme === 'dark' ? '#d1d5db' : "#1f2937"}
+                    iconBackPressable={true}
+                    onIconBackPress={() => setShowPassword(!showConfirmPassword)}
                 />
                 
             </View>

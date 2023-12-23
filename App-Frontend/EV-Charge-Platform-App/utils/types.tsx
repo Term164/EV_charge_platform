@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { Station } from "./databaseTypes";
 
 type HomeTabParamList = {
     Dashboard: undefined;
@@ -14,6 +13,9 @@ type HomeTabParamList = {
 type RootStackParamList = {
     SignInScreen: undefined;
     SignUpScreen: undefined;
+    ForgotPasswordScreen: undefined;
+    VerifyCodeScreen: undefined;
+    ResetPasswordScreen: undefined;
 }
 
 enum StateActionKind {
@@ -41,6 +43,9 @@ type IoniconIconName = React.ComponentProps<typeof Ionicons>['name'];
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignInScreen'>
 type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUpScreen'>
+type ForgotPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'ForgotPasswordScreen'>
+type VerifyScreenProps = NativeStackScreenProps<RootStackParamList, 'VerifyCodeScreen'>
+type ResetPasswordScreenProps = NativeStackScreenProps<RootStackParamList, 'ResetPasswordScreen'>
 type NoReservationsPageProps = BottomTabScreenProps<HomeTabParamList, 'Dashboard'>
 
 type ProfilePageProps = {
@@ -49,7 +54,7 @@ type ProfilePageProps = {
 
 type MakeReservationPageProps = {
   exitModal: () => void
-  station: Station
+  building: Building
 }
 
 type EditReservationPageProps = {
@@ -382,6 +387,9 @@ const mapStyleDark = [
 export {
     SignInScreenProps,
     SignUpScreenProps,
+    ForgotPasswordScreenProps,
+    VerifyScreenProps,
+    ResetPasswordScreenProps,
     NoReservationsPageProps,
     AppState,
     StateAction,

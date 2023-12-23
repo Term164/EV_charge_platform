@@ -1,11 +1,11 @@
-import { ChargingType, MakeReservationPageProps } from "../utils/types";
+import { Building, ChargingType, MakeReservationPageProps } from "../utils/types";
 import { Pressable, Text, View } from "react-native";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import CustomButton from "../components/CustomButton";
 import { useState } from "react";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
-import DropDownPicker from "react-native-dropdown-picker";
-import { getConnectorIcon, getTimeFromDate } from "../utils/utils";
+import DropDownPicker, { ThemeNameType } from "react-native-dropdown-picker";
+import { getConnectorIcon, getLabelFromChargingTypeValue, getTimeFromDate } from "../utils/utils";
 import { useTranslation } from "react-i18next";
 import { useCurrentSettings } from "../utils/GlobalStateContext";
 
@@ -19,7 +19,7 @@ function getTextColorBasedOnAvailability(availability: number) {
     return colorStyle;
 }
 
-export default function MakeReservationPage({exitModal, station}: MakeReservationPageProps) {
+export default function MakeReservationPage({exitModal, building}: MakeReservationPageProps) {
 
     const today = new Date();
     today.setHours(0,1,0,0);
@@ -40,12 +40,24 @@ export default function MakeReservationPage({exitModal, station}: MakeReservatio
     const [endTime, setEndTime] = useState<Date>(endTimeDate);
     const [numOfHours, setNumOfHours] = useState(1);
 
+    const getChargingTypeItems = (building: Building) => {
+        let connectorTypesArray;
+        const setOfTypes = new Set<ChargingType>();
+        building.Connectors.forEach(connector => {
+            setOfTypes.add(connector.chargingType);
+        });
+    
+        connectorTypesArray = Array.from(setOfTypes).map(type => {
+            const value = type.toString();
+            return {label: getLabelFromChargingTypeValue(value), value: value, icon: () => getConnectorIcon(type, colorScheme)}
+        })
+        return connectorTypesArray;
+    }
+
+
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState('english');
-    const [items, setItems] = useState([
-        {label: 'Type 2', value: 'type2', icon: () => getConnectorIcon(ChargingType.TYPE2)},
-        {label: 'Tesla', value: 'tesla', icon: () => getConnectorIcon(ChargingType.TESLASUC)}
-    ]);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState(getChargingTypeItems(building));
 
     const selectedHourStyle = "basis-4/12 bg-blue-200 dark:bg-blue-500 py-4 rounded-md shadow-lg shadow-black";
     const hourStyle = "basis-3/12 bg-gray-200 dark:bg-slate-600 py-2 rounded-md shadow-lg";
@@ -53,9 +65,9 @@ export default function MakeReservationPage({exitModal, station}: MakeReservatio
     return(
         <View className="flex-1 p-5 bg-slate-100 dark:bg-slate-800">
             <Text className="self-center mb-2 text-gray-500 dark:text-slate-400 text-2xl font-semibold">{t('makeReservationTitle')}</Text>
-            <Text className="text-lg font-semibold text-gray-800 dark:text-slate-100 uppercase">{station.building.buildingName}</Text>
-            <Text className="text-base font-medium text-gray-500 dark:text-slate-300">{station.building.buildingLocation}</Text>
-            <Text className="font-semibold text-lg text-gray-600 dark:text-slate-400 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(station.building.availability)}>{station.building.availability}</Text>%</Text>
+            <Text className="text-lg font-semibold text-gray-800 dark:text-slate-100 uppercase">{building.name}</Text>
+            <Text className="text-base font-medium text-gray-500 dark:text-slate-300">{building.address}</Text>
+            <Text className="font-semibold text-lg text-gray-600 dark:text-slate-400 mb-2">{t('availabilityStatus')} <Text className={getTextColorBasedOnAvailability(building.availability)}>{building.availability}</Text>%</Text>
 
             <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1">{t('type')}</Text>
             <DropDownPicker
@@ -63,7 +75,7 @@ export default function MakeReservationPage({exitModal, station}: MakeReservatio
                         placeholderStyle={{color: colorScheme === 'light' ? '#6b7280' : '#e2e8f0', fontSize: 20}}
                         labelStyle={{fontSize: 20}}
                         style={{backgroundColor: colorScheme === 'dark' ? '#334155' : 'white'}}
-                        theme={colorScheme.toUpperCase()}
+                        theme={colorScheme.toUpperCase() as ThemeNameType}
                         open={open}
                         value={value}
                         items={items}

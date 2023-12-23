@@ -1,25 +1,27 @@
 import React, { useContext } from 'react';
-import { AppState, Language, StateAction, StateActionKind } from './types';
-import { Profile, Station } from './databaseTypes';
+import { AppState, Building, Language, StateAction, StateActionKind } from './types';
+import { Profile } from './databaseTypes';
 
-type userSettingsContext = {
-  colorScheme: string,
-  language: Language,
+export type userSettingsContext = {
+  colorScheme: string
+  language: Language
   notifications: string,
+  selectedChargingTypes: Array<string>
   toggleColorScheme: () => void
-  setColorScheme: (colorScheme: string) => void,
+  setColorScheme: (colorScheme: string) => void
+  updateSettingsContext: (settingsContext: userSettingsContext) => void
 }
 
 type authContextFunctions = {
-  signIn: (username: string, password: string) => Promise<void>,
-  signOut: () => void,
+  signIn: (username: string, password: string) => Promise<void>
+  signOut: () => void
   signUp: (username: string, email: string, password: string, confirmPassword: string) => Promise<boolean>
 }
 
 type userData= {
   header: object,
   userData: Profile,
-  stations: Array<Station>
+  buildings: Array<Building>
 }
 
 export const SettingsContext = React.createContext<userSettingsContext | null>(null);
