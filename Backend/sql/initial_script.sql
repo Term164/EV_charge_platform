@@ -287,3 +287,18 @@ CREATE INDEX ind_registration_secrets_account_id ON Registration_secrets
 (
   account_id
 );
+
+CREATE TABLE Reset_password_secrets
+(
+ "id"            SERIAL,
+ account_id      int NOT NULL,
+ reset_password_secret varchar(100) NOT NULL,
+ expiration_time timestamp NOT NULL,
+ CONSTRAINT prm_reset_password_secrets_id PRIMARY KEY ("id"),
+ CONSTRAINT frn_reset_password_secrets_account_id FOREIGN KEY (account_id) REFERENCES Accounts ("id")
+);
+
+CREATE INDEX ind_reset_password_secrets_account_id ON Reset_password_secrets
+(
+  account_id
+);
