@@ -53,7 +53,7 @@ export default function StationsPage() {
         bottomSheetModalRef.current?.dismiss();
     }, [])
 
-    if (markers.length == 0) {
+    if (userData.buildings.length == 0) {
         return (
             <NoStationsPage/>
         );

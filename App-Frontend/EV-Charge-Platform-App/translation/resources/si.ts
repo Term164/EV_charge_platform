@@ -51,9 +51,13 @@ export default {
     //============================= MAKE RESERVATION =================================
     makeReservationTitle: 'Ustvarite novo rezervacijo',
     reserveNowCTA: 'REZERVIRAJ',
+    chargerType: "Vrsta polnilca",
     //============================= SETTINGS =================================
+    account: 'Profil',
     personalInfo: 'Osebne informacije',
     editProfile: 'Uredi svoj profil',
+    preferredChargingType: 'Izbrane vrste polnjenja',
+    allTypes: 'Vse vrste',
     notifications: 'Obvestila',
     interface: 'Vmesnik',
     theme: 'Tema',
@@ -65,11 +69,12 @@ export default {
     help: 'Pomoč',
     about: 'O nas',
     logout: 'Odjava',
+    send: 'POŠLJI',
     //============================= PROFILE =================================
     assigned: 'Dodeljeno',
     notAssigned: 'Ni dodeljeno',
     //============================= GENERAL WORDS =================================
-    searchHere: 'Išči stabo',
+    searchHere: 'Išči stavbo',
     type: 'Vrsta',
     date: 'Datum',
     from: 'Od',
@@ -86,5 +91,37 @@ export default {
     dashboard: 'Nadzorna plošča',
     map: 'Zemljevid',
     stations: 'Postaje',
-    settings: 'Nastavitve'
+    settings: 'Nastavitve',
+    // ============================ FORGOT PASSWORDS SCREEN ===========================
+    forgotPasword: 'Ste pozabili geslo?',
+    forgotPassFirstMessage: 'Vnesite e-poštni naslov, povezan z vašim računom.',
+    forgotPassSecondMessage: 'Na vaš e-poštni naslov vam bomo poslali potrditveno kodo, s katero boste lahko ponastavili geslo.',
+    forgotPassEmail: 'Vnesite e-poštni naslov',
+    // ============================ VERIFICATION SCREEN ===========================
+    verification: 'Potrditev',
+    verificationMessage: 'Vnesite potrditveno kodo, ki smo vam jo poslali na vaš e-poštni naslov.',
+    verificationCode: 'Niste prejeli kode? ',
+    resendin: 'Ponovno pošlji čez',
+    resend: 'Ponovno pošlji',
+    verify: 'POTRDI',
+    // ============================ RESET PASS SCREEN ===========================
+    resetPassword: 'Ponastavitev gesla',
+    enterNewPassword: 'Vnesite novo geslo',
+    confirmNewPassword: 'Potrdite novo geslo',
+    showPass: 'POKAŽI GESLO',
+    // =============================== TOAST ================================
+    emailAddressEmpty: 'E-poštni naslov ne sme biti prazen.',
+    somethingWrong: 'Prišlo je do napake.',
+    profileUpdatedSuccess: 'Profil uspešno posodobljen.',
+    profileUpdateFail: 'Pri posodabljanju vašega profila je prišlo do napake.',
+    passwordFieldEmpty: 'Polje za geslo ne sme biti prazno.',
+    passwordStrength: 'Vaše geslo mora biti dolgo vsaj 8 znakov in vsebovati vsaj eno veliko in eno malo črko, številko ter poseben znak.',
+    passwordsNotMatching: 'Vnešeni gesli se ne ujemata.',
+    passwordChangeSuccess: 'Vaše geslo je bilo uspešno spremenjeno.',
+    usernamePassProvided: 'Uporabniško ime in geslo morata biti navedena.',
+    usernameFieldEmpty: 'Polje za uporabniško ime ne sme biti prazno.',
+    username4: 'Uporabniško ime mora biti dolgo vsaj 4 znake.',
+    emailFieldEmtpy: 'Polje za e-pošto ne sme biti prazno.',
+    validEmailAddress: 'Vnesti morate veljaven e-poštni naslov.',
+    registrationSuccess: 'Uspešno ste se registrirali, preverite svoj e-poštni predal za aktivacijo računa.'
 }

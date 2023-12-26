@@ -3,6 +3,8 @@ import { StateAction, StateActionKind } from './types';
 import { Toast } from 'react-native-toast-notifications';
 import { serverAddress } from './Constants';
 import * as SecureStore from 'expo-secure-store';
+import { APIResponse, LoginResponse } from './databaseTypes';
+import { useTranslation } from 'react-i18next';
 
 
 function isValidEmail(email: string) {
@@ -14,17 +16,28 @@ function isPasswordStrongEnough(pass: string) {
 }
 
 export function getAuthContextFunctions(dispatch: React.Dispatch<StateAction>) {
+    const { t } = useTranslation();
     const authContext = React.useMemo(
     () => ({
         signIn: async (username: string, password: string) => {
-            // In a production app, we need to send some data (usually username, password) to server and get a token
-            // We will also need to handle errors if sign in failed
-            // After getting token, we need to persist the token using `SecureStore`
-            // In the example, we'll use a dummy token
 
             if (username.length === 0 || password.length === 0) {
-                Toast.show('Username and password must be provided.', {type: 'warning', duration: 2000});
+                Toast.show(t('usernamePassProvided'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return;
+            }
+
+            let JSONdata;
+            
+            if (isValidEmail(username)) {
+                JSONdata = {
+                    "email": username,
+                    "password": password
+                }
+            } else {
+                JSONdata = {
+                    "username": username,
+                    "password": password
+                }
             }
 
             try {
@@ -36,10 +49,7 @@ export function getAuthContextFunctions(dispatch: React.Dispatch<StateAction>) {
                         Accept: '*/*',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        "username": username,
-                        "password": password
-                    })
+                    body: JSON.stringify(JSONdata)
                     }
                 );
                 const loginResponse = await response.json() as LoginResponse;
@@ -51,50 +61,45 @@ export function getAuthContextFunctions(dispatch: React.Dispatch<StateAction>) {
                     Toast.show(loginResponse.message, {type: 'danger'});
                 }
             } catch (error) {
-                Toast.show('something went wrong', {type: 'danger'});
+                Toast.show(t('somethingWrong'), {type: 'danger'});
             }
             return;
         },
         signOut: () => dispatch({ type: StateActionKind.SIGN_OUT }),
         signUp: async (username: string, email: string, password: string, confirmPassword: string) => {
-            // In a production app, we need to send user data to server and get a token
-            // We will also need to handle errors if sign up failed
-            // After getting token, we need to persist the token using `SecureStore`
-            // In the example, we'll use a dummy token
-
 
             if (username.length === 0) {
-                Toast.show('Username field must not be empty.', {type: 'warning', duration: 2000});
+                Toast.show(t('usernameFieldEmpty'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if (username.length < 4) {
-                Toast.show('Username must be atleast 4 characters long.', {type: 'warning', duration: 2000});
+                Toast.show(t('username4'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if (email.length === 0) {
-                Toast.show('Email filed must not be empty.', {type: 'warning', duration: 2000});
+                Toast.show(t('emailFieldEmtpy'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if(!isValidEmail(email)) {
-                Toast.show('You must enter a valid email address.', {type: 'warning', duration: 2000});
+                Toast.show(t('validEmailAddress'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if (password.length === 0) {
-                Toast.show('Password filed must not be empty.', {type: 'warning', duration: 2000});
+                Toast.show(t('passwordFieldEmpty'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if (!isPasswordStrongEnough(password)) {
-                Toast.show('Your password must be atleast 8 characters long and contain atleast one uppercase and lowercase letter a digit and a special character.', {type: 'warning', duration: 10000});
+                Toast.show(t('passwordStrength'), {type: 'warning', duration: 10000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
             if (confirmPassword != password) {
-                Toast.show('The two inputed passwords do not match', {type: 'warning', duration: 2000});
+                Toast.show(t('passwordsNotMatching'), {type: 'warning', duration: 2000, textStyle: {textAlign: 'center'}});
                 return false;
             }
 
@@ -115,16 +120,15 @@ export function getAuthContextFunctions(dispatch: React.Dispatch<StateAction>) {
                     }
                 );
                 const loginResponse = await response.json() as APIResponse;
-                console.log(loginResponse);
                 if (loginResponse.message === "Registration succesfull") {
-                    Toast.show('You have been succesfully registered, please check your email to activate your account.', {type: 'success'});
+                    Toast.show(t('registrationSuccess'), {type: 'success'});
                     return true;
                 } else {
                     Toast.show(loginResponse.message, {type: 'danger'});
                     return false;
                 }
             } catch (error) {
-                Toast.show('something went wrong', {type: 'danger'});
+                Toast.show(t('somethingWrong'), {type: 'danger'});
                 if (error instanceof Error )
                     console.trace(error.message, error.stack, error.name ,error.cause);
                 return false;

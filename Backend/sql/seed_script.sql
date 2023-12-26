@@ -27,10 +27,11 @@ INSERT INTO Buildings ("building_name", "building_location", "longitude", "latit
 
 -- Charging Types
 INSERT INTO Charging_types ("type") VALUES 
-    ('Type 1'),
-    ('Type 2'),
-    ('Tesla'),
-    ('Ostalo');
+    ('TYPE1'),
+    ('TYPE2'),
+    ('CHAdeMO'),
+    ('CSS'),
+    ('TESLASUC');
 
 -- Charging Stations
 INSERT INTO Charging_stations ("building_id", "name") VALUES

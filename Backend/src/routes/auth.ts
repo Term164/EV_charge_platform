@@ -27,4 +27,19 @@ router.post('/logout', (_req, res) => {
     res.send('Logout user from the platform');
 });
 
+router.post('/forgotPassword', asyncHandler( async (req, res) => {
+    const response = await authService.forgotPassword(req.body);
+    res.status(response.status).send(response);
+}));
+
+router.post('/confirmValidationCode', asyncHandler(async (req, res) => {
+    const response = await authService.confirmVerificationCode(req.body);
+    res.status(response?.status).send(response);
+}));
+
+router.post('/resetPassword', asyncHandler(async (req, res) => {
+    const response = await authService.resetPassword(req.body);
+    res.status(response?.status).send(response);
+}));
+
 export default router;

@@ -31,12 +31,12 @@ const sessionChecker = asyncHandler(async (request: Request, response: Response,
         return;
     }
 
-    if ('sessionID' in request.body) {
-        const result = await SQLStatementManager.getSessionIDStatement.execute({params: [request.body.sessionID]});
+    if ('sessionid' in request.headers) {
+        const result = await SQLStatementManager.getSessionIDStatement.execute({params: [request.header('sessionid')]});
         if (result.rows === undefined) throw new Error('result is undefined');
         if (result.rows.length === 0) {
             response.status(401).send({
-                status: 400,
+                status: 401,
                 message: "No session with this ID exists.",
                 error: "No session with this ID exists.",
                 data: null
@@ -111,7 +111,7 @@ const authorizationChecker = asyncHandler(async (request: Request, response: Res
         return;
     }
 
-    const data = await SQLStatementManager.checkAdminAuthorizationStatement.execute({params: [request.body.sessionID]});
+    const data = await SQLStatementManager.checkAdminAuthorizationStatement.execute({params: [request.header('sessionid')]});
 
     if (data.rows == undefined) {
         response.status(500).send({status: 500, message: 'An error occured and we could not authorize this API call, please contact an administrator.', error: 'Database data not recieved', data: null });

@@ -14,8 +14,8 @@ type RootStackParamList = {
     SignInScreen: undefined;
     SignUpScreen: undefined;
     ForgotPasswordScreen: undefined;
-    VerifyCodeScreen: undefined;
-    ResetPasswordScreen: undefined;
+    VerifyCodeScreen: {email: string, accountID: number};
+    ResetPasswordScreen: {accountID: number};
 }
 
 enum StateActionKind {

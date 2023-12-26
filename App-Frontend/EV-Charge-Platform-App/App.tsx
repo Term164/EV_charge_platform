@@ -30,6 +30,7 @@ import { parseStations } from './utils/utils';
 import ForgotPasswordScreen from './pages/ForgotPasswordScreen';
 import VerifyPasswordScreen from './pages/VerifyPasswordScreen';
 import ResetPasswordScreen from './pages/ResetPasswordScreen';
+global.Buffer = require('buffer').Buffer;
 
 const startingState: AppState = {
   isLoading: true,
@@ -122,6 +123,9 @@ export default function App() {
           );
           userData = await response.json() as ProfileResponse;
           if (response.status === 200) {
+            if (userData.data.profile_picture != null) {
+              userData.data.profile_picture = Buffer.from(userData.data.profile_picture);
+            }
             setUser(userData.data);
           }
       } catch (error) {

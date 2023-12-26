@@ -39,7 +39,6 @@ export function getTimeFromDate(date: Date) {
 
 
 export function parseStations(stations: Array<Station>, selectedChargingTypes: Array<string>) {
-    console.log(selectedChargingTypes);
     const buildings: Map<number, Building> = new Map<number, Building>();
 
     stations.forEach(station => {

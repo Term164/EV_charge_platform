@@ -56,7 +56,7 @@ interface EditUserProfileRequest {
     id: number,
     username?: string,
     email_account?: string,
-    profile_picture?: string,
+    profile_picture?: Buffer,
     rfid?: string,
     company_id?: number
 }
@@ -151,6 +151,16 @@ interface EditChargingConnectorRequest {
     powerOutput: number | null;
 }
 
+type ConfirmValidationCodeRequest = {
+    accountID: number,
+    validationCode: number
+};
+
+type ResetPasswordRequest = {
+    accountID: number,
+    newPassword: string
+};
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -179,5 +189,7 @@ export {
     GetAllAvailableStationsRequest,
     AddChargingConnectorRequest,
     ChargingConnectorID,
-    EditChargingConnectorRequest
+    EditChargingConnectorRequest,
+    ConfirmValidationCodeRequest,
+    ResetPasswordRequest
 };

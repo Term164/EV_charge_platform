@@ -8,7 +8,6 @@ export async function getUserSettingsContext(colorScheme: ColorSchemeName, toggl
     const language = await AsyncStorage.getItem('language') as Language;
     const notifications = await AsyncStorage.getItem('notifications');
     const selectedChargingTypes = JSON.parse(await AsyncStorage.getItem('chargingTypes') as string);
-
     const settingsContext = {
         colorScheme: theme ? theme : colorScheme as string,
         toggleColorScheme: toggleColorScheme,

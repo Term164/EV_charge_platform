@@ -94,7 +94,7 @@ export default function SettingsPage() {
             </Modal>
 
             <ScrollView className="w-full h-full" contentContainerStyle={{flexGrow: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text className="w-11/12 text-gray-500/70 dark:text-slate-400 text-base font-medium mb-3">Account</Text>
+                <Text className="w-11/12 text-gray-500/70 dark:text-slate-400 text-base font-medium mb-3">{t('account')}</Text>
 
                 <View className="w-11/12 h-16 overflow-hidden rounded-2xl">
                     <Pressable 
@@ -114,10 +114,10 @@ export default function SettingsPage() {
                 </View>
 
                 <View className="w-11/12 h-20 bg-gray-300/70 dark:bg-slate-800 rounded-2xl mt-3 z-10 relative">
-                    <Text className="text-base font-medium ml-4 text-gray-800 dark:text-slate-300 absolute left-10 top-2">{'Preffered charging types'}</Text>
+                    <Text className="text-base font-medium ml-4 text-gray-800 dark:text-slate-300 absolute left-10 top-2">{t('preferredChargingType')}</Text>
                     <ChargingStationSVG style={{position: 'absolute', top: 25, left: 10}} width={32} height={32} fill={colorScheme === 'dark' ? '#cbd5e1' : '#374151'} />
                     <DropDownPicker
-                            placeholder="All types"
+                            placeholder={t("allTypes")}
                             min={0}
                             mode={'BADGE'}
                             max={5}

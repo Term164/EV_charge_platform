@@ -4,9 +4,10 @@ interface UserAccount {
     password_hash: string,
     email_account: string,
     validated: boolean,
-    profile_picture?: string,
+    profile_picture?: Buffer,
     rfid?: number,
-    company_id?: number
+    company_id?: number,
+    company_name?: string
 }
 
 interface building {

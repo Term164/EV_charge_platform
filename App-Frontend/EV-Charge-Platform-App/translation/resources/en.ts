@@ -51,8 +51,12 @@ export default {
     //============================= MAKE RESERVATION =================================
     makeReservationTitle: 'Make new reservation',
     reserveNowCTA: 'RESERVE NOW',
+    chargerType: "Charger type",
     //============================= SETTINGS =================================
+    account: 'Account',
     personalInfo: 'Personal Information',
+    prefferedChargingType: 'Preferred charging types',
+    allTypes: 'All Types',
     editProfile: 'Edit your profile',
     notifications: 'Notifications',
     interface: 'Interface',
@@ -82,9 +86,42 @@ export default {
     off: 'off',
     save: 'SAVE',
     company: 'Company',
+    send: 'SEND',
     //============================= NAVIGATION TAB =================================
     dashboard: 'Dashboard',
     map: 'Map',
     stations: 'Stations',
-    settings: 'Settings'
+    settings: 'Settings',
+    // ============================ FORGOT PASSWORDS SCREEN ===========================
+    forgotPasword: 'Forgot Password?',
+    forgotPassFirstMessage: 'Enter the email address associated with your account.',
+    forgotPassSecondMessage: 'We will email you a verification code with wich to reset your password.',
+    forgotPassEmail: 'Enter Email Address',
+    // ============================ VERIFICATION SCREEN ===========================
+    verification: 'Verification',
+    verificationMessage: 'Enter the verification code we just sent you to your email address.',
+    verificationCode: 'Did not recieve a code? ',
+    resendin: 'Resend in',
+    resend: 'Resend',
+    verify: 'VERIFY',
+    // ============================ RESET PASS SCREEN ===========================
+    resetPassword: 'Reset Password',
+    enterNewPassword: 'Enter New Password',
+    confirmNewPassword: 'Confirm New Password',
+    showPass: 'SHOW PASSWORD',
+    // =============================== TOAST ================================
+    emailAddressEmpty: 'Email address cannot be empty.',
+    somethingWrong: 'Something went wrong',
+    profileUpdatedSuccess: 'Profile updated successfully.',
+    profileUpdateFail: 'Something went wrong when updating your profile',
+    passwordFieldEmpty: 'Password field must not be emtpy.',
+    passwordStrength: 'Your password must be atleast 8 characters long and contain atleast one uppercase and lowercase letter a digit and a special character.',
+    passwordsNotMatching: 'The two inputed passwords do not match',
+    passwordChangeSuccess: 'Your password has succesfully been changed.',
+    usernamePassProvided: 'Username and password must be provided.',
+    usernameFieldEmpty: 'Username field must not be empty.',
+    username4: 'Username must be atleast 4 characters long.',
+    emailFieldEmtpy: 'Email filed must not be empty.',
+    validEmailAddress: 'You must enter a valid email address.',
+    registrationSuccess: 'You have been succesfully registered, please check your email to activate your account.',
 };

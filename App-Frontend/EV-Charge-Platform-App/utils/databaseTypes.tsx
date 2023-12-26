@@ -7,16 +7,22 @@ type APIResponse = {
     data: object | null
 }
 
+type forgotPasswordResponse = {
+    data: {account_id: number} 
+} & APIResponse;
+
 type LoginResponse = {data: {'sessionID': string} | null} & APIResponse;
 
 type Profile = {
     company_id: number,
+    company_name: string,
     email_account: string,
     id: number,
     password_hash: string,
     username: string,
     validated: boolean,
-    rfid: string | undefined
+    rfid?: string,
+    profile_picture?: Buffer
 }
 
 type ProfileResponse = {
@@ -52,4 +58,4 @@ type Station = {
     copmpany: string
 }
 
-export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, DBConnector}
+export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, DBConnector, forgotPasswordResponse}

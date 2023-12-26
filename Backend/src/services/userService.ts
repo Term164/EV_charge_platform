@@ -160,7 +160,6 @@ async function editUserProfile(requestBody: unknown): Promise <APIResponse> {
 
 async function getUserProfile(requestBody: unknown): Promise<APIResponse> {
     const sessionID = parser.parseSessionID(requestBody);
-
     const result = await SQLStatementManager.getUserDataStatement.execute({params: [sessionID]});
     if (result.rows != undefined) {
         const userData = parser.parseUserAccountData(result.rows[0]);

@@ -71,7 +71,7 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
             <Text className="text-gray-600 dark:text-slate-500 text-xl mb-1">{t('type')}</Text>
             <DropDownPicker
-                        placeholder="Charger type"
+                        placeholder={t('chargerType')}
                         placeholderStyle={{color: colorScheme === 'light' ? '#6b7280' : '#e2e8f0', fontSize: 20}}
                         labelStyle={{fontSize: 20}}
                         style={{backgroundColor: colorScheme === 'dark' ? '#334155' : 'white'}}

@@ -25,9 +25,10 @@ router.get('/get/all', asyncHandler(async (req, res) => {
 }));
 
 router.get('/get/allAvailable', asyncHandler(async (req, res) => {
-    const response = await stationService.getAllAvailableStations(req.body);
+    const response = await stationService.getAllAvailableStations(req.query);
     res.status(response.status)
         .send(response);
+    console.log('done');
 }));
 
 router.post('/post/assignCompany', asyncHandler(async (req, res) => {
