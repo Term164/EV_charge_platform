@@ -70,7 +70,6 @@ async function createStation(body: unknown): Promise<APIResponse> {
 async function getAllStations(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        //parseDeleteBuildingRequest here, since it parses the same interface -> buildingID
         data = parser.parseGetAllStationsRequest(body);
     } catch (error) {
         log.debug(error);
@@ -96,19 +95,19 @@ async function getAllStations(body: unknown): Promise<APIResponse> {
 async function deleteStation(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteStationRequest(body);
+        data = parser.parseStationID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
     await db.connection.startTransaction();
-    const connectorResult = await SQLStatementManager.deleteChargingConnectorByStationIDStatement.execute({params: [data.stationID]});
+    const connectorResult = await SQLStatementManager.deleteChargingConnectorByStationIDStatement.execute({params: [data]});
     if (connectorResult.rowsAffected == 0) {
         await db.connection.rollback();
         return {status: 500, message: 'Failed to delete some connectors', error: 'Failed to delete some connectors, possibly the station doesn\'t exist', data: connectorResult};
     }
-    const stationResult = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data.stationID]});
+    const stationResult = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data]});
     if (stationResult.rowsAffected != 1) {
         await db.connection.rollback();
         return {status: 500, message: 'Failed to delete a station', error: 'Failed to delete a station.', data: stationResult};
@@ -119,8 +118,8 @@ async function deleteStation(body: unknown): Promise<APIResponse> {
 }
 
 /** Only for station name or building id
-
-*  Changing connectors has different request */
+ *
+ *  Changing connectors has different request */
 async function editStation(body: unknown): Promise<APIResponse> {
     let data;
     try {
@@ -179,13 +178,13 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseGetAllAvailableStationsRequest(body);
+        data = parser.parseUserIDFromInt(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
-    const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data.userID]});
+    const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data]});
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
 

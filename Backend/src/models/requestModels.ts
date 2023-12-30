@@ -27,14 +27,6 @@ interface AssignRequest {
     otherID: number;
 }
 
-interface CreateCompanyRequest {
-    companyName: string;
-}
-
-interface DeleteCompanyRequest {
-    companyID: number;
-}
-
 interface EditCompanyRequest {
     companyID: number;
     newCompanyName: string;
@@ -76,10 +68,6 @@ interface EditBuildingRequest {
     newBuildingLatitude: number | null;
 }
 
-interface DeleteBuildingRequest {
-    buildingID: number;
-}
-
 interface AssignCompanyRequest {
     companyID: number;
     buildingID: number;
@@ -101,10 +89,6 @@ interface CreateStationRequest {
     chargingConnectors: connectorTypeIDAndSerialNumberAndPowerOutput[];
 }
 
-interface DeleteStationRequest {
-    stationID: number;
-}
-
 interface AssignStationToCompanyRequest {
     stationID: number;
     companyID: number | null;
@@ -118,30 +102,14 @@ interface EditStationRequest {
     newStationName: string | null;
 }
 
-interface CreateChargingTypeRequest {
-    chargingType: string;
-}
-
-interface DeleteChargingTypeRequest {
-    chargingTypeID: number;
-}
-
 interface EditChargingTypeRequest {
     chargingTypeID: number;
     newChargingType: string;
 }
 
-interface GetAllAvailableStationsRequest {
-    userID: number;
-}
-
 interface AddChargingConnectorRequest {
     stationID: number;
     chargingConnector: connectorTypeIDAndSerialNumberAndPowerOutput;
-}
-
-interface ChargingConnectorID {
-    chargingConnectorID: number;
 }
 
 interface EditChargingConnectorRequest {
@@ -151,6 +119,24 @@ interface EditChargingConnectorRequest {
     powerOutput: number | null;
 }
 
+interface CreateReservationRequest {
+    userID: number;
+    desiredBuildingID: number;
+    chargingTime: number;
+    desiredChargingTypeID: number | null;
+    desiredFrom: Date;
+    desiredTo: Date;
+}
+
+interface EditReservationRequest {
+    reservationID: number;
+    desiredFrom: Date | null;
+    desiredTo: Date | null;
+    chargingTime: number | null;
+    desiredChargingTypeID: number | null;
+}
+
+
 export {
     UserRegistrationRequest,
     UserVerificationRequest,
@@ -158,26 +144,20 @@ export {
     AssignRequest,
     AssignEmployeeToBuildingRequest,
     APIResponse,
-    CreateCompanyRequest,
-    DeleteCompanyRequest,
     EditCompanyRequest,
     RevokeBuildingAccessRequest,
     EditUserProfileRequest,
     CreateBuildingRequest,
     EditBuildingRequest,
-    DeleteBuildingRequest,
     AssignCompanyRequest,
     GetAllStationsRequest,
     CreateStationRequest,
     connectorTypeIDAndSerialNumberAndPowerOutput,
-    DeleteStationRequest,
     AssignStationToCompanyRequest,
     EditStationRequest,
-    CreateChargingTypeRequest,
-    DeleteChargingTypeRequest,
     EditChargingTypeRequest,
-    GetAllAvailableStationsRequest,
     AddChargingConnectorRequest,
-    ChargingConnectorID,
-    EditChargingConnectorRequest
+    EditChargingConnectorRequest,
+    CreateReservationRequest,
+    EditReservationRequest
 };

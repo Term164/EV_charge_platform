@@ -40,13 +40,13 @@ async function addChargingConnector(body: unknown): Promise<APIResponse> {
 async function deleteChargingConnector(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseDeleteChargingConnectorRequest(body);
+        data = parser.parseChargingConnectorID(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {error}};
     }
 
-    const result = await SQLStatementManager.deleteChargingConnectorStatement.execute({params: [data.chargingConnectorID]});
+    const result = await SQLStatementManager.deleteChargingConnectorStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1)
         return {status: 400, message: 'Failed to delete a connector, probably doesn\'t exist.', error: 'Failed to delete a connector, probably doesn\'t exist.', data: result};
@@ -64,7 +64,7 @@ async function editChargingConnector(body: unknown): Promise<APIResponse> {
 
     await db.connection.startTransaction();
     try {
-        await SQLStatementManager.eidtChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber, data.powerOutput]});
+        await SQLStatementManager.editChargingConnectorStatement.execute({params: [data.chargingConnectorID, data.chargingTypeID, data.serialNumber, data.powerOutput]});
     } catch (error) {
         await db.connection.rollback();
         if (error instanceof Error) {
