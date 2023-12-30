@@ -4,14 +4,21 @@ import reservationService from '../services/reservationService';
 
 const router = express.Router();
 
-router.get('/get/all', asyncHandler(async (req, res) => {
-    const response = await reservationService.getAllReservations(req.body);
+router.get('/get/allReservationsForPerson', asyncHandler(async (req, res) => {
+    const response = await reservationService.getAllReservationsForPerson(req.body);
     res.status(response.status)
         .send(response);
 }));
 
 router.get('/get/reservation', asyncHandler(async (req, res) => {
     const response = await reservationService.getSpecificReservation(req.body);
+    res.status(response.status)
+        .send(response);
+}));
+
+//* For BAdmins
+router.get('/get/allReservationsForBuilding', asyncHandler(async (req, res) => {
+    const response = await reservationService.getAllReservationsForBuilding(req.body);
     res.status(response.status)
         .send(response);
 }));

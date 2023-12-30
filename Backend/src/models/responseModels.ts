@@ -31,7 +31,8 @@ class ChargingStationResponse {
     company: CompanyResponse | null;
 }
 
-class ReservationCreationInfo {
+class CreatedReservationInfo {
+    userID: number;
     allocatedConnectorID: number | null;
     allocatedFrom: Date | null;
     allocatedTo: Date | null;
@@ -45,5 +46,5 @@ export {
     ChargingTypeResponse,
     ChargingConnectorResponse,
     ChargingStationResponse,
-    ReservationCreationInfo,
+    CreatedReservationInfo,
 };

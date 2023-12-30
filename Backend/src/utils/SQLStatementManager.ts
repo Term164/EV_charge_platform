@@ -83,12 +83,13 @@ class StatmentManager {
     getAllNextReservationsStatement: PreparedStatement;
 
     // Reservation statements
-    getAllAvailableChargingTypesAtBuildingForPerson: PreparedStatement;
-    getAllReservationsForPerson: PreparedStatement;
-    getSpecificReservation: PreparedStatement;
-    createReservation: PreparedStatement;
-    editReservation: PreparedStatement;
-    cancelReservation: PreparedStatement;
+    getAllAvailableChargingTypesAtBuildingForPersonStatement: PreparedStatement;
+    getAllReservationsForPersonStatement: PreparedStatement;
+    getAllReservationsForBuildingStatement: PreparedStatement;
+    getSpecificReservationStatement: PreparedStatement;
+    createReservationStatement: PreparedStatement;
+    editReservationStatement: PreparedStatement;
+    cancelReservationStatement: PreparedStatement;
 
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
@@ -501,21 +502,40 @@ class StatmentManager {
     }
 
     private async prepareReservationStatements() {
-        this.getAllAvailableChargingTypesAtBuildingForPerson = await db.connection.prepare(
+        this.getAllAvailableChargingTypesAtBuildingForPersonStatement = await db.connection.prepare(
             `SELECT * FROM get_all_available_types_for_building_for_user($1, $2);`,
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4]}
         );
 
-        this.getSpecificReservation = await db.connection.prepare(
+        this.getAllReservationsForPersonStatement = await db.connection.prepare(
+            `SELECT * FROM reservations WHERE account_id = $1;`,
+            {paramTypes: [DataTypeOIDs.int4]}
+        );
+
+        this.getAllReservationsForBuildingStatement = await db.connection.prepare(
+            `SELECT * FROM reservations WHERE desired_building_id = $1;`,
+            {paramTypes: [DataTypeOIDs.int4]}
+        );
+
+        this.getSpecificReservationStatement = await db.connection.prepare(
             `SELECT * FROM reservations WHERE id = $1;`,
             {paramTypes: [DataTypeOIDs.int4]}
         );
 
-        this.createReservation = await db.connection.prepare(
+        this.createReservationStatement = await db.connection.prepare(
             `SELECT * FROM create_reservation($1, $2, $3, $4, $5, $6);`,
             {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.timestamp, DataTypeOIDs.timestamp, DataTypeOIDs.int4]}
         );
 
+        this.cancelReservationStatement = await db.connection.prepare(
+            `SELECT * FROM cancel_reservation($1);`,
+            {paramTypes: [DataTypeOIDs.int4]}
+        );
+
+        this.editReservationStatement = await db.connection.prepare(
+            `SELECT * FROM edit_reservation($1,$2,$3,$4,$5);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.timestamp, DataTypeOIDs.timestamp, DataTypeOIDs.int4, DataTypeOIDs.int4]}
+        );
     }
 
     public async init() {

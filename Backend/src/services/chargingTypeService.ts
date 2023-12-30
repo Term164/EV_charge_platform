@@ -14,7 +14,7 @@ async function createChargingType(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
-    const result = await SQLStatementManager.createChargingTypeStatement.execute({params: [data.chargingType]});
+    const result = await SQLStatementManager.createChargingTypeStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1)
         return {status:500, message: "Something went wrong while trying to create a new charging type", error: "Something went wrong while trying to create a new charging type.", data: result};
@@ -38,7 +38,7 @@ async function deleteChargingType(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
     }
 
-    const result = await SQLStatementManager.deleteChargingTypeStatement.execute({params: [data.chargingTypeID]});
+    const result = await SQLStatementManager.deleteChargingTypeStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1)
         return {status: 500, message: 'Failed to delete a charging type', error: 'Failed to delete a charging type.', data: result};

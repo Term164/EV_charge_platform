@@ -46,7 +46,7 @@ async function deleteChargingConnector(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {error}};
     }
 
-    const result = await SQLStatementManager.deleteChargingConnectorStatement.execute({params: [data.chargingConnectorID]});
+    const result = await SQLStatementManager.deleteChargingConnectorStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1)
         return {status: 400, message: 'Failed to delete a connector, probably doesn\'t exist.', error: 'Failed to delete a connector, probably doesn\'t exist.', data: result};

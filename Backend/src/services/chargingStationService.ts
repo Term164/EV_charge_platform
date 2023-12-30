@@ -102,12 +102,12 @@ async function deleteStation(body: unknown): Promise<APIResponse> {
     }
 
     await db.connection.startTransaction();
-    const connectorResult = await SQLStatementManager.deleteChargingConnectorByStationIDStatement.execute({params: [data.stationID]});
+    const connectorResult = await SQLStatementManager.deleteChargingConnectorByStationIDStatement.execute({params: [data]});
     if (connectorResult.rowsAffected == 0) {
         await db.connection.rollback();
         return {status: 500, message: 'Failed to delete some connectors', error: 'Failed to delete some connectors, possibly the station doesn\'t exist', data: connectorResult};
     }
-    const stationResult = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data.stationID]});
+    const stationResult = await SQLStatementManager.deleteChargingStationStatement.execute({params: [data]});
     if (stationResult.rowsAffected != 1) {
         await db.connection.rollback();
         return {status: 500, message: 'Failed to delete a station', error: 'Failed to delete a station.', data: stationResult};

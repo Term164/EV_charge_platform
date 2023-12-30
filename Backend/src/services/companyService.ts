@@ -9,13 +9,13 @@ import { CompanyResponse } from "../models/responseModels";
 async function createCompany(body: unknown): Promise<APIResponse> {
     let data;
     try {
-        data = parser.parseCreateCompanyRequest(body);
+        data = parser.parseCompanyName(body);
     } catch (error) {
         log.debug(error);
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.createCompanyStatement.execute({params: [data.companyName]});
+    const result = await SQLStatementManager.createCompanyStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1) throw new Error("Something went wrong while trying to create a new company.");
 
@@ -41,7 +41,7 @@ async function deleteCompany(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.deleteCompanyStatement.execute({params: [data.companyID]});
+    const result = await SQLStatementManager.deleteCompanyStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1) //throw new Error("Something went wrong while trying to delete a company.");
         return {status: 400, message: 'Failed to delete a company.', error: 'Returned number of rows affected while deleting a building was not 1.', data: null};

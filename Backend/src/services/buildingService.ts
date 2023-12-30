@@ -42,7 +42,7 @@ async function deleteBuilding(body: unknown): Promise<APIResponse> {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.deleteBuildingStatement.execute({params: [data.buildingID]});
+    const result = await SQLStatementManager.deleteBuildingStatement.execute({params: [data]});
 
     if (result.rowsAffected != 1) // throw new Error("Something went wrong while trying to delete a building.");
         return ({status: 400, message: 'Failed to delete a building.', error: 'Returned number of rows affected while deleting a building was not 1.', data: null});
@@ -79,7 +79,7 @@ async function getAllBuildingsOwnedByCompany(body: unknown): Promise<APIResponse
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.getAllBuildingsByCompanyStatement.execute({params: [data.companyID]});
+    const result = await SQLStatementManager.getAllBuildingsByCompanyStatement.execute({params: [data]});
 
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
@@ -96,7 +96,7 @@ async function getAllCompaniesAssignedToBuilding(body: unknown): Promise<APIResp
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.getAllCompaniesAssignedToBuildingStatement.execute({params: [data.buildingID]});
+    const result = await SQLStatementManager.getAllCompaniesAssignedToBuildingStatement.execute({params: [data]});
 
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
