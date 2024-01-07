@@ -90,6 +90,8 @@ async function getSpecificReservation(body: unknown): Promise<APIResponse> {
 
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
+    if (result.rows.length == 0)
+        return {status: 404, message: "Reservation not found.", error: "Reservation with that ID does not exist.", data: null};
     const returnedReservation: reservation =  parser.parseReservationDatabaseModel(result.rows?.at(0));
     return {status: 200, message: `Returned ${result.rows?.length} reservations`, error: null, data: {'Result': returnedReservation}};
 }

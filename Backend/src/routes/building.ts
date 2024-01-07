@@ -11,7 +11,7 @@ router.get('/get/all', asyncHandler(async (_req, res) => {
 }));
 
 router.get('/get/companyOwned', asyncHandler(async (req, res) => {
-    const response = await buildingService.getAllBuildingsOwnedByCompany(req.body);
+    const response = await buildingService.getAllBuildingsOwnedByCompany(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -29,7 +29,7 @@ router.patch('/patch/edit', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/delete/building', asyncHandler(async (req, res) => {
-    const response = await buildingService.deleteBuilding(req.body);
+    const response = await buildingService.deleteBuilding(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -41,7 +41,7 @@ router.post('/post/assignCompany', asyncHandler(async (req, res) => {
 }));
 
 router.get('/get/assignedCompanies', asyncHandler(async (req, res) => {
-    const response = await buildingService.getAllCompaniesAssignedToBuilding(req.body);
+    const response = await buildingService.getAllCompaniesAssignedToBuilding(req.query);
     res.status(response.status)
         .send(response);
 }));

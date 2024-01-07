@@ -17,7 +17,7 @@ router.get('/get/all', asyncHandler(async (_req, res) => {
 }));
 
 router.delete('/delete/company', asyncHandler(async (req, res) => {
-    const response = await companyService.deleteCompany(req.body);
+    const response = await companyService.deleteCompany(req.query);
     res.status(response.status)
         .send(response);
 }));

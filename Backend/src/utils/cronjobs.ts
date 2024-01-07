@@ -16,6 +16,18 @@ function startCronJobs () {
             })
             .catch((error) => {log.error(error);});
     });
+
+    log.info('Started hourly cron job for deleting expired sessions, registration & reset password secrets.');
+    cron.schedule('0 * * * *', () => {
+        deleteExpiredSessions();
+        deleteExpiredRegistrationSecrets();
+        deleteExpiredResetPasswordSecrets();
+    });
+
+    log.info('Started daily cron job for deleting past reservations.');
+    cron.schedule('0 0 * * *', () => {
+        deleteOldReservations();
+    });
 }
 
 async function getCurrentReservations() {
@@ -27,6 +39,27 @@ function reserveConnectors(reservationList: ReservationData[]) {
     for (const reservation of reservationList) {
         void sendReservationRequest(reservation.stationID, reservation.connectorID, reservation.expiryDate.toISOString(), reservation.idTag);
     }
+}
+
+
+async function deleteExpiredSessions () {
+    const result = await SQLStatementManager.deleteExpiredSessionsStatement.execute();
+    log.info("Deleted "+result.rowsAffected+" expired sessions.");
+}
+
+async function deleteExpiredRegistrationSecrets () {
+    const result = await SQLStatementManager.deleteExpiredRegistrationSecretsStatement.execute();
+    log.info("Deleted "+result.rowsAffected+" expired registration secrets.");
+}
+
+async function deleteExpiredResetPasswordSecrets () {
+    const result = await SQLStatementManager.deleteExpiredResetPasswordSecretsStatement.execute();
+    log.info("Deleted "+result.rowsAffected+" expired reset password secrets.");
+}
+
+async function deleteOldReservations () {
+    const result = await SQLStatementManager.deleteOldReservationsStatement.execute();
+    log.info("Deleted "+result.rowsAffected+" past reservations.");
 }
 
 export {startCronJobs};

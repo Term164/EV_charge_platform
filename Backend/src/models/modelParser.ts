@@ -29,6 +29,13 @@ function parseNumberParameter(param: unknown, paramName: string): number {
     return param;
 }
 
+function parseNumberFromString(param: unknown, paramName: string): number {
+    let converted = Number(param);
+    if (isNaN(converted))
+        throw new Error("Cannot convert "+paramName+" to number.");
+    return converted;
+}
+
 function parseStringParameter(param: unknown, paramName: string): string {
     if (!param || !isString(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
@@ -204,8 +211,8 @@ function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAcces
 
     if ('userID' in request && 'buildingID' in request) {
         const revokeRequest: RevokeBuildingAccessRequest = {
-            userID: parseNumberParameter(request.userID, 'userID'),
-            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
+            userID: parseNumberFromString(request.userID, 'userID'),
+            buildingID: parseNumberFromString(request.buildingID, 'buildingID'),
         };
 
         return revokeRequest;
@@ -469,7 +476,7 @@ function parseUserID(dataBody: unknown): number {
     }
 
     if ('userID' in dataBody) {
-        return parseNumberParameter(dataBody.userID, 'userID');
+        return parseNumberFromString(dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -479,9 +486,10 @@ function parseUserIDFromInt(dataBody: unknown): number {
     if (!dataBody || typeof dataBody !== 'object') {
         throw new Error('Incorrect or missing data');
     }
-
+    
     if ('userID' in dataBody) {
-        return parseNumberParameter(dataBody.userID, 'userID');
+        console.log("parse:", dataBody, dataBody.userID, typeof dataBody.userID );
+        return parseNumberFromString( dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -493,7 +501,7 @@ function parseCompanyID(request: unknown): number {
     }
 
     if ('companyID' in request)
-        return parseNumberParameter(request.companyID, 'companyID');
+        return parseNumberFromString(request.companyID, 'companyID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -513,7 +521,7 @@ function parseBuildingID(request: unknown): number {
     }
 
     if ('buildingID' in request)
-        return parseNumberParameter(request.buildingID, 'buildingID'); 
+        return parseNumberFromString(request.buildingID, 'buildingID'); 
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -523,7 +531,7 @@ function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
     }
 
     const GetAllStationsRequest: GetAllStationsRequest = {
-        buildingID : ('buildingID' in request) ? parseNumberParameter(request.buildingID, 'buildingID') : null
+        buildingID : ('buildingID' in request) ? parseNumberFromString(request.buildingID, 'buildingID') : null
     };
     return GetAllStationsRequest;
 }
@@ -534,7 +542,7 @@ function parseStationID(request: unknown): number {
     }
 
     if ('stationID' in request)
-        return parseNumberParameter(request.stationID, 'stationID');
+        return parseNumberFromString(request.stationID, 'stationID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -554,7 +562,7 @@ function parseChargingTypeID(request: unknown): number {
     }
 
     if ('chargingTypeID' in request)
-        return parseNumberParameter(request.chargingTypeID, 'chargingTypeID');
+        return parseNumberFromString(request.chargingTypeID, 'chargingTypeID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -564,7 +572,7 @@ function parseChargingConnectorID(request: unknown): number {
     }
 
     if ('chargingConnectorID' in request)
-        return parseNumberParameter(request.chargingConnectorID, 'chargingConnectorID');
+        return parseNumberFromString(request.chargingConnectorID, 'chargingConnectorID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -574,7 +582,7 @@ function parseReservationID(request: unknown): number {
     }
 
     if ('reservationID' in request) 
-        return parseNumberParameter(request.reservationID, 'reservationID');
+        return parseNumberFromString(request.reservationID, 'reservationID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
