@@ -177,11 +177,12 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
 
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
     let data;
+    //log.debug("service:",body);
     try {
         data = parser.parseUserIDFromInt(body);
     } catch (error) {
         log.debug(error);
-        return {status: 400, message: 'Incorrect data in request', error: 'Incorrect data in request', data: {data}};
+        return {status: 400, message: 'Incorrect data in request', error: (error as Error).message, data: {data}};
     }
 
     const result = await SQLStatementManager.getAllAvailableChargingStationsStatement.execute({params: [data]});

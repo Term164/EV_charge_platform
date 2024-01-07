@@ -91,6 +91,12 @@ class StatmentManager {
     editReservationStatement: PreparedStatement;
     cancelReservationStatement: PreparedStatement;
 
+    // Cronjob statements - cleaning database
+    deleteExpiredSessionsStatement: PreparedStatement;
+    deleteExpiredRegistrationSecretsStatement: PreparedStatement;
+    deleteExpiredResetPasswordSecretsStatement: PreparedStatement;
+    deleteOldReservationsStatement: PreparedStatement;
+
     private async prepareAdminServiceStatements() {
         this.assignBadminStatement = await db.connection.prepare(
             `INSERT INTO Building_admins (account_id, building_id)
@@ -538,6 +544,21 @@ class StatmentManager {
         );
     }
 
+    private async prepareCronjobStatements() {
+        this.deleteExpiredSessionsStatement = await db.connection.prepare(
+            `DELETE FROM sessions WHERE expiration_time < (now() - interval '1 hour');`);
+
+        this.deleteExpiredRegistrationSecretsStatement = await db.connection.prepare(
+            `DELETE FROM registration_secrets WHERE expiration_time < (now() - interval '1 hour');`);
+
+        this.deleteExpiredResetPasswordSecretsStatement = await db.connection.prepare(
+            `DELETE FROM reset_password_secrets WHERE expiration_time < (now() - interval '1 hour');`);
+
+        this.deleteOldReservationsStatement = await db.connection.prepare(
+            `DELETE FROM reservations WHERE desired_to < (current_date - interval '3 days');`);
+
+    }
+
     public async init() {
         await Promise.all(
             [
@@ -552,7 +573,8 @@ class StatmentManager {
                 this.prepareChargingStationServiceStatements(),
                 this.prepareChargingTypeServiceStatements(),
                 this.prepareOCPPStatements(),
-                this.prepareReservationStatements()
+                this.prepareReservationStatements(),
+                this.prepareCronjobStatements()
             ]
         );
         log.info("All SQL statements have been prepared.");
