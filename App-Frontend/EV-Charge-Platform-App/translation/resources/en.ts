@@ -55,7 +55,7 @@ export default {
     //============================= SETTINGS =================================
     account: 'Account',
     personalInfo: 'Personal Information',
-    prefferedChargingType: 'Preferred charging types',
+    preferedChargingType: 'Preferred charging types',
     allTypes: 'All Types',
     editProfile: 'Edit your profile',
     notifications: 'Notifications',
