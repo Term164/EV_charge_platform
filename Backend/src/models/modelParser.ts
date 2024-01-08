@@ -1,7 +1,8 @@
 import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin, reservation } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, CreateReservationRequest, EditReservationRequest, GetPercentageRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, ConfirmValidationCodeRequest, ResetPasswordRequest, CreateReservationRequest, EditReservationRequest, GetPercentageRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse, CreatedReservationInfo } from "./responseModels";
+
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -21,19 +22,22 @@ function isDate (dateObject: unknown): dateObject is Date {
     return dateObject instanceof Date;
 }
 
+function parseNumberFromString(param: unknown, paramName: string): number {
+    if (!param || !isString(param)) {
+        throw new Error(`Incorrect or missing ${paramName}`);
+    }
+
+    const number = parseInt(param);
+    if (!isNaN(number)) return number;
+    else throw new Error(`Provided parameter could not be cast to a number.`);
+}
+
 function parseNumberParameter(param: unknown, paramName: string): number {
     if (!param || !isNumber(param)) {
         throw new Error(`Incorrect or missing ${paramName}`);
     }
 
     return param;
-}
-
-function parseNumberFromString(param: unknown, paramName: string): number {
-    const converted = Number(param);
-    if (isNaN(converted))
-        throw new Error("Cannot convert "+paramName+" to number.");
-    return converted;
 }
 
 function parseStringParameter(param: unknown, paramName: string): string {
@@ -250,10 +254,10 @@ function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
 
     if ('userID' in request) {
         const userEditData: EditUserProfileRequest = {
-            id: parseNumberParameter(request.userID, 'userID'),
+            id: isString(request.userID) ? parseNumberFromString(request.userID, 'userID') : parseNumberParameter(request.userID, 'userID'),
             username: 'username' in request ? parseStringParameter(request.username, 'username') : undefined,
             email_account: 'email_account' in request ? parseStringParameter(request.email_account, 'email_account') : undefined,
-            profile_picture: 'profile_picture' in request ? undefined : undefined, //TODO: find out how to parse pfp
+            profile_picture: 'profile_picture' in request ? request.profile_picture as Buffer : undefined,
             rfid: 'rfid' in request ? parseStringParameter(request.rfid,'rfid') : undefined,
             company_id: 'companyID' in request ? parseNumberParameter(request.companyID, 'companyID') : undefined
         };
@@ -425,6 +429,41 @@ function parseEditChargingConnectorRequest(request: unknown): EditChargingConnec
     throw new Error('Incorrect data: some fields are missing');
 }
 
+function parseValidationCodeConfirmationRequest(dataBody: unknown): ConfirmValidationCodeRequest {
+    if (!dataBody || typeof dataBody !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('accountID' in dataBody && 'validationCode' in dataBody) {
+        const confirmValidationCodeRequest: ConfirmValidationCodeRequest = {
+            accountID: parseNumberParameter(dataBody.accountID, 'accountID'),
+            validationCode: parseNumberParameter(dataBody.validationCode, 'validationCode')
+        };
+
+        return confirmValidationCodeRequest;
+    } else {
+        throw new Error('Incorrect data: some fields are missing');
+    }
+}
+
+function parseResetPasswordRequest(dataBody: unknown): ResetPasswordRequest {
+    if (!dataBody || typeof dataBody !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('accountID' in dataBody && 'newPassword' in dataBody) {
+        const passwordResetRequest: ResetPasswordRequest = {
+            accountID: parseNumberParameter(dataBody.accountID, 'accountID'),
+            newPassword: parseStringParameter(dataBody.newPassword, 'newPassword')
+        };
+
+        return passwordResetRequest;
+    } else {
+        throw new Error('Incorrect data: some fields are missing');
+    }
+}
+
+
 function parseCreateReservationRequest(request: unknown): CreateReservationRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
@@ -493,6 +532,18 @@ function parseUserID(dataBody: unknown): number {
 
     if ('userID' in dataBody) {
         return parseNumberFromString(dataBody.userID, 'userID');
+    } else {
+        throw new Error('Incorrect data: some fields are missing');
+    }
+}
+
+function parseEmail(dataBody: unknown): string {
+    if (!dataBody || typeof dataBody !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('email' in dataBody) {
+        return parseStringParameter(dataBody.email, 'email');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -607,8 +658,8 @@ function parseSessionID(request: unknown): string {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('sessionID' in request) {
-        return parseStringParameter(request.sessionID, 'sessionID');
+    if ('sessionid' in request) {
+        return parseStringParameter(request.sessionid, 'sessionID');
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -628,9 +679,10 @@ function parseUserAccountData(data: unknown): UserAccount {
         password_hash: parseStringParameter(data[2], 'password_hash'),
         email_account: parseStringParameter(data[3], 'email_account'),
         validated: parseBooleanParameter(data[4], 'validated'),
-        profile_picture: data[5] === null ? undefined : parseStringParameter('TODO', 'profile_picture'),
+        profile_picture: data[5] === null ? undefined : data[5] as Buffer,
         rfid: data[6] === null ? undefined : parseNumberParameter(data[6], 'rfid'),
-        company_id: data[7] === null ? undefined : parseNumberParameter(data[7], 'company_id')
+        company_id: data[7] === null ? undefined : parseNumberParameter(data[7], 'company_id'),
+        company_name: data[8] === null || data[8] === undefined ? undefined : parseStringParameter(data[8], 'company_name')
     };
 
     return userAccount;
@@ -903,6 +955,7 @@ function parseArrayOfReportsAboutReservationCreation(result: unknown): CreatedRe
 
     const arrayOfReports: CreatedReservationInfo[] = new Array<CreatedReservationInfo>(result.length);
     for (let i = 0; i < result.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         arrayOfReports[i] = parseReportAboutReservationCreation(result[i]);
     }
 
@@ -926,7 +979,10 @@ export default {
     parseEditCompanyRequest,
     parseBuildingAdmin,
     parseCompanyAdmin,
+    parseValidationCodeConfirmationRequest,
+    parseResetPasswordRequest,
     parseUserID,
+    parseEmail,
     parseUserIDFromInt,
     parseCreateBuildingRequest,
     parseEditBuildingRequest,

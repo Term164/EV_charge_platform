@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import assignAdminService from '../services/assignAdminService';
 import assignEmployeeService from '../services/assignEmployeeService';
 import userService from '../services/userService';
+import { UploadedFile } from 'express-fileupload';
 
 const router = express.Router();
 
@@ -78,14 +79,19 @@ router.delete('/delete/cadmin', asyncHandler( async (req, res) => {
         .send(response);
 }));
 
+
 router.patch('/patch/editProfile', asyncHandler( async (req, res) => {
+    if (req.files != null) {
+        const image = req.files?.file as UploadedFile;
+        req.body.profile_picture = image.data;
+    }
     const response = await userService.editUserProfile(req.body);
     res.status(response.status)
         .send(response);
 }));
 
 router.get('/get/profile', asyncHandler( async (req, res) => {
-    const response = await userService.getUserProfile(req.body);
+    const response = await userService.getUserProfile(req.headers);
     res.status(response.status)
         .send(response);
 }));

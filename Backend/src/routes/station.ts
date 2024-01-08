@@ -28,6 +28,7 @@ router.get('/get/allAvailable', asyncHandler(async (req, res) => {
     const response = await stationService.getAllAvailableStations(req.query);
     res.status(response.status)
         .send(response);
+    console.log('done');
 }));
 
 router.get('/get/availabilityPercentage', asyncHandler(async (req, res) => {

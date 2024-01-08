@@ -205,6 +205,7 @@ async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
 
     const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, false);
+    console.log('end');
     return {status: 200, message: `Returned ${result.rows.length} connectors in total`, error: null, data: {'Result': returnedStations}};
 }
 

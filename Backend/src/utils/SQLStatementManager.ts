@@ -16,6 +16,10 @@ class StatmentManager {
     saveSessionIDStatement: PreparedStatement;
     getUserDataFromEmailStatement: PreparedStatement;
     getUserDataFromUsernameStatement: PreparedStatement;
+    checkEmailExists: PreparedStatement;
+    createNewValidationCode: PreparedStatement;
+    confirmValidationCode: PreparedStatement;
+    updatePassword: PreparedStatement;
 
     // Building Service statements
     createBuildingStatement: PreparedStatement;
@@ -148,6 +152,33 @@ class StatmentManager {
             FROM Accounts
             WHERE username = $1`,
             {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.checkEmailExists = await db.connection.prepare(
+            `SELECT id FROM accounts WHERE email_account = $1;`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.createNewValidationCode = await db.connection.prepare(
+            `INSERT INTO reset_password_secrets ("account_id", "reset_password_secret", "expiration_time")
+            VALUES ($1, $2, NOW() + interval '10 minutes');`,
+            {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
+        );
+
+        this.confirmValidationCode = await db.connection.prepare(
+            `SELECT reset_password_secret
+            FROM reset_password_secrets
+            WHERE account_id = $1
+            ORDER BY expiration_time DESC
+            LIMIT 1;`,
+            {paramTypes: [DataTypeOIDs.numeric]}
+        );
+
+        this.updatePassword = await db.connection.prepare(
+            `UPDATE Accounts 
+            SET password_hash = $1
+            WHERE id = $2;`,
+            {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.numeric]}
         );
     }
 
@@ -338,10 +369,10 @@ class StatmentManager {
         );
 
         this.getUserDataStatement = await db.connection.prepare(
-            `SELECT a.*
+            `SELECT a.*, c.company_name
             FROM accounts a
-            INNER JOIN sessions s
-            ON a.id = s.account_id
+            LEFT JOIN sessions s ON a.id = s.account_id
+            LEFT JOIN companies c ON a.company_id = c.id
             WHERE s.session_secret = $1;
             `,
             {paramTypes: [DataTypeOIDs.varchar]}

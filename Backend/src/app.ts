@@ -9,13 +9,15 @@ import buildingsRoutes from './routes/building';
 import stationRoutes from './routes/station';
 import reservationRoutes from './routes/reservation';
 import devRoutes from './routes/dev';
+import fileUpload from 'express-fileupload';
+
 
 // !IMPORTANT: The sequence of middleware and api endpoints is important
 // ! Do not change the sequence unless you know what you are doing.
 
 const app = express();
+app.use(fileUpload());
 app.use(express.json());
-
 app.use(middleware.requestLogger);
 
 app.use('/api/v1/auth', authRoutes);
