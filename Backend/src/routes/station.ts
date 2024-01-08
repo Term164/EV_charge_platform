@@ -19,7 +19,7 @@ router.patch('/patch/edit', asyncHandler(async (req, res) => {
 }));
 
 router.get('/get/all', asyncHandler(async (req, res) => {
-    const response = await stationService.getAllStations(req.body);
+    const response = await stationService.getAllStations(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -38,7 +38,7 @@ router.post('/post/assignCompany', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/delete/station', asyncHandler(async (req, res) => {
-    const response = await stationService.deleteStation(req.body);
+    const response = await stationService.deleteStation(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -52,7 +52,7 @@ router.post('/connector/post/new', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/connector/delete/connector', asyncHandler(async (req, res) => {
-    const response = await chargingConnectorService.deleteChargingConnector(req.body);
+    const response = await chargingConnectorService.deleteChargingConnector(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -78,7 +78,7 @@ router.get('/type/get/all', asyncHandler(async (_req, res) => {
 }));
 
 router.delete('/type/delete/type', asyncHandler(async (req, res) => {
-    const response = await chargingTypeService.deleteChargingType(req.body);
+    const response = await chargingTypeService.deleteChargingType(req.query);
     res.status(response.status)
         .send(response);
 }));

@@ -1,7 +1,11 @@
 import { ReservationData } from "./OCPPModels";
-import { UserAccount, building, buildingAdmin, company, companyAdmin } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateChargingTypeRequest, CreateCompanyRequest, CreateStationRequest, DeleteCompanyRequest, DeleteChargingTypeRequest, EditCompanyRequest, DeleteStationRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllAvailableStationsRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, DeleteBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, ChargingConnectorID, EditChargingConnectorRequest, ConfirmValidationCodeRequest, ResetPasswordRequest } from "./requestModels";
-import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse } from "./responseModels";
+import { UserAccount, building, buildingAdmin, company, companyAdmin, reservation } from "./databaseModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, ConfirmValidationCodeRequest, ResetPasswordRequest, CreateReservationRequest, EditReservationRequest } from "./requestModels";
+import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse, CreatedReservationInfo } from "./responseModels";
+
+
+//import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, CreateReservationRequest, EditReservationRequest } from "./requestModels";
+
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
 
@@ -62,6 +66,31 @@ function parseDateParameter(param: unknown, paramName: string): Date {
 
     return param;
 }
+
+/** The Date must be in proper format: ISO 8601 -> YYYYY-MM-DDThh:mm:ss[Z]
+*
+* If letter Z is as the end, it means it's a UTC timestamp, otherwise it's treated as local and will get converted to UTC.
+*/
+function parseLocalDatetimeToUTC(param: unknown): Date {
+    if (param === null || !isDate(param))
+        throw new Error(`Incorrect or missing date`);
+    const now_utc = Date.UTC(param.getUTCFullYear(), param.getUTCMonth(),
+        param.getUTCDate(), param.getUTCHours(),
+        param.getUTCMinutes(), param.getUTCSeconds());
+    console.log("Got date",param,"which is in UTC",new Date(now_utc));
+    return new Date(now_utc);
+}
+
+function parseDatetimeFromStringToUTC(param: unknown): Date {
+    let data;
+    try {
+        data = new Date(param as string);
+    } catch (error) {
+        throw new Error("Given parameter is not date proof. ");
+    }
+    return parseLocalDatetimeToUTC(data);
+}
+
 
 // ==================================== REQUEST MODEL PARSERS ========================================
 
@@ -148,36 +177,6 @@ function parseAssignRequest(request: unknown): AssignRequest {
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseCreateCompanyRequest(request: unknown): CreateCompanyRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('companyName' in request) {
-        const CreateCompanyRequest: CreateCompanyRequest = {
-            companyName: parseStringParameter(request.companyName, 'companyName')
-        };
-
-        return CreateCompanyRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
-function parseDeleteCompanyRequest(request: unknown): DeleteCompanyRequest {
-    if (!request || typeof request !== 'object') {
-        throw new Error('Incorrect or missing data');
-    }
-
-    if ('companyID' in request) {
-        const DeleteCompanyRequest: DeleteCompanyRequest = {
-            companyID: parseNumberParameter(request.companyID, 'companyID')
-        };
-
-        return DeleteCompanyRequest;
-    }
-    throw new Error('Incorrect data: some fields are missing');
-}
-
 function parseEditCompanyRequest(request: unknown): EditCompanyRequest {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
@@ -219,8 +218,8 @@ function parseDeleteBuildingAccessRequest(request: unknown): RevokeBuildingAcces
 
     if ('userID' in request && 'buildingID' in request) {
         const revokeRequest: RevokeBuildingAccessRequest = {
-            userID: parseNumberParameter(request.userID, 'userID'),
-            buildingID: parseNumberParameter(request.buildingID, 'buildingID'),
+            userID: parseNumberFromString(request.userID, 'userID'),
+            buildingID: parseNumberFromString(request.buildingID, 'buildingID'),
         };
 
         return revokeRequest;
@@ -469,6 +468,48 @@ function parseResetPasswordRequest(dataBody: unknown): ResetPasswordRequest {
 }
 
 
+function parseCreateReservationRequest(request: unknown): CreateReservationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request && 'desiredBuildingID' in request && 'chargingTime' in request && 'desiredFrom' in request && 'desiredTo' in request) {
+        const CreateReservationRequest: CreateReservationRequest = {
+            userID: parseNumberParameter(request.userID, 'userID'),
+            desiredBuildingID: parseNumberParameter(request.desiredBuildingID, 'desiredBuildingID'),
+            chargingTime: parseNumberParameter(request.chargingTime, 'chargingTime'),
+            desiredFrom: parseDatetimeFromStringToUTC(request.desiredFrom),
+            desiredTo: parseDatetimeFromStringToUTC(request.desiredTo),
+            desiredChargingTypeID : ('desiredChargingTypeID' in request) ? parseNumberParameter(request.desiredChargingTypeID, 'desiredChargingTypeID') : null
+        };
+
+        return CreateReservationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseEditReservationRequest(request: unknown): EditReservationRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('reservationID' in request) {
+        const EditReservationRequest : EditReservationRequest = {
+            reservationID: parseNumberParameter(request.reservationID, 'reservationID'),
+            desiredFrom: 'desiredFrom' in request ? parseDatetimeFromStringToUTC(request.desiredFrom) : null,
+            desiredTo: 'desiredTo' in request ? parseDatetimeFromStringToUTC(request.desiredTo) : null,
+            chargingTime: 'chargingTime' in request ? parseNumberParameter(request.chargingTime, 'chargingTime') : null,
+            // Because a user can clear desired charging type, there is a difference between
+            // desiredChargingTypeID=null and not putting it in. If user sends null, we send -1 to sql.
+            desiredChargingTypeID : !('desiredChargingTypeID' in request) ? null :
+                ( isNumber(request.desiredChargingTypeID) ? parseNumberParameter(request.desiredChargingTypeID, 'desiredChargingTypeID') : -1 )
+        };
+
+        return EditReservationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
 // ==================================== SINGLE VARIABLE PARSERS ======================================
 
 function parseUserID(dataBody: unknown): number {
@@ -477,7 +518,7 @@ function parseUserID(dataBody: unknown): number {
     }
 
     if ('userID' in dataBody) {
-        return parseNumberParameter(dataBody.userID, 'userID');
+        return parseNumberFromString(dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
     }
@@ -495,18 +536,46 @@ function parseEmail(dataBody: unknown): string {
     }
 }
 
-function parseDeleteBuildingRequest(request: unknown): DeleteBuildingRequest {
+function parseUserIDFromInt(dataBody: unknown): number {
+    if (!dataBody || typeof dataBody !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in dataBody) {
+        console.log("parse:", dataBody, dataBody.userID, typeof dataBody.userID );
+        return parseNumberFromString( dataBody.userID, 'userID');
+    } else {
+        throw new Error('Incorrect data: some fields are missing');
+    }
+}
+
+function parseCompanyID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('buildingID' in request) {
-        const DeleteBuildingRequest: DeleteBuildingRequest = {
-            buildingID: parseNumberParameter(request.buildingID, 'buildingID')
-        };
+    if ('companyID' in request)
+        return parseNumberFromString(request.companyID, 'companyID');
+    throw new Error('Incorrect data: some fields are missing');
+}
 
-        return DeleteBuildingRequest;
+function parseCompanyName(request: unknown): string {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
     }
+
+    if ('companyName' in request)
+        return parseStringParameter(request.companyName, 'companyName');
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseBuildingID(request: unknown): number {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('buildingID' in request)
+        return parseNumberFromString(request.buildingID, 'buildingID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -516,84 +585,58 @@ function parseGetAllStationsRequest(request: unknown): GetAllStationsRequest {
     }
 
     const GetAllStationsRequest: GetAllStationsRequest = {
-        buildingID : ('buildingID' in request) ? parseNumberParameter(request.buildingID, 'buildingID') : null
+        buildingID : ('buildingID' in request) ? parseNumberFromString(request.buildingID, 'buildingID') : null
     };
     return GetAllStationsRequest;
 }
 
-function parseDeleteStationRequest(request: unknown): DeleteStationRequest {
+function parseStationID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('stationID' in request) {
-        const DeleteStationRequest: DeleteStationRequest = {
-            stationID: parseNumberParameter(request.stationID, 'stationID')
-        };
-
-        return DeleteStationRequest;
-    }
+    if ('stationID' in request)
+        return parseNumberFromString(request.stationID, 'stationID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseCreateChargingTypeRequest(request: unknown): CreateChargingTypeRequest {
+function parseCreateChargingTypeRequest(request: unknown): string {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('chargingType' in request) {
-        const CreateChargingTypeRequest: CreateChargingTypeRequest = {
-            chargingType: parseStringParameter(request.chargingType, 'chargingType')
-        };
-
-        return CreateChargingTypeRequest;
-    }
+    if ('chargingType' in request)
+        return parseStringParameter(request.chargingType, 'chargingType');
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseDeleteChargingTypeRequest(request: unknown): DeleteChargingTypeRequest {
+function parseChargingTypeID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('chargingTypeID' in request) {
-        const DeleteChargingTypeRequest: DeleteChargingTypeRequest = {
-            chargingTypeID: parseNumberParameter(request.chargingTypeID, 'chargingTypeID')
-        };
-
-        return DeleteChargingTypeRequest;
-    }
+    if ('chargingTypeID' in request)
+        return parseNumberFromString(request.chargingTypeID, 'chargingTypeID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseGetAllAvailableStationsRequest(request: unknown): GetAllAvailableStationsRequest {
+function parseChargingConnectorID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    console.log(request);
-    if ('userID' in request) {
-        const GetAllAvailableStationsRequest: GetAllAvailableStationsRequest = {
-            userID: parseNumberFromString(request.userID, 'userID')
-        };
-
-        return GetAllAvailableStationsRequest;
-    }
+    if ('chargingConnectorID' in request)
+        return parseNumberFromString(request.chargingConnectorID, 'chargingConnectorID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
-function parseDeleteChargingConnectorRequest(request: unknown): ChargingConnectorID {
+function parseReservationID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('chargingConnectorID' in request) {
-        const ChargingConnectorID: ChargingConnectorID = {
-            chargingConnectorID: parseNumberParameter(request.chargingConnectorID, 'chargingConnectorID')
-        };
-
-        return ChargingConnectorID;
-    }
+    if ('reservationID' in request)
+        return parseNumberFromString(request.reservationID, 'reservationID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -729,6 +772,34 @@ function parseReservationInfo(data: unknown) {
     }
     return reservationData;
 }
+
+function parseReservationDatabaseModel(result: unknown): reservation {
+    if (result == null || typeof result != 'object')
+        throw new Error('Incorrect or missing data');
+
+    if ('id' in result && 'account_id' in result && 'allocated_connector_id' in result &&
+        'desired_charging_type_id' in result && 'creation_time' in result && 'charging_time' in result &&
+        'desired_from' in result && 'desired_to' in result && 'allocated_from' in result &&
+        'allocated_to' in result && 'desired_building_id' in result && 'position_in_queue' in result) {
+        const info: reservation = {
+            id: parseNumberParameter(result.id, 'id'),
+            account_id: parseNumberParameter(result.account_id, 'account_id'),
+            allocated_connector_id: isNumber(result.allocated_connector_id) ? parseNumberParameter(result.allocated_connector_id, 'allocated_connector_id') : null,
+            desired_charging_type_id: isNumber(result.desired_charging_type_id) ? parseNumberParameter(result.desired_charging_type_id, 'desired_charging_type_id') : null,
+            creation_time: parseDateParameter(result.creation_time, 'creation_time'),
+            charging_time: parseNumberParameter(result.charging_time, 'charging_time'),
+            desired_from: parseDateParameter(result.desired_from, 'desired_from'),
+            desired_to: parseDateParameter(result.desired_to, 'desired_to'),
+            allocated_from: isDate(result.allocated_from) ? parseDateParameter(result.allocated_from, 'allocated_from') : null,
+            allocated_to: isDate(result.allocated_to) ? parseDateParameter(result.allocated_to, 'allocated_to') : null,
+            desired_building_id: isNumber(result.desired_building_id) ? parseNumberParameter(result.desired_building_id, 'desired_building_id') : null,
+            position_in_queue: isNumber(result.position_in_queue) ? parseNumberParameter(result.position_in_queue, 'position_in_queue') : null
+        };
+        return info;
+    }
+    throw new Error('Incorrect data: Some fields are missing');
+}
+
 // ==================================== RESPONSE MODEL PARSERS ==============================================
 function parseBuildingResponse(rows: unknown): BuildingResponse[] {
 
@@ -844,8 +915,43 @@ function parseChargingStationResponse(rows: unknown, specific: boolean): Chargin
     return returningArray;
 }
 
+/** Will always return an object with some attributes being null */
+function parseReportAboutReservationCreation(result: unknown): CreatedReservationInfo {
+    if (result == null || typeof result != 'object')
+        throw new Error('Incorrect or missing data');
+
+    if ('user_id' in result && 'allocated_connector_id' in result && 'allocated_from' in result && 'allocated_to' in result && 'charging_time' in result && 'position_in_queue' in result) {
+        const info: CreatedReservationInfo = {
+            userID: parseNumberParameter(result.user_id, 'user_id'),
+            allocatedConnectorID: isNumber(result.allocated_connector_id) ? parseNumberParameter(result.allocated_connector_id, 'allocated_connector_id') : null,
+            allocatedFrom: isDate(result.allocated_from) ? parseDateParameter(result.allocated_from, 'allocated_from') : null,
+            allocatedTo: isDate(result.allocated_to) ? parseDateParameter(result.allocated_to, 'allocated_to') : null,
+            chargingTime: isNumber(result.charging_time) ? parseNumberParameter(result.charging_time, 'charging_time') : null,
+            positionInQueue: isNumber(result.position_in_queue) ? parseNumberParameter(result.position_in_queue, 'position_in_queue') : null
+        };
+        return info;
+    }
+    throw new Error('Incorrect data: Some fields are missing');
+}
+
+function parseArrayOfReportsAboutReservationCreation(result: unknown): CreatedReservationInfo[] {
+    if (result == null)
+        throw new Error('Missing data');
+    if (!Array.isArray(result))
+        throw new Error('Incorrect data format: Result should be an array');
+
+    const arrayOfReports: CreatedReservationInfo[] = new Array<CreatedReservationInfo>(result.length);
+    for (let i = 0; i < result.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        arrayOfReports[i] = parseReportAboutReservationCreation(result[i]);
+    }
+
+    return arrayOfReports;
+}
 
 export default {
+    parseLocalDatetimeToUTC,
+    parseDatetimeFromStringToUTC,
     parseNumberParameter,
     parseUserRegistrationRequest,
     parseUserVerificationRequest,
@@ -855,8 +961,8 @@ export default {
     parseDeleteBuildingAccessRequest,
     parseEditUserProfileRequest,
     parseUserAccountData,
-    parseCreateCompanyRequest,
-    parseDeleteCompanyRequest,
+    parseCompanyID,
+    parseCompanyName,
     parseEditCompanyRequest,
     parseBuildingAdmin,
     parseCompanyAdmin,
@@ -864,29 +970,35 @@ export default {
     parseResetPasswordRequest,
     parseUserID,
     parseEmail,
+    parseUserIDFromInt,
     parseCreateBuildingRequest,
     parseEditBuildingRequest,
-    parseDeleteBuildingRequest,
+    parseBuildingID,
     parseAssignCompanyRequest,
     parseGetAllStationsRequest,
     parseCreateStationRequest,
-    parseDeleteStationRequest,
+    parseStationID,
     parseAssignStationToCompanyRequest,
     parseEditStationRequest,
     parseCreateChargingTypeRequest,
-    parseDeleteChargingTypeRequest,
+    parseChargingTypeID,
     parseEditChargingTypeRequest,
-    parseGetAllAvailableStationsRequest,
     parseAddChargingConnectorRequest,
-    parseDeleteChargingConnectorRequest,
+    parseChargingConnectorID,
     parseEditChargingConnectorRequest,
     parseSessionID,
-    // -----------------------
+    parseReservationID,
+    parseCreateReservationRequest,
+    parseEditReservationRequest,
+    // ----- Responses --------
     parseBuildingResponse,
     parseCompanyResponse,
     parseChargingTypeResponse,
     parseChargingStationResponse,
-    // ----------------------- OCPP
+    parseReportAboutReservationCreation,
+    parseArrayOfReportsAboutReservationCreation,
+    parseReservationDatabaseModel,
+    // -------- OCPP -------
     parseConnectorIDs,
     parseReservationInfo,
 };

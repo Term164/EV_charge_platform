@@ -11,9 +11,9 @@
 -- -> uni for unique constraint
 --
 --=============================================
--- V 3.1
--- -> Adds "longitude" & "lattitude" to Buildings table
--- -> Adds "power_output" to Charging Connectors table
+-- V 3.2
+-- -> Renames columns to allocated_connector_id (was charging_connector_id) and desired_charging_type_id (was just charging_type_id). This makes it much more clear of the intention.
+-- -> Added columns desired_building_id and position_in_queue, both of which are needed for manipulating reservations, that are in queue (not final).
 --=============================================
 
 CREATE TABLE Companies
@@ -40,7 +40,7 @@ CREATE TABLE Accounts
 
 CREATE INDEX ind_accounts_company_id ON Accounts
 (
- company_id
+  company_id
 );
 
 
@@ -54,7 +54,7 @@ CREATE TABLE Platform_admins
 
 CREATE INDEX ind_platform_admins_account_id ON Platform_admins
 (
- account_id
+  account_id
 );
 
 
@@ -82,12 +82,12 @@ CREATE TABLE Building_admins
 
 CREATE INDEX ind_building_admins_account_id ON Building_admins
 (
- account_id
+  account_id
 );
 
 CREATE INDEX ind_building_admins_building_id ON Building_admins
 (
- building_id
+  building_id
 );
 
 
@@ -104,12 +104,12 @@ CREATE TABLE Company_admins
 
 CREATE INDEX ind_company_admins_account_id ON Company_admins
 (
- account_id
+  account_id
 );
 
 CREATE INDEX ind_company_admins_company_id ON Company_admins
 (
- company_id
+  company_id
 );
 
 
@@ -126,12 +126,12 @@ CREATE TABLE "Building-Company"
 
 CREATE INDEX ind_building_company_building_id ON "Building-Company"
 (
- building_id
+  building_id
 );
 
 CREATE INDEX ind_building_company_company_id ON "Building-Company"
 (
- company_id
+  company_id
 );
 
 
@@ -151,12 +151,12 @@ CREATE TABLE Building_accesses
 
 CREATE INDEX ind_building_accesses_account_id ON Building_accesses
 (
- account_id
+  account_id
 );
 
 CREATE INDEX ind_building_accesses_building_id ON Building_accesses
 (
- building_id
+  building_id
 );
 
 
@@ -182,12 +182,12 @@ CREATE TABLE Charging_stations
 
 CREATE INDEX ind_charging_stations_building_id ON Charging_stations
 (
- building_id
+  building_id
 );
 
 CREATE INDEX ind_charging_stations_company_id ON Charging_stations
 (
- company_id
+  company_id
 );
 
 
@@ -219,33 +219,41 @@ CREATE TABLE Reservations
 (
  "id"                SERIAL,
  account_id          int NOT NULL,
- charging_connector_id int NULL,
- charging_type_id    int NULL,
+ allocated_connector_id int NULL,
+ desired_charging_type_id int NULL,
+ desired_building_id int NULL,
  creation_time       timestamptz NOT NULL,
  charging_time       int NOT NULL,
  desired_from        timestamptz NOT NULL,
  desired_to          timestamptz NOT NULL,
  allocated_from      timestamptz NULL,
  allocated_to        timestamptz NULL,
+ position_in_queue   int NULL,
  CONSTRAINT prm_reservations_id PRIMARY KEY ("id"),
- CONSTRAINT frn_reservations_charging_connector_id FOREIGN KEY (charging_connector_id) REFERENCES Charging_connectors ("id"),
- CONSTRAINT frn_reservations_charging_type_id FOREIGN KEY (charging_type_id) REFERENCES Charging_types ("id"),
- CONSTRAINT frn_reservations_account_id FOREIGN KEY (account_id) REFERENCES Accounts ("id")
+ CONSTRAINT frn_reservations_charging_connector_id FOREIGN KEY (allocated_connector_id) REFERENCES Charging_connectors ("id"),
+ CONSTRAINT frn_reservations_charging_type_id FOREIGN KEY (desired_charging_type_id) REFERENCES Charging_types ("id"),
+ CONSTRAINT frn_reservations_account_id FOREIGN KEY (account_id) REFERENCES Accounts ("id"),
+ CONSTRAINT frn_reservations_building_id FOREIGN KEY (desired_building_id) REFERENCES Buildings ("id")
 );
 
 CREATE INDEX ind_reservations_charging_connector_id ON Reservations
 (
- charging_connector_id
+  allocated_connector_id
 );
 
 CREATE INDEX ind_reservations_charging_type_id ON Reservations
 (
- charging_type_id
+  desired_charging_type_id
 );
 
 CREATE INDEX ind_reservations_account_id ON Reservations
 (
- account_id
+  account_id
+);
+
+CREATE INDEX ind_reservations_building_id ON Reservations
+(
+  desired_building_id
 );
 
 
@@ -261,7 +269,7 @@ CREATE TABLE Sessions
 
 CREATE INDEX ind_sessions_account_id ON Sessions
 (
- account_id
+  account_id
 );
 
 
@@ -277,5 +285,20 @@ CREATE TABLE Registration_secrets
 
 CREATE INDEX ind_registration_secrets_account_id ON Registration_secrets
 (
- account_id
+  account_id
+);
+
+CREATE TABLE Reset_password_secrets
+(
+ "id"            SERIAL,
+ account_id      int NOT NULL,
+ reset_password_secret varchar(100) NOT NULL,
+ expiration_time timestamp NOT NULL,
+ CONSTRAINT prm_reset_password_secrets_id PRIMARY KEY ("id"),
+ CONSTRAINT frn_reset_password_secrets_account_id FOREIGN KEY (account_id) REFERENCES Accounts ("id")
+);
+
+CREATE INDEX ind_reset_password_secrets_account_id ON Reset_password_secrets
+(
+  account_id
 );
