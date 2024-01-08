@@ -451,6 +451,77 @@ $$ LANGUAGE plpgsql;
 -- ====================================
 -- | Helper function for reservations |
 -- ====================================
+-- --------------- get_percent_available ---------------
+-- Returns a percentage of avaialable hours for that person for that date.
+-- Returns a percentage as rounded integer
+
+CREATE OR REPLACE FUNCTION get_percent_available(user_id_in int, building_id_in int, date_of_reservation date)
+RETURNS int
+AS $$
+DECLARE
+  hours_not_reserved int;
+  num_of_connectors int;
+  working_hours int;
+  percentage real;
+  
+  connector_array int[];
+  start_working_day timestamp;
+  end_working_day timestamp;
+  current_connector_id int;
+  dz timestamp;
+  dk timestamp;
+  result_record record;
+BEGIN
+  SELECT * FROM get_all_available_for_building(user_id_in, building_id_in) INTO connector_array;
+  IF array_length(connector_array, 1) IS NULL THEN
+    RAISE EXCEPTION 'Array of possible connectors is empty. Either user doesnt exist, or he really cant use any connectors, in which case he shouldnt even be here.';
+  END IF;
+  
+  working_hours := 12;
+  num_of_connectors := array_length(connector_array, 1);
+  hours_not_reserved := 0;
+
+  start_working_day := date_of_reservation + '07:00'::time;
+  end_working_day := date_of_reservation + '19:00'::time;
+
+  FOR current_connector_id IN SELECT UNNEST(connector_array)
+  LOOP
+    RAISE INFO 'Checking %', current_connector_id;
+    -- Set "time window"
+    dz := start_working_day;
+    dk := dz + INTERVAL '1 hour';
+      
+    -- Loop through all hours of a connector, moving time window an hour
+    WHILE dk <= end_working_day
+    LOOP
+      SELECT r.allocated_from, r.allocated_to FROM Reservations r
+      INTO  result_record
+      WHERE r.allocated_connector_id = current_connector_id  AND
+      DATE(r.desired_from) = date_of_reservation AND
+      ((dz >= r.allocated_from  AND dz <  r.allocated_to)  OR
+      (dk >  r.allocated_from  AND dk <= r.allocated_to));
+        
+      -- If clash isn't found, that means that a slot is possible
+      IF NOT FOUND THEN
+        RAISE INFO 'Slot found %-%', dz, dk;
+        hours_not_reserved := hours_not_reserved + 1;
+      END IF;
+      -- Move the time window
+      dz := dz + INTERVAL '1 hour';
+      dk := dk + INTERVAL '1 hour';
+    END LOOP;
+  END LOOP;
+
+  -- availability = hours_not_reserved / (num_of_connectors * working_hours)
+  percentage := 1.0 * hours_not_reserved / (num_of_connectors * working_hours);
+  RAISE NOTICE '% = % / (% * %), returning %', percentage, hours_not_reserved, num_of_connectors, working_hours, ROUND(percentage*100);
+  RETURN ROUND(percentage*100);
+END;
+$$ LANGUAGE plpgsql;
+
+-- ====================================
+-- | Helper function for reservations |
+-- ====================================
 -- --------------- update_queue ---------------
 -- Jump starts the queue update process.
 
