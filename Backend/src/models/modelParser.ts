@@ -1,6 +1,6 @@
 import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin, reservation } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, CreateReservationRequest, EditReservationRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, CreateReservationRequest, EditReservationRequest, GetPercentageRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse, CreatedReservationInfo } from "./responseModels";
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
@@ -30,7 +30,7 @@ function parseNumberParameter(param: unknown, paramName: string): number {
 }
 
 function parseNumberFromString(param: unknown, paramName: string): number {
-    let converted = Number(param);
+    const converted = Number(param);
     if (isNaN(converted))
         throw new Error("Cannot convert "+paramName+" to number.");
     return converted;
@@ -70,7 +70,6 @@ function parseLocalDatetimeToUTC(param: unknown): Date {
     const now_utc = Date.UTC(param.getUTCFullYear(), param.getUTCMonth(),
         param.getUTCDate(), param.getUTCHours(),
         param.getUTCMinutes(), param.getUTCSeconds());
-    console.log("Got date",param,"which is in UTC",new Date(now_utc));
     return new Date(now_utc);
 }
 
@@ -459,11 +458,28 @@ function parseEditReservationRequest(request: unknown): EditReservationRequest {
             chargingTime: 'chargingTime' in request ? parseNumberParameter(request.chargingTime, 'chargingTime') : null,
             // Because a user can clear desired charging type, there is a difference between
             // desiredChargingTypeID=null and not putting it in. If user sends null, we send -1 to sql.
-            desiredChargingTypeID : !('desiredChargingTypeID' in request) ? null : 
+            desiredChargingTypeID : !('desiredChargingTypeID' in request) ? null :
                 ( isNumber(request.desiredChargingTypeID) ? parseNumberParameter(request.desiredChargingTypeID, 'desiredChargingTypeID') : -1 )
         };
 
         return EditReservationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseGetPercentageRequest(request: unknown): GetPercentageRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request && 'buildingID' in request && 'date' in request) {
+        const GetPercentageRequest: GetPercentageRequest = {
+            userID: parseNumberFromString(request.userID, 'userID'),
+            buildingID: parseNumberFromString(request.buildingID, 'buildingID'),
+            date: parseDatetimeFromStringToUTC(request.date)
+        };
+
+        return GetPercentageRequest;
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -486,7 +502,7 @@ function parseUserIDFromInt(dataBody: unknown): number {
     if (!dataBody || typeof dataBody !== 'object') {
         throw new Error('Incorrect or missing data');
     }
-    
+
     if ('userID' in dataBody) {
         console.log("parse:", dataBody, dataBody.userID, typeof dataBody.userID );
         return parseNumberFromString( dataBody.userID, 'userID');
@@ -510,7 +526,7 @@ function parseCompanyName(request: unknown): string {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('companyName' in request) 
+    if ('companyName' in request)
         return parseStringParameter(request.companyName, 'companyName');
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -521,7 +537,7 @@ function parseBuildingID(request: unknown): number {
     }
 
     if ('buildingID' in request)
-        return parseNumberFromString(request.buildingID, 'buildingID'); 
+        return parseNumberFromString(request.buildingID, 'buildingID');
     throw new Error('Incorrect data: some fields are missing');
 }
 
@@ -551,7 +567,7 @@ function parseCreateChargingTypeRequest(request: unknown): string {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('chargingType' in request) 
+    if ('chargingType' in request)
         return parseStringParameter(request.chargingType, 'chargingType');
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -581,7 +597,7 @@ function parseReservationID(request: unknown): number {
         throw new Error('Incorrect or missing data');
     }
 
-    if ('reservationID' in request) 
+    if ('reservationID' in request)
         return parseNumberFromString(request.reservationID, 'reservationID');
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -931,6 +947,7 @@ export default {
     parseReservationID,
     parseCreateReservationRequest,
     parseEditReservationRequest,
+    parseGetPercentageRequest,
     // ----- Responses --------
     parseBuildingResponse,
     parseCompanyResponse,

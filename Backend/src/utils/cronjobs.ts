@@ -19,14 +19,24 @@ function startCronJobs () {
 
     log.info('Started hourly cron job for deleting expired sessions, registration & reset password secrets.');
     cron.schedule('0 * * * *', () => {
-        deleteExpiredSessions();
-        deleteExpiredRegistrationSecrets();
-        deleteExpiredResetPasswordSecrets();
+        deleteExpiredSessions()
+            .then((n) => {log.info("Deleted "+n+" expired sessions.");})
+            .catch((error) => {log.error(error);});
+
+        deleteExpiredRegistrationSecrets()
+            .then((n) => {log.info("Deleted "+n+" expired registration secrets.");})
+            .catch((error) => {log.error(error);});
+
+        deleteExpiredResetPasswordSecrets()
+            .then((n) => {log.info("Deleted "+n+" expired reset password secrets.");})
+            .catch((error) => {log.error(error);});
     });
 
     log.info('Started daily cron job for deleting past reservations.');
     cron.schedule('0 0 * * *', () => {
-        deleteOldReservations();
+        deleteOldReservations()
+            .then((n) => {log.info("Deleted "+n+" past reservations");})
+            .catch((error) => {log.error(error);});
     });
 }
 
@@ -44,22 +54,22 @@ function reserveConnectors(reservationList: ReservationData[]) {
 
 async function deleteExpiredSessions () {
     const result = await SQLStatementManager.deleteExpiredSessionsStatement.execute();
-    log.info("Deleted "+result.rowsAffected+" expired sessions.");
+    return result.rowsAffected;
 }
 
 async function deleteExpiredRegistrationSecrets () {
     const result = await SQLStatementManager.deleteExpiredRegistrationSecretsStatement.execute();
-    log.info("Deleted "+result.rowsAffected+" expired registration secrets.");
+    return result.rowsAffected;
 }
 
 async function deleteExpiredResetPasswordSecrets () {
     const result = await SQLStatementManager.deleteExpiredResetPasswordSecretsStatement.execute();
-    log.info("Deleted "+result.rowsAffected+" expired reset password secrets.");
+    return result.rowsAffected;
 }
 
 async function deleteOldReservations () {
     const result = await SQLStatementManager.deleteOldReservationsStatement.execute();
-    log.info("Deleted "+result.rowsAffected+" past reservations.");
+    return result.rowsAffected;
 }
 
 export {startCronJobs};

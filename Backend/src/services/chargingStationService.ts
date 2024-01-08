@@ -175,6 +175,21 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
         : 'Successfully cleared a company reservation for a station.', error:null, data:{}};
 }
 
+async function getAvailabilityPercentage(body: unknown): Promise<APIResponse> {
+    let data;
+    try {
+        data = parser.parseGetPercentageRequest(body);
+    } catch (error) {
+        log.debug(error);
+        return {status: 400, message: 'Incorrect data in request', error:'Incorrect data in request', data: {data}};
+    }
+
+    const result = await SQLStatementManager.getAvailabilityPercentageStatement.execute({params: [data.userID, data.buildingID, data.date]});
+    if (result.rows == undefined)
+        return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
+    return {status: 200, message: `Returned`, error: null, data: {'Percentage': result.rows.at(0)[0]}};
+}
+
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
     let data;
     //log.debug("service:",body);
@@ -199,5 +214,6 @@ export default {
     deleteStation,
     assignCompany,
     editStation,
-    getAllAvailableStations
+    getAllAvailableStations,
+    getAvailabilityPercentage
 };
