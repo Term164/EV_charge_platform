@@ -68,6 +68,7 @@ class StatmentManager {
     createChargingConnectorStatement: PreparedStatement;
     getAllChargingStationsSpecificStatement: PreparedStatement;
     getAllChargingStationsFullStatement: PreparedStatement;
+    getAvailabilityPercentageStatement: PreparedStatement;
     deleteChargingStationStatement: PreparedStatement;
     deleteChargingConnectorByStationIDStatement: PreparedStatement;
     deleteChargingConnectorStatement: PreparedStatement;
@@ -449,6 +450,11 @@ class StatmentManager {
                 LEFT JOIN buildings b ON b.id = cs.building_id
                 LEFT JOIN companies c ON cs.company_id = c.id;`,
             {paramTypes: []}
+        );
+
+        this.getAvailabilityPercentageStatement = await db.connection.prepare(
+            `SELECT * FROM get_percent_available($1,$2,$3);`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4, DataTypeOIDs.date]}
         );
 
         this.deleteChargingStationStatement = await db.connection.prepare(

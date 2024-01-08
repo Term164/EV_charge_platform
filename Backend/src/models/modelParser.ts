@@ -1,10 +1,7 @@
 import { ReservationData } from "./OCPPModels";
 import { UserAccount, building, buildingAdmin, company, companyAdmin, reservation } from "./databaseModels";
-import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, ConfirmValidationCodeRequest, ResetPasswordRequest, CreateReservationRequest, EditReservationRequest } from "./requestModels";
+import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, ConfirmValidationCodeRequest, ResetPasswordRequest, CreateReservationRequest, EditReservationRequest, GetPercentageRequest } from "./requestModels";
 import { BuildingResponse, ChargingConnectorResponse, ChargingStationResponse, ChargingTypeResponse, CompanyResponse, CreatedReservationInfo } from "./responseModels";
-
-
-//import { AssignStationToCompanyRequest, AssignEmployeeToBuildingRequest, AssignRequest, CreateStationRequest, EditCompanyRequest, EditUserProfileRequest, EditChargingTypeRequest, RevokeBuildingAccessRequest, EditStationRequest, GetAllStationsRequest, UserLoginRequest, UserRegistrationRequest, UserVerificationRequest, CreateBuildingRequest, EditBuildingRequest, AssignCompanyRequest, connectorTypeIDAndSerialNumberAndPowerOutput, AddChargingConnectorRequest, EditChargingConnectorRequest, CreateReservationRequest, EditReservationRequest } from "./requestModels";
 
 
 // ================================== TYPE CHECKER FUNCTIONS ==============================
@@ -77,7 +74,6 @@ function parseLocalDatetimeToUTC(param: unknown): Date {
     const now_utc = Date.UTC(param.getUTCFullYear(), param.getUTCMonth(),
         param.getUTCDate(), param.getUTCHours(),
         param.getUTCMinutes(), param.getUTCSeconds());
-    console.log("Got date",param,"which is in UTC",new Date(now_utc));
     return new Date(now_utc);
 }
 
@@ -506,6 +502,23 @@ function parseEditReservationRequest(request: unknown): EditReservationRequest {
         };
 
         return EditReservationRequest;
+    }
+    throw new Error('Incorrect data: some fields are missing');
+}
+
+function parseGetPercentageRequest(request: unknown): GetPercentageRequest {
+    if (!request || typeof request !== 'object') {
+        throw new Error('Incorrect or missing data');
+    }
+
+    if ('userID' in request && 'buildingID' in request && 'date' in request) {
+        const GetPercentageRequest: GetPercentageRequest = {
+            userID: parseNumberFromString(request.userID, 'userID'),
+            buildingID: parseNumberFromString(request.buildingID, 'buildingID'),
+            date: parseDatetimeFromStringToUTC(request.date)
+        };
+
+        return GetPercentageRequest;
     }
     throw new Error('Incorrect data: some fields are missing');
 }
@@ -990,6 +1003,7 @@ export default {
     parseReservationID,
     parseCreateReservationRequest,
     parseEditReservationRequest,
+    parseGetPercentageRequest,
     // ----- Responses --------
     parseBuildingResponse,
     parseCompanyResponse,

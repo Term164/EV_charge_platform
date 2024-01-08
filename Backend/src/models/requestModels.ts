@@ -145,6 +145,11 @@ interface EditReservationRequest {
     desiredChargingTypeID: number | null;
 }
 
+interface GetPercentageRequest {
+    userID: number;
+    buildingID: number;
+    date: Date;
+}
 
 export {
     UserRegistrationRequest,
@@ -170,5 +175,6 @@ export {
     ResetPasswordRequest,
     EditChargingConnectorRequest,
     CreateReservationRequest,
-    EditReservationRequest
+    EditReservationRequest,
+    GetPercentageRequest
 };
