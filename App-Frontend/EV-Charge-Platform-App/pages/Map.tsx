@@ -1,7 +1,6 @@
 import { View, Text, Dimensions, Animated, ScrollView, Pressable, Alert, Modal, ActivityIndicator } from "react-native";
 import MapView, {Callout, MapMarker} from "react-native-maps";
 import React from 'react';
-import { markers } from "../utils/markers";
 import { Building, mapStyle, mapStyleDark } from "../utils/types";
 import SearchBar from "react-native-dynamic-search-bar";
 import { searchBuildingsByName } from "../utils/search";
@@ -22,13 +21,6 @@ const LONGITUDE = 14.505751;
 const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATION;
 
-const region = {
-    latitude: markers[0] ? markers[0].coordinate.latitude : LATITUDE,
-    longitude: markers[0] ? markers[0].coordinate.longitude : LONGITUDE,
-    latitudeDelta: LATITUDE_DELTA,
-    longitudeDelta: LONGITUDE_DELTA
-}
-
 class MapScreen extends React.Component<any, any> {
 
     animation: Animated.Value;
@@ -45,11 +37,11 @@ class MapScreen extends React.Component<any, any> {
         this.state = {
             index: 0,
             searchBarSelected: false,
-            filteredBuildings: markers,
+            filteredBuildings: props.buildings,
             searching: false,
             selectedBuilding: null,
             bottomSheetModalRef: React.createRef(),
-            isItemSelected: markers.length == 0 ? false : true,
+            isItemSelected: props.buildings.length == 0 ? false : true,
             ModalShowing: false,
         };
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
@@ -89,6 +81,13 @@ class MapScreen extends React.Component<any, any> {
 
     render(): React.ReactNode {
         const buildings = this.props.buildings as Array<Building>;
+
+        const region = {
+            latitude: buildings[0] ? buildings[0].coordinate.latitude : LATITUDE,
+            longitude: buildings[0] ? buildings[0].coordinate.longitude : LONGITUDE,
+            latitudeDelta: LATITUDE_DELTA,
+            longitudeDelta: LONGITUDE_DELTA
+        }
 
         const { t } = this.props;
         const filterBuildings = async (searchWord: string) => {

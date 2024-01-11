@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { Reservation } from "./databaseTypes";
 
 type HomeTabParamList = {
     Dashboard: undefined;
@@ -59,6 +60,7 @@ type MakeReservationPageProps = {
 
 type EditReservationPageProps = {
   exitModal: () => void
+  updateReservation: () => void
   reservation: Reservation;
 }
 
@@ -84,6 +86,7 @@ type Coordinate = {
 }
 
 type Building = {
+  id: number,
   coordinate: Coordinate,
   name: string,
   address: string,
@@ -97,19 +100,6 @@ enum ReservationStatus {
   RESERVED = 'Reserved',
   ALLOCATED = 'Allocated',
   INQUEUE = 'In Queue',
-}
-
-type Reservation = {
-  building: Building,
-  allocated_connector: Connector | null;
-  charging_time: number,
-  desired_from: Date,
-  desired_to: Date,
-  desired_type: ChargingType,
-  allocated_from: Date | null,
-  allocated_to: Date | null,
-  queueNumber: number,
-  reservation_status: ReservationStatus
 }
 
 type Language = 'en' | 'si';
@@ -400,7 +390,6 @@ export {
     Connector,
     Building,
     ReservationStatus,
-    Reservation,
     ChargingType,
     mapStyle,
     mapStyleDark,

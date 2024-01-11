@@ -33,6 +33,10 @@ type StationResponse = {
     data: {Result: Array<Station>}
 } & APIResponse
 
+type UserReservationsResponse = {
+    data: {Result: Reservation[]}
+} & APIResponse
+
 type DBConnector = {
     chargingConnectorID: number,
     chargingConnectorSerialNumber: number,
@@ -58,4 +62,21 @@ type Station = {
     copmpany: string
 }
 
-export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, DBConnector, forgotPasswordResponse}
+type Reservation = {
+    account_id: number,
+    allocated_from: Date | null,
+    allocated_to: Date | null,
+    charging_time: number,
+    creation_time: Date,
+    building_location: string,
+    building_name: string,
+    desired_charging_type: ChargingType | null,
+    desired_from: Date,
+    desired_to: Date,
+    id: number,
+    position_in_queue: number | null,
+    charging_type: ChargingType | null,
+    power_output: number | null,
+}
+
+export {APIResponse, Profile, LoginResponse, ProfileResponse, StationResponse, Station, Building, Reservation, DBConnector, forgotPasswordResponse, UserReservationsResponse}

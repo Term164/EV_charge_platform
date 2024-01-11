@@ -551,7 +551,28 @@ class StatmentManager {
         );
 
         this.getAllReservationsForPersonStatement = await db.connection.prepare(
-            `SELECT * FROM reservations WHERE account_id = $1;`,
+            `SELECT 
+            r.id,
+            r.account_id,
+            r.allocated_from,
+            r.allocated_to,
+            r.charging_time,
+            r.creation_time,
+            r.desired_from,
+            r.desired_to,
+            r.position_in_queue,
+            b.building_name,
+            b.building_location,
+            ct.type as charging_type,
+            c.power_output,
+            ct2.type as desired_charging_type
+            FROM reservations as r
+            LEFT JOIN buildings b ON b.id = r.desired_building_id
+            LEFT JOIN charging_connectors c ON c.id = r.allocated_connector_id
+            LEFT JOIN charging_types ct ON ct.id = c.charging_type_id
+            LEFT JOIN charging_types ct2 ON ct2.id = r.desired_charging_type_id
+            WHERE account_id = $1
+            ORDER BY r.allocated_from`,
             {paramTypes: [DataTypeOIDs.int4]}
         );
 

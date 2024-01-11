@@ -3,7 +3,6 @@ import CHAdeMOSVG from "../assets/connector-icons/ev-plug-chademo.svg";
 import TeslaSVG from "../assets/connector-icons/ev-plug-tesla.svg";
 import CSSSVG from "../assets/connector-icons/ev-plug-ccs2.svg";
 import { Building, ChargingType, Connector } from "../utils/types";
-import { useColorScheme } from "nativewind";
 import { DBConnector, Station } from "./databaseTypes";
 
 export function getConnectorIcon(connectorType: ChargingType, colorScheme: string) {
@@ -21,6 +20,25 @@ export function getConnectorIcon(connectorType: ChargingType, colorScheme: strin
     }
 }
 
+export function getChargingTypeID(type: ChargingType) {
+    switch(type) {
+        case ChargingType.TYPE1: 
+            return 1;
+        case ChargingType.TYPE2:
+            return 2;
+        case ChargingType.CHAdeMO: 
+            return 3;
+        case ChargingType.CCS:
+            return 4;
+        case ChargingType.TESLASUC:
+            return 5;
+    }
+}
+
+export function combineDateAndTime (date: Date, time: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds());
+}
+
 const ChargingTypeLabelValueMap = new Map<string, string>([
     ['TYPE1', 'Type 1'],
     ['TYPE2', 'Type 2'],
@@ -34,9 +52,9 @@ export function getLabelFromChargingTypeValue(value: string) {
 }
 
 export function getTimeFromDate(date: Date) {
+    date = new Date(date);
     return `${("0" + date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)} `
 }
-
 
 export function parseStations(stations: Array<Station>, selectedChargingTypes: Array<string>) {
     const buildings: Map<number, Building> = new Map<number, Building>();
@@ -55,6 +73,7 @@ export function parseStations(stations: Array<Station>, selectedChargingTypes: A
             if (connectors.length < 1) return; // If there is no connectors dont creat the building
 
             const building: Building = {
+                id: station.building.buildingID,
                 coordinate: {latitude: station.building.buildingLatitude, longitude: station.building.buildingLongitude},
                 address: station.building.buildingLocation,
                 name: station.building.buildingName,

@@ -2,12 +2,16 @@ import { Building, ChargingType, MakeReservationPageProps } from "../utils/types
 import { Pressable, Text, View } from "react-native";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import CustomButton from "../components/CustomButton";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { TextInputWithIcon } from "../components/TextInputWithIcon";
 import DropDownPicker, { ThemeNameType } from "react-native-dropdown-picker";
-import { getConnectorIcon, getLabelFromChargingTypeValue, getTimeFromDate } from "../utils/utils";
+import { combineDateAndTime, getChargingTypeID, getConnectorIcon, getLabelFromChargingTypeValue, getTimeFromDate } from "../utils/utils";
 import { useTranslation } from "react-i18next";
-import { useCurrentSettings } from "../utils/GlobalStateContext";
+import { UserDataContext, useCurrentSettings } from "../utils/GlobalStateContext";
+import { serverAddress } from "../utils/Constants";
+import { useColorScheme } from "nativewind";
+import { useToast } from "react-native-toast-notifications";
+import { APIResponse } from "../utils/databaseTypes";
 
 
 function getTextColorBasedOnAvailability(availability: number) {
@@ -18,6 +22,8 @@ function getTextColorBasedOnAvailability(availability: number) {
     else colorStyle = 'text-green-600';
     return colorStyle;
 }
+
+
 
 export default function MakeReservationPage({exitModal, building}: MakeReservationPageProps) {
 
@@ -33,7 +39,9 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
     const { t } = useTranslation();
 
-    const { colorScheme, toggleColorScheme } = useCurrentSettings();
+    const toast = useToast();
+
+    const { colorScheme, toggleColorScheme } = useColorScheme();
 
     const [selectedDate, setSelectedDate] = useState<Date>(tommorow);
     const [startTime, setStartTime] = useState<Date>(startTimeDate);
@@ -58,6 +66,52 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState(getChargingTypeItems(building));
+
+    const userData = useContext(UserDataContext);
+
+    const makeReservationRequest = async () => {
+
+        let data;
+
+        if (value) {
+            data = {
+                userID: userData?.userData.id,
+                desiredBuildingID: building.id,
+                chargingTime: numOfHours,
+                desiredFrom: combineDateAndTime(selectedDate, startTime),
+                desiredTo: combineDateAndTime(selectedDate, endTime),
+                desiredChargingTypeID: getChargingTypeID(value)
+              }
+        } else {
+            data = {
+                userID: userData?.userData.id,
+                desiredBuildingID: building.id,
+                chargingTime: numOfHours,
+                desiredFrom: combineDateAndTime(selectedDate, startTime),
+                desiredTo: combineDateAndTime(selectedDate, endTime),
+              }
+        }
+
+        try {
+            exitModal();
+            const response = await fetch(
+                `${serverAddress}/api/v1/reservation/post/new`,
+                {
+                  method: 'POST',
+                  headers: userData?.header as HeadersInit,
+                  body: JSON.stringify(data)
+                }
+            );
+            if (response.status === 200) {
+                toast.show(t('reservationCreated'), {type: 'success', textStyle: {textAlign: 'center'}});
+            } else {
+                toast.show(t('somethingWrong'), {type: 'danger', textStyle: {textAlign: 'center'}});
+            }
+        } catch (error) {
+            console.log(error);
+            toast.show(t('somethingWrong'), {type: 'danger', textStyle: {textAlign: 'center'}});
+        }
+    }
 
     const selectedHourStyle = "basis-4/12 bg-blue-200 dark:bg-blue-500 py-4 rounded-md shadow-lg shadow-black";
     const hourStyle = "basis-3/12 bg-gray-200 dark:bg-slate-600 py-2 rounded-md shadow-lg";
@@ -208,6 +262,7 @@ export default function MakeReservationPage({exitModal, building}: MakeReservati
 
             <View className="flex-row justify-end items-center px-2 self-center mt-4">
                 <CustomButton
+                    onPress={makeReservationRequest}
                     textStyle="font-bold text-lg text-white dark:text-slate-200 tracking-widest"
                     className="w-28 py-2 bg-blue-500 dark:bg-blue-700 text-center rounded-lg justify-center items-center border border-blue-800 shadow-lg mr-4"
                     android_ripple={{color: ''}}

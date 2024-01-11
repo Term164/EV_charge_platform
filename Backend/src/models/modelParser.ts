@@ -555,7 +555,6 @@ function parseUserIDFromInt(dataBody: unknown): number {
     }
 
     if ('userID' in dataBody) {
-        console.log("parse:", dataBody, dataBody.userID, typeof dataBody.userID );
         return parseNumberFromString( dataBody.userID, 'userID');
     } else {
         throw new Error('Incorrect data: some fields are missing');
@@ -647,7 +646,7 @@ function parseReservationID(request: unknown): number {
     if (!request || typeof request !== 'object') {
         throw new Error('Incorrect or missing data');
     }
-
+``
     if ('reservationID' in request)
         return parseNumberFromString(request.reservationID, 'reservationID');
     throw new Error('Incorrect data: some fields are missing');

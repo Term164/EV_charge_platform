@@ -86,7 +86,6 @@ export default function App() {
                 },
               }
           );
-          const loginResponse = await response.json() as APIResponse;
           if (response.status === 200) {
             dispatch({ type: StateActionKind.RESTORE_TOKEN, token: userToken });
           } else {
@@ -106,7 +105,7 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-
+    setUser(null);
     const getProfileData = async () => {
       let userData;
       try {

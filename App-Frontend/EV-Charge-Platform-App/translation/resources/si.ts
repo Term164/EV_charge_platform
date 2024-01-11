@@ -25,6 +25,7 @@ export default {
     allocated: 'Dodeljeno',
     queue: 'v vrsti', // this comes out like this '4th in queue'
     cancelReservation: 'Prekliči rezervacijo?',
+    reservationCanceled: 'Rezervacija uspešno odpovedana.',
     cancelReservationSupportText: 'Opravljate preklic rezervacije. Ta dejanja ni mogoče razveljaviti, izgubili boste svoje mesto v določeni stavbi.',
     cancelReservationCofirm: 'PREKLIC',
     cancelReservationExit: 'NAZAJ',
@@ -43,6 +44,7 @@ export default {
     editingReservation: 'Urejanje rezervacije',
     availabilityStatus: 'Razpoložljivost za to stavbo je na',
     desiredLength: 'Željena dolžina rezervacije:',
+    reservationEdited: 'Rezervacija uspešno spremenjena',
     //============================= STATIONS NO DATA =================================
     noStations: 'Ni najdenih postaj',
     supportTextStations: 'Vaša nastavitev računa je nepopolna. Za pomoč se obrnite na skrbnika vašega podjetja ali stavbe.',
@@ -52,6 +54,7 @@ export default {
     makeReservationTitle: 'Ustvarite novo rezervacijo',
     reserveNowCTA: 'REZERVIRAJ',
     chargerType: "Vrsta polnilca",
+    reservationCreated: 'Rezervacija uspešno ustvarjena',
     //============================= SETTINGS =================================
     account: 'Profil',
     personalInfo: 'Osebne informacije',
