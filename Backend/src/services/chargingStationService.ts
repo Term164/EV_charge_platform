@@ -187,7 +187,7 @@ async function getAvailabilityPercentage(body: unknown): Promise<APIResponse> {
     const result = await SQLStatementManager.getAvailabilityPercentageStatement.execute({params: [data.userID, data.buildingID, data.date]});
     if (result.rows == undefined)
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
-    return {status: 200, message: `Returned`, error: null, data: {'Percentage': result.rows.at(0)[0]}};
+    return {status: 200, message: `Returned`, error: null, data: {'Percentage': result.rows.at(0)[0] as number}};
 }
 
 async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
@@ -205,7 +205,6 @@ async function getAllAvailableStations(body: unknown): Promise<APIResponse> {
         return {status: 500, message: `Returned undefined`, error: "Returned undefined", data: result};
 
     const returnedStations: ChargingStationResponse[] =  parser.parseChargingStationResponse(result.rows, false);
-    console.log('end');
     return {status: 200, message: `Returned ${result.rows.length} connectors in total`, error: null, data: {'Result': returnedStations}};
 }
 

@@ -1,6 +1,5 @@
 import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { markers } from "../utils/markers";
 import CustomButton from "../components/CustomButton";
 import SearchBar from "react-native-dynamic-search-bar";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";

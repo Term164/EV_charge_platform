@@ -25,6 +25,7 @@ export default {
     allocated: 'Allocated',
     queue: 'In Queue', // this comes out like this '4th in queue'
     cancelReservation: 'Cancel reservation ?',
+    reservationCanceled: 'Reservation successfully canceled',
     cancelReservationSupportText: 'You are about to cancel your reservation. This action is not reversable and you will lose your spot at the specific building.',
     cancelReservationCofirm: 'CANCEL',
     cancelReservationExit: 'GO BACK',
@@ -43,6 +44,7 @@ export default {
     editingReservation: 'Edit reservation',
     availabilityStatus: 'Availability for this building is at',
     desiredLength: 'Desired length of Reservation:',
+    reservationEdited: 'Reservation successfully edited',
     //============================= STATIONS NO DATA =================================
     noStations: 'No Stations Found',
     supportTextStations: 'Your account setup is incomplete. Please contact your company administrator or building administrator for assistance.',
@@ -52,6 +54,7 @@ export default {
     makeReservationTitle: 'Make new reservation',
     reserveNowCTA: 'RESERVE NOW',
     chargerType: "Charger type",
+    reservationCreated: 'Reservation successfully created',
     //============================= SETTINGS =================================
     account: 'Account',
     personalInfo: 'Personal Information',
