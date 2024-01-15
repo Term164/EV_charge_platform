@@ -1,5 +1,6 @@
 import express from 'express';
 import middleware from './utils/middleware';
+import cors from 'cors';
 
 // * ====================== IMPORT ALL ROUTES =======================
 import userRoutes from './routes/user';
@@ -18,6 +19,9 @@ import fileUpload from 'express-fileupload';
 const app = express();
 app.use(fileUpload());
 app.use(express.json());
+
+app.use(cors());
+
 app.use(middleware.requestLogger);
 
 app.use('/api/v1/auth', authRoutes);
