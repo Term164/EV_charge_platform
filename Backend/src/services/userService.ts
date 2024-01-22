@@ -170,6 +170,34 @@ async function getUserProfile(requestBody: unknown): Promise<APIResponse> {
 
 }
 
+async function getAllUsers(): Promise<APIResponse> {
+    const result = await SQLStatementManager.getAllUsersStatement.execute({params: [],
+        objectRows: true
+    });
+    if (result.rows == undefined) 
+        return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
+    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
+}
+
+async function getRoleOfUser(requestBody: unknown): Promise<APIResponse> {
+    const sessionID = parser.parseSessionID(requestBody);
+    const result = await SQLStatementManager.getRoleOfUserstatement.execute({params: [sessionID]});
+    console.log("res:",result);
+    if (result.rows == undefined)
+        return {status: 500, message: `Could not retrieve role`, error: 'Something went wrong retrieving a role', data: null};    
+    return {status: 200, message: `Successfully retrieved user role.`, error: null, data: {"Role": result.rows.at(0)[0]}};
+}
+
+async function getCompanyUsers(requestBody: unknown): Promise<APIResponse> {
+    const companyID = parser.parseCompanyID(requestBody);
+    const result = await SQLStatementManager.getCompanyUsersStatement.execute({params: [companyID],
+        objectRows: true
+    });
+    if (result.rows == undefined)
+        return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
+    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
+}
+
 export default {
     getBuildingAdmins,
     getCompanyAdmins,
@@ -180,5 +208,8 @@ export default {
     deleteAccount,
     deleteBuildingAccess,
     editUserProfile,
-    getUserProfile
+    getUserProfile,
+    getAllUsers,
+    getRoleOfUser,
+    getCompanyUsers
 };

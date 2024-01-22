@@ -289,6 +289,61 @@ BEGIN
 END
 $$;
 
+
+-- --------------- get_role_of_user ---------------
+-- return a string, either 'padmin', 'badmin', 'cadmin' or empty ''
+-- /api/v1/user/get/role
+-- edit_connector(session_secret)
+CREATE OR REPLACE FUNCTION get_role_of_user(session_secret_in text)
+RETURNS text
+AS $$
+DECLARE
+  user_id int;
+  user_role text;
+  
+  res record;
+BEGIN
+  SELECT account_id FROM Sessions 
+  WHERE session_secret = session_secret_in
+  INTO user_id;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Session does not match any users.';
+  END IF;
+  RAISE NOTICE 'Foud user %', user_id;
+  
+  SELECT * FROM platform_admins
+  WHERE account_id = user_id
+  INTO res;
+  
+  IF FOUND THEN
+    RAISE NOTICE 'Found in padmin, %', res;
+    RETURN 'padmin';
+  END IF;
+  
+  SELECT * FROM building_admins
+  WHERE account_id = user_id
+  INTO res;
+  
+  IF FOUND THEN
+    RAISE NOTICE 'Found in badmin, %', res;
+    RETURN 'badmin';
+  END IF;
+  
+  SELECT * FROM company_admins
+  WHERE account_id = user_id
+  INTO res;
+  
+  IF FOUND THEN
+    RAISE NOTICE 'Found in cadmin, %', res;
+    RETURN 'cadmin';
+  END IF;
+  
+  RAISE NOTICE 'No role';
+  RETURN '';
+END;
+$$ LANGUAGE plpgsql;
+
 -- ========================= RESERVATIONS =============================================
 
 -- ---------------- created_reservation_info ---------------

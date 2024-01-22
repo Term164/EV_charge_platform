@@ -1,62 +1,82 @@
 <script>
-	import { login } from '../hooks/auth';
-	import { store } from '../hooks/auth';
+	import { goto } from '$app/navigation';
+	import { login } from '$lib';
 	import Input from './Input.svelte';
 	import Button from './Button.svelte';
 	import A from './A.svelte';
+	import { SvelteEasyToast, toast } from 'svelte-easy-toast';
+
+	const showErrorToast = (message) => {
+	    toast({
+		type: 'error', // primary, dark, danger, success, info, warning, default, error
+		position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+		text: message,
+		title: 'Napaka',
+	    });
+    }
+	const showGeneralErrorToast = () => {
+	    toast({
+		type: 'error', // primary, dark, danger, success, info, warning, default, error
+		position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+		text: 'Poskusite kasneje',
+		title: 'Neznana napaka',
+	    });
+	}
+	const showSuccessToast = (message) => {
+	    toast({
+		type: 'success', // primary, dark, danger, success, info, warning, default, error
+		position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+		text: message,
+		title: 'Uspeh'
+	    });
+    }
 
 	let username = '';
 	let password = '';
-	let error = ''
 	
+	let isLoading = false;
 
 	async function handleLogin() {
-        /*if ( username.trim() === "" || password.trim() === "" ) {
-			console.log("empty - error");
-			error = 'Prosim izpolnite vsa polja.'
-			return 0;
-		}*/
-		
-		console.log("Good");
-		
-        const user = await login( username, password );
-        console.log("got", user);
-		return 0;
-		if ( user ) {
-			console.log(user)
-			$store = user
-			if ( error ) error = ''
-		}
-		else {
-			error = 'Incorrect username and password.'
-			console.log("Incorrect username and password.")
+        if (username.trim() === "" || password.trim() === "") {
+			showErrorToast("Izpolnite vsa polja");
+			return;
 		}
 
+		isLoading = true;
+        const status = await login(username, password);
+        isLoading = false;
+		
+		if (status == 200) {
+			//showSuccessToast("Uspešna prijava");
+			goto('/');
+		} else if (status == 400) {
+			showErrorToast('Napačno uporabniško ime ali geslo');
+		} else {
+			showGeneralErrorToast();
+		}
+
+		username, password = '';
 	}
-	
+
 </script>
 
+<SvelteEasyToast />  
+
 <div class="flex flex-col items-center justify-center ">
-	<img class="m-2" src='/logo/Charge-Mate-Logo.png' alt='Logo'/>
-	<h1 class="m-2 text-5xl font-bold">Dobrodošli nazaj</h1>
-	<p class='mb-6 text-gray-500 text-lg'>Prijavite se za nadaljevanje</p>
+	<img class="scale-75" src='/logo/Charge-Mate-Logo.png' alt='Logo'/>
+	<h1 class="-mt-16 text-5xl font-bold">Dobrodošli nazaj</h1>
+	<p class='mb-4 text-gray-500 text-lg'>Prijavite se za nadaljevanje</p>
 
 <form on:submit|preventDefault={handleLogin} class="flex flex-col items-center justify-center">
 	<Input placeholder="Uporabniško ime ali e-pošta" bind:value={username} type="text"/>	
 	<Input placeholder="Geslo" bind:value={password} type="password" />	
-	<Button>Prijava</Button>
-	
-	<div id="error_message" class="text-danger">
-		<p class="text-danger">{error}</p>
-	</div>
-
+	<Button isLoading='{isLoading}' type='blue'>{isLoading ? 'Prijavljanje...' : 'Prijava'}</Button>
 </form>
 
-<div class="flex flex-row ">
+<div class="flex flex-row mt-6">
 	<p class="">Še nimate računa?</p>
 	<A href="/register">Registrirajte se</A>
 </div>
-
 
 </div>
 
