@@ -96,4 +96,22 @@ router.get('/get/profile', asyncHandler( async (req, res) => {
         .send(response);
 }));
 
+router.get('/get/users', asyncHandler( async (_req, res) => {
+    const response = await userService.getAllUsers();
+    res.status(response.status)
+        .send(response);
+}));
+
+router.get('/get/role', asyncHandler( async (req, res) => {
+    const response = await userService.getRoleOfUser(req.headers);
+    res.status(response.status)
+        .send(response);
+}));
+
+router.get('/get/companyUsers', asyncHandler( async (req, res) => {
+    const response = await userService.getCompanyUsers(req.query);
+    res.status(response.status)
+        .send(response);
+}));
+
 export default router;

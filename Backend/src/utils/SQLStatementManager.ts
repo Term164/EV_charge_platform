@@ -35,6 +35,7 @@ class StatmentManager {
     getAllCompaniesStatment: PreparedStatement;
     deleteCompanyStatement: PreparedStatement;
     editCompanyStatement: PreparedStatement;
+    getCompanyOfAdminStatement: PreparedStatement;
 
     // Register Service statements;
     checkUniqueUsernameStatement: PreparedStatement;
@@ -56,6 +57,9 @@ class StatmentManager {
     deleteBuildingAccessStatement: PreparedStatement;
     editUserProfileStatement: PreparedStatement;
     getUserDataStatement: PreparedStatement;
+    getAllUsersStatement: PreparedStatement;
+    getRoleOfUserstatement: PreparedStatement;
+    getCompanyUsersStatement: PreparedStatement;
 
     // Middleware
     getSessionIDStatement: PreparedStatement;
@@ -253,6 +257,14 @@ class StatmentManager {
             WHERE id = $2;`,
             {paramTypes: [DataTypeOIDs.varchar, DataTypeOIDs.numeric]}
         );
+
+        this.getCompanyOfAdminStatement = await db.connection.prepare(
+            `SELECT c.id, c.company_name 
+            FROM Companies c JOIN Company_admins ca ON c.id = ca.company_id
+            JOIN Sessions s ON ca.account_id = s.account_id
+            WHERE session_secret = $1;`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
     }
 
     private async prepareRegisterServiceStatements () {
@@ -376,6 +388,26 @@ class StatmentManager {
             WHERE s.session_secret = $1;
             `,
             {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.getAllUsersStatement = await db.connection.prepare(
+            `SELECT a.id, username, email_account, rfid, company_id, company_name
+            FROM accounts a
+            LEFT JOIN companies c ON a.company_id = c.id;`,
+            {paramTypes: []}
+        );
+
+        this.getRoleOfUserstatement = await db.connection.prepare(
+            `SELECT * FROM get_role_of_user($1);`,
+            {paramTypes: [DataTypeOIDs.varchar]}
+        );
+
+        this.getCompanyUsersStatement = await db.connection.prepare(
+            `SELECT a.id, username, email_account, rfid, company_id, company_name
+            FROM accounts a
+            LEFT JOIN companies c ON a.company_id = c.id
+            WHERE a.company_id = $1;`,
+            {paramTypes: [DataTypeOIDs.int4]}
         );
     }
 

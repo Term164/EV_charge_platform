@@ -16,6 +16,12 @@ router.get('/get/all', asyncHandler(async (_req, res) => {
         .send(response);
 }));
 
+router.get('/get/companyOfAdmin', asyncHandler(async (req, res) => {
+    const response = await companyService.getCompanyOfAdmin(req.headers);
+    res.status(response.status)
+        .send(response);
+}));
+
 router.delete('/delete/company', asyncHandler(async (req, res) => {
     const response = await companyService.deleteCompany(req.query);
     res.status(response.status)

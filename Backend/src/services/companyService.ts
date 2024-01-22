@@ -32,6 +32,17 @@ async function getAllCompanies(): Promise<APIResponse> {
     return {status: 200, message: `Returned ${result.rows.length} companies`, error: null, data: {'Result': returnedCompanies}};
 }
 
+async function getCompanyOfAdmin(requestBody: unknown): Promise<APIResponse> {
+    const sessionID = parser.parseSessionID(requestBody);
+    const result = await SQLStatementManager.getCompanyOfAdminStatement.execute({params: [sessionID],
+        objectRows: true
+    });
+    console.log("res:", result);
+    if (result.rows == undefined)
+        return {status: 500, message: `Could not retrieve company`, error: 'Something went wrong retrieving a company', data: null};    
+    return {status: 200, message: `Successfully retrieved a company.`, error: null, data: {"Result": result.rows.at(0)}};
+}
+
 async function deleteCompany(body: unknown): Promise<APIResponse> {
     let data;
     try {
@@ -68,5 +79,6 @@ export default {
     createCompany,
     getAllCompanies,
     deleteCompany,
-    editCompany
+    editCompany,
+    getCompanyOfAdmin
 };
