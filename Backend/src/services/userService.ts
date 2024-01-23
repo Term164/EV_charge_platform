@@ -2,6 +2,7 @@ import { APIResponse } from "../models/requestModels";
 import db from '.././utils/database';
 import parser from "../models/modelParser";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
+import { userInfo } from "os";
 
 // ================================ MAIN FUNCTIONS ==============================
 
@@ -198,6 +199,14 @@ async function getCompanyUsers(requestBody: unknown): Promise<APIResponse> {
     return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
 }
 
+async function getAssignedBuildingAccesses(requestBody: unknown): Promise<APIResponse> {
+    const userID = parser.parseUserID(requestBody);
+    const result = await SQLStatementManager.getAssignedBuildingAccesses.execute({params: [userID]});
+    if (result.rows == undefined)
+        return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
+    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
+}
+
 export default {
     getBuildingAdmins,
     getCompanyAdmins,
@@ -211,5 +220,6 @@ export default {
     getUserProfile,
     getAllUsers,
     getRolesOfUser,
-    getCompanyUsers
+    getCompanyUsers,
+    getAssignedBuildingAccesses
 };

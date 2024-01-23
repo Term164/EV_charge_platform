@@ -42,7 +42,7 @@ export const setRoleAndUserProfile = async () => {
     
     const res1 = await getRolesOfUser(get(accountID));
     if (res1.status == 200)
-        accountRole.set(res1.data.Role);
+        accountRole.set(res1.data.Roles);
 }
 
 function deleteCookies () {

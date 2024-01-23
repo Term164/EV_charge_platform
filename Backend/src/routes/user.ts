@@ -114,4 +114,10 @@ router.get('/get/companyUsers', asyncHandler( async (req, res) => {
         .send(response);
 }));
 
+router.get('/get/assignedBuildingAccesses', asyncHandler( async (req, res) => {
+    const response = await userService.getAssignedBuildingAccesses(req.query);
+    res.status(response.status)
+        .send(response);
+}));
+
 export default router;

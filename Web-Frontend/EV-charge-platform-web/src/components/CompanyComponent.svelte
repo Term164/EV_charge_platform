@@ -182,7 +182,7 @@
       
         
         <SimpleModal show={showRFIDModal} {closeRFIDModal}>
-          <div class="w-5/12 z-10 flex-col items-center flex">
+          <div class=" z-10 flex-col items-center flex">
             <h2 class="text-2xl m-4">Urejanje uporabnika: {selectedUser.username}</h2>
               
             <Input placeholder="RFID" bind:value={editingRFID} type="text" customClass='mx-4'/>	
@@ -191,21 +191,21 @@
               <Button on:click={sendRFID} isLoading='{isRFIDLoading}' type='green' customClass='min-w-48'>
                 {isRFIDLoading ? 'Shranjevanje...' : 'Shrani'}
               </Button>
-              <Button on:click={close} type='red' customClass='min-w-48'>Prekliči</Button>
+              <Button on:click={closeRFIDModal} type='red' customClass='min-w-48'>Prekliči</Button>
             </div>
           </div>
         </SimpleModal>
 
         <SimpleModal show={showBuildingAccessModal} {closeBuildingAccessModal}>
-          <div class="w-7/12 z-10 flex-col items-center flex">
+          <div class="z-10 flex-col items-center flex">
             <h2 class="text-2xl m-4">Dostopi za uporabnika: {selectedUser.username}</h2>
             
               
             <div class="flex items-center justify-between w-full px-4">
-              <Button on:click={sendRFID} isLoading='{isRFIDLoading}' type='green' customClass='min-w-48'>
+              <Button on:click={console} isLoading='{isRFIDLoading}' type='green' customClass='min-w-48'>
                 {isRFIDLoading ? 'Shranjevanje...' : 'Shrani'}
               </Button>
-              <Button on:click={close} type='red' customClass='min-w-48'>Prekliči</Button>
+              <Button on:click={closeBuildingAccessModal} type='red' customClass='min-w-48'>Prekliči</Button>
             </div>
           </div>
         </SimpleModal>

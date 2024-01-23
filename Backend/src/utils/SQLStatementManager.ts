@@ -60,6 +60,7 @@ class StatmentManager {
     getAllUsersStatement: PreparedStatement;
     getRolesOfUserstatement: PreparedStatement;
     getCompanyUsersStatement: PreparedStatement;
+    getAssignedBuildingAccesses: PreparedStatement;
 
     // Middleware
     getSessionIDStatement: PreparedStatement;
@@ -408,6 +409,13 @@ class StatmentManager {
             LEFT JOIN companies c ON a.company_id = c.id
             WHERE a.company_id = $1;`,
             {paramTypes: [DataTypeOIDs.int4]}
+        );
+
+        this.getAssignedBuildingAccesses = await db.connection.prepare(
+            `SELECT building_id 
+            FROM building_accesses
+            WHERE account_id = $1;`,
+            {paramTypes:[DataTypeOIDs.int4]}
         );
     }
 
