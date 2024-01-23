@@ -203,7 +203,7 @@ async function getAssignedBuildingAccesses(requestBody: unknown): Promise<APIRes
     const result = await SQLStatementManager.getAssignedBuildingAccesses.execute({params: [userID]});
     if (result.rows == undefined)
         return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
-    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
+    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows.at(0)[0]}};
 }
 
 export default {
