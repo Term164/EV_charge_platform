@@ -2,7 +2,6 @@ import { APIResponse } from "../models/requestModels";
 import db from '.././utils/database';
 import parser from "../models/modelParser";
 import { SQLStatementManager } from "../utils/SQLStatementManager";
-import { userInfo } from "os";
 
 // ================================ MAIN FUNCTIONS ==============================
 
