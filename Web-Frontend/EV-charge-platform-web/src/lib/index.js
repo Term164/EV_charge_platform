@@ -132,10 +132,10 @@ export const getAllUsers = async () => {
     return res;
 }
 
-export const getRolesOfUser = async () => {
+export const getRolesOfUser = async (userID) => {
     console.log("getting users role");
     const response = await fetch(
-        serverUrl+'user/get/role', {
+        serverUrl+'user/get/role?userID='+userID, {
         method: 'GET',
         headers: {
             'sessionID': await checkOnlySession(),
