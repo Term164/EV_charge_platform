@@ -412,7 +412,7 @@ class StatmentManager {
         );
 
         this.getAssignedBuildingAccesses = await db.connection.prepare(
-            `SELECT building_id 
+            `SELECT array_agg(building_id)
             FROM building_accesses
             WHERE account_id = $1;`,
             {paramTypes:[DataTypeOIDs.int4]}
