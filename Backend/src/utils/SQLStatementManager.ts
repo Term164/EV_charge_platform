@@ -58,7 +58,7 @@ class StatmentManager {
     editUserProfileStatement: PreparedStatement;
     getUserDataStatement: PreparedStatement;
     getAllUsersStatement: PreparedStatement;
-    getRoleOfUserstatement: PreparedStatement;
+    getRolesOfUserstatement: PreparedStatement;
     getCompanyUsersStatement: PreparedStatement;
 
     // Middleware
@@ -397,9 +397,9 @@ class StatmentManager {
             {paramTypes: []}
         );
 
-        this.getRoleOfUserstatement = await db.connection.prepare(
+        this.getRolesOfUserstatement = await db.connection.prepare(
             `SELECT * FROM get_role_of_user($1);`,
-            {paramTypes: [DataTypeOIDs.varchar]}
+            {paramTypes: [DataTypeOIDs.int4]}
         );
 
         this.getCompanyUsersStatement = await db.connection.prepare(

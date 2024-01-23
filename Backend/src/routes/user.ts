@@ -103,7 +103,7 @@ router.get('/get/users', asyncHandler( async (_req, res) => {
 }));
 
 router.get('/get/role', asyncHandler( async (req, res) => {
-    const response = await userService.getRoleOfUser(req.headers);
+    const response = await userService.getRolesOfUser(req.headers);
     res.status(response.status)
         .send(response);
 }));

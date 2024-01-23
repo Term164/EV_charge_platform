@@ -29,7 +29,7 @@
                 Domov
             </a>
           </li>
-          {#if $accountRole == 'padmin'}
+          {#if $accountRole.includes('padmin')}
           <li>
             <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Stavbe
@@ -41,7 +41,7 @@
             </a>
           </li>
           {/if}
-          {#if $accountRole == 'badmin'}
+          {#if $accountRole.includes('badmin')}
           <li>
             <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Moje stavbe
@@ -49,13 +49,17 @@
           </li>
 
           {/if}
-          {#if $accountRole == 'cadmin'}
+          {#if $accountRole.includes('cadmin')}
           <li>
             <a href="/company" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Moje podjetje
             </a>
           </li>
-
+          <li>
+            <a href="/buildingAccess" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+                Dostopi do stavb
+            </a>
+          </li>
           {/if}
           <li>
             <a href="/users" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">

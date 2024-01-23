@@ -1,25 +1,48 @@
 // Middleware for all API calls
 
+import { get } from 'svelte/store';
 import { goto } from '$app/navigation';
-import { accountRole } from '../store';
+import { accountID, accountRole, accountUsername } from '../store';
 
-const serverUrl = 'http://192.168.1.202:4200/api/v1/';
+const serverUrl = 'http://ec2-13-49-225-227.eu-north-1.compute.amazonaws.com:3000/api/v1/';
 
 function setSession (session) {
     document.cookie = 'sessionID='+session+'; sameSite=Strict';
 }
 
-function checkSession () {
+async function checkSession () {
     if (!document.cookie) {
         // TODO show him a modal or something
         alert("Seja je potekla ali pa ne obstaja. Ponovno se prijavite.");
         goto('/login');
     }
 
-    if (!accountRole || accountRole == '')
-        getRoleOfUser();
+    if (get(accountRole) == [] || get(accountID) == -1)
+        await setRoleAndUserProfile();
 
     return document.cookie.split('; ')[0].split('=')[1];
+}
+
+async function checkOnlySession () {
+    if (!document.cookie) {
+        // TODO show him a modal or something
+        alert("Seja je potekla ali pa ne obstaja. Ponovno se prijavite.");
+        goto('/login');
+    }
+
+    return document.cookie.split('; ')[0].split('=')[1];
+}
+
+export const setRoleAndUserProfile = async () => {
+    const res2 = await getUserProfile();
+    if (res2.status == 200){
+        accountID.set(res2.data.id);
+        accountUsername.set(res2.data.username);
+    }
+    
+    const res1 = await getRolesOfUser(get(accountID));
+    if (res1.status == 200)
+        accountRole.set(res1.data.Role);
 }
 
 function deleteCookies () {
@@ -30,6 +53,8 @@ export const logout = () => {
     deleteCookies();
     goto('/login');
 };
+
+/*=========== API CALLS ===========*/
 
 export const login = async (username, password) => {
     let data = {
@@ -79,7 +104,8 @@ export const ping = async () => {
         serverUrl+'dev/ping', {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkOnlySession(),
+            "Content-Type": "application/json"
         }
     });
     const res = await response.json(); console.log(res);
@@ -95,30 +121,30 @@ export const getAllUsers = async () => {
         serverUrl+'user/get/users', {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         }
     });
     const res = await response.json(); console.log(res);
-    if (res.status && res.status == 401)
+    if (!res.status || res.status == 401)
         handleResponseIsError(res);
     
     return res;
 }
 
-export const getRoleOfUser = async () => {
+export const getRolesOfUser = async () => {
     console.log("getting users role");
     const response = await fetch(
         serverUrl+'user/get/role', {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkOnlySession(),
+            "Content-Type": "application/json"
         }
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json(); console.log("got",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
-    
-    accountRole.set(res.data.Role);
 
     return res;
 }
@@ -129,10 +155,11 @@ export const getUserProfile = async () => {
         serverUrl+'user/get/profile', {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkOnlySession(),
+            "Content-Type": "application/json"
         }
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json(); console.log("got",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -145,10 +172,11 @@ export const getCompanyData = async () => {
         serverUrl+'company/get/companyOfAdmin', {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         }
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json(); console.log("got",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -161,10 +189,11 @@ export const getCompanyOwnedBuildings = async (companyID) => {
         serverUrl+'building/get/companyOwned?companyID='+companyID, {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         }
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json();
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -177,10 +206,11 @@ export const getCompanyUsers = async (companyID) => {
         serverUrl+'user/get/companyUsers?companyID='+companyID, {
         method: 'GET',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         }
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json();
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -197,11 +227,12 @@ export const updateRFID = async (userID, rfid) => {
         serverUrl+'user/patch/editProfile', {
         method: 'PATCH',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json(); console.log("updated",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -218,11 +249,34 @@ export const assignCompany = async (userID, companyID) => {
         serverUrl+'user/post/assignCompany', {
         method: 'POST',
         headers: {
-            'sessionID': checkSession()
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
     });
-    const res = await response.json(); console.log(res);
+    const res = await response.json(); console.log("assigned",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+};
+
+export const assignBuildingAccess = async (userID, buildingID) => {
+    let data = {
+        userID: userID,
+        buildingID: buildingID
+    };
+    console.log("assigning building access", data);
+    const response = await fetch(
+        serverUrl+'user/post/assignBuilding', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json(); console.log("assigned",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -237,6 +291,9 @@ function handleResponseIsError (res) {
         goto('/login');
     } else if (res.message == 'No session with this ID exists.') {
         alert("Seja ne obstaja. Prijavite se.");
+        goto('/login');
+    } else {
+        alert("Neznana napaka. Poskusite kasneje.");
         goto('/login');
     }
 

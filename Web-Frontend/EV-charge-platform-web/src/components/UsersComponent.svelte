@@ -2,7 +2,25 @@
 	import { getAllUsers, getCompanyData, assignCompany } from '$lib';
 	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import { accountRole, myCompanyID } from '../store';
+	import { accountID, accountRole, accountCompanyID, accountCompanyName } from '../store';
+  import { SvelteEasyToast, toast } from 'svelte-easy-toast';
+
+  const showGeneralErrorToast = () => {
+    toast({
+		type: 'error', // primary, dark, danger, success, info, warning, default, error
+		position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+		text: 'Poskusite kasneje',
+		title: 'Neznana napaka',
+	  });
+	}
+  const showErrorToast = (message) => {
+    toast({
+		type: 'error', // primary, dark, danger, success, info, warning, default, error
+		position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+		text: message,
+		title: 'Napaka',
+    });
+  }
 
     let searchKeyword = '';
     let users = [];
@@ -11,7 +29,6 @@
     let isLoading = true;
 
     let selectedUserRow;
-    let selectedUser;
     
     let isUserAssigningLoading = false;
 
@@ -26,36 +43,38 @@
         console.log("users is now", users, users.length);
         
         const companyResult = await getCompanyData();
-        if (companyResult.status && companyResult.status == 200)
-          $myCompanyID = companyResult.data.Result.id;
+        if (companyResult.status && companyResult.status == 200){
+          $accountCompanyID = companyResult.data.Result.id;
+          $accountCompanyName = companyResult.data.Result.company_name;
+        } else {
+          showGeneralErrorToast();
+        }
         
-        console.log("C",$myCompanyID);
-    
+        console.log("C",$accountCompanyID, $accountCompanyName);
     });
 
   function filter() {
     filteredList = users.filter((x) => x.username.includes(searchKeyword.trim()));
   }
 
-  function handleSelectRow (user) {
-    selectedUserRow = (selectedUserRow != user.id ? user.id : null);
-    selectedUser = (selectedUserRow != null ? user : null);
-  }
-
   async function assignUserToCompany (userID) {
     isUserAssigningLoading = true;
-    const assignResult = await assignCompany(userID, $myCompanyID);
+    selectedUserRow = userID;
+    const assignResult = await assignCompany(userID, $accountCompanyID);
     console.log(assignResult);
     if (assignResult.status == 200){
-      isUserAssigningLoading = false;
-      
+      users[ users.findIndex(x => x.id == userID) ].company_name = $accountCompanyName;
+      filteredList = users;
+    } else {
+      showErrorToast('Napaka pri dodeljevanju osebe v podjetje.');
     }
-
+    selectedUserRow = null;
+    isUserAssigningLoading = false;
   }
 
 
 </script>
-
+<SvelteEasyToast />  
 
 <div class="flex flex-col justify-center items-center">
     <h1 class="mt-2 text-4xl">Pregled Uporabnikov</h1>
@@ -97,20 +116,23 @@
           </thead>
           <tbody>
             {#each filteredList as user (user.id)}
-            <tr key={user.id} class="border p-2">
-                <td class="border p-2">{user.username}</td>
+              {#if user.id != $accountID}
+              <tr key={user.id} class="border p-2">
+                <td class="border p-2 py-4">{user.username}</td>
                 <td class="border p-2">{user.email_account}</td>
                 <td class="border p-2">{user.rfid != undefined ? user.rfid : 'Ni nastavljeno'}</td>
                 <td class="border p-2">{user.company_name != undefined ? user.company_name : 'Ni dodeljeno'}</td>
-                <td class="border w-56 bg-inherit bg-none cursor-default text-center">
+                <td class="border w-64 bg-inherit bg-none cursor-default text-center">
                 {#if user.company_name == undefined}
-                  <Button type='green' customClass='m-0 scale-90 px-2'
-                  on:click={assignUserToCompany(user.id, $myCompanyID)}
-                  isLoading='{isUserAssigningLoading}'
-                  >{isUserAssigningLoading ? 'Dodajanje...' : 'Dodaj v podjetje'}</Button>
+                  <Button type='green' customClass='my-1 scale-90 px-2 py-2'
+                  on:click={assignUserToCompany(user.id, $accountCompanyID)}
+                  isLoading='{isUserAssigningLoading && user.id == selectedUserRow}'>
+                    {isUserAssigningLoading && user.id == selectedUserRow ? 'Dodajanje...' : 'Dodaj v podjetje'}
+                  </Button>
                 {/if}
-                </td>                
-              </tr>             
+                </td>
+              </tr>
+              {/if}
             {/each}
           </tbody>
         </table>

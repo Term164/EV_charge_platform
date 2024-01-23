@@ -179,13 +179,13 @@ async function getAllUsers(): Promise<APIResponse> {
     return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
 }
 
-async function getRoleOfUser(requestBody: unknown): Promise<APIResponse> {
-    const sessionID = parser.parseSessionID(requestBody);
-    const result = await SQLStatementManager.getRoleOfUserstatement.execute({params: [sessionID]});
+async function getRolesOfUser(requestBody: unknown): Promise<APIResponse> {
+    const userID = parser.parseUserID(requestBody);
+    const result = await SQLStatementManager.getRolesOfUserstatement.execute({params: [userID]});
     console.log("res:",result);
     if (result.rows == undefined)
         return {status: 500, message: `Could not retrieve role`, error: 'Something went wrong retrieving a role', data: null};    
-    return {status: 200, message: `Successfully retrieved user role.`, error: null, data: {"Role": result.rows.at(0)[0]}};
+    return {status: 200, message: `Successfully retrieved user role.`, error: null, data: {"Roles": result.rows.at(0)[0]}};
 }
 
 async function getCompanyUsers(requestBody: unknown): Promise<APIResponse> {
@@ -210,6 +210,6 @@ export default {
     editUserProfile,
     getUserProfile,
     getAllUsers,
-    getRoleOfUser,
+    getRolesOfUser,
     getCompanyUsers
 };
