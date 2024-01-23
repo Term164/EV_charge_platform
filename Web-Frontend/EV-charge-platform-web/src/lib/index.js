@@ -193,7 +193,7 @@ export const getCompanyOwnedBuildings = async (companyID) => {
             "Content-Type": "application/json"
         }
     });
-    const res = await response.json();
+    const res = await response.json(); console.log("got",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -283,6 +283,22 @@ export const assignBuildingAccess = async (userID, buildingID) => {
     return res;
 };
 
+export const getAssignedBuildingAccess = async (userID) => {
+    console.log("getting assigned building access");
+    const response = await fetch(
+        serverUrl+'user/get/assignedBuildingAccesses?userID='+userID, {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json(); console.log("assigned",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+};
 
 function handleResponseIsError (res) {
     console.log("handling", res);

@@ -1,5 +1,5 @@
 <script>
-	import { updateRFID } from './../lib/index.js';
+	import { assignBuildingAccess, getAssignedBuildingAccess, updateRFID } from './../lib/index.js';
 	import Button from './Button.svelte';
 	import { getCompanyData, getCompanyOwnedBuildings, getCompanyUsers } from '$lib';
 	import { onMount } from 'svelte';
@@ -10,19 +10,22 @@
   let showRFIDModal = false;
   let showBuildingAccessModal = false;
   
-  function closeRFIDModal() {
+  function closeRFIDModal() {    
+    isRFIDLoading =
     showRFIDModal = false;
-    isRFIDLoading = false;
   }
-  function closeBuildingAccessModal() {
+  function closeBuildingAccessModal() {    
+    isAddBuildingAccessDropdownOpen =
+    isAddBuildingAccessLoading =
+    isRemoveBuildingAccessLoading =
     showBuildingAccessModal = false;
-    isBuildingAccessLoading = false;
   }
 
   let buildings = [];
   let users = [];
 
   let buildingAccesses = [];
+  let filteredBuildings = [];
 
   let isCompanyLoading = true;
   let isBuildingsLoading = true;
@@ -31,7 +34,11 @@
   let selectedUser;
   let editingRFID;
   let isRFIDLoading = false;
-  let isBuildingAccessLoading = false;
+  
+  let selectedBuildingID;
+  let isAddBuildingAccessDropdownOpen = false;
+  let isAddBuildingAccessLoading = false;
+  let isRemoveBuildingAccessLoading = false;
 
   onMount( async () => {
     const companyResult = await getCompanyData();
@@ -62,11 +69,6 @@
     showRFIDModal = true;
   }
 
-  function handleBuildingAccess (user) {
-    selectedUser = user;
-    showBuildingAccessModal = true;
-  }
-
   async function sendRFID () {
     isRFIDLoading = true;
     const result = await updateRFID(selectedUser.id, editingRFID);
@@ -77,14 +79,38 @@
     }
   }
 
-  async function getBuildingAccessesOfUser (userID) {
-    const res = await getBuildingAccesses(userID);
-    if (res.status == 200)
+  async function handleShowBuildingAccess (user) {
+    selectedUser = user;
+    const res = await getAssignedBuildingAccess(user.id);
+    if (res.status == 200) {
       buildingAccesses = res.data.Result;
+      filteredBuildings = buildingAccesses == null || buildingAccesses.length == 0 ?
+        buildings :
+        buildings.filter(x => buildingAccesses.includes(x.buildingID));
+    }
+      
+    showBuildingAccessModal = true;
+    console.log("b:",buildingAccesses, filteredBuildings);
   }
 
+  async function handleRemoveBuildingAccess () {
+    isRemoveBuildingAccessLoading = true;
+    setTimeout(()=> isRemoveBuildingAccessLoading=false, 3000);
+    console.log("selected building:", selectedBuildingID);
+   
+  }
 
+  async function handleAddBuildingAccess () {
+    isAddBuildingAccessLoading = true;
+    const res = await assignBuildingAccess(selectedUser.id, selectedBuildingID);
+    if (res.status == 200) {
+      buildingAccesses.push(selectedBuildingID);
+    }
 
+   
+  }
+
+$: console.log("selected building is now:", selectedBuildingID);
 </script>
 
 
@@ -104,30 +130,27 @@
       <!-- Left half -->
       <div class="w-5/12 flex-col items-center flex ">
           
-        <h1 class="text-2xl m-2 mb-4 justify-self-center">Poslovne stavbe</h1>
-        
+        <h1 class="text-3xl m-2 mb-2 justify-self-center">Poslovne stavbe</h1>
+        <p class="text-lg mb-2">To so vse poslovne stavbe, v katerih posluje naše podjetje.</p>
+
         {#if isBuildingsLoading}
           Pridobivam podatke....
         {:else}
 
-        <div>
+        <div class="w-full px-20">
           <table class="border-collapse border m-2 w-full">
             <thead class="bg-blue-400">
               <tr>
                 <th class="border p-2">Ime stavbe:</th>
                 <th class="border p-2">Lokacija stavbe:</th>
-                <th class="border p-2">Geo. Širina:</th>
-                <th class="border p-2">Geo. Dolžina:</th>
               </tr>
             </thead>
             <tbody>
               
               {#each buildings as b (b.buildingID)}
                 <tr key={b.buildingID}>
-                  <td class="border p-2">{b.buildingName}</td>
-                  <td class="border p-2">{b.buildingLocation}</td>
-                  <td class="border p-2">{b.buildingLatitude != null ? b.buildingLatitude : 'Ni podatka'}</td>
-                  <td class="border p-2">{b.buildingLongitude != null ? b.buildingLongitude : 'Ni podatka'}</td>
+                  <td class="border p-3">{b.buildingName}</td>
+                  <td class="border p-3">{b.buildingLocation}</td>                  
                 </tr>
               {/each}
               
@@ -144,7 +167,8 @@
       <div class="mx-4 my-0 border-r-2 border-gray-300 min-h-screen flex-grow "></div>
       <!-- Right half -->
       <div class="w-7/12 flex-col items-center flex ">
-        <h1 class="m-2 mb-4 text-2xl justify-self-center">Zaposleni</h1>
+        <h1 class="m-2 mb-2 text-3xl justify-self-center">Zaposleni</h1>
+        <p class="text-lg mb-4">To so vsi zaposleni. Lahko se jim uredi RFID koda ali pa nastavi dostope do stavb.</p>
 
         {#if isUsersLoading}
           Pridobivam podatke....
@@ -170,7 +194,7 @@
                   <Button on:click={() => handleUpdateRFID(user)} type='blue' customClass='my-1 scale-90 px-2 py-2'>
                     Uredi RFID
                   </Button>
-                  <Button on:click={() => handleBuildingAccess(user)} type='blue' customClass='my-1 scale-90 px-2 py-2'>
+                  <Button on:click={() => handleShowBuildingAccess(user)} type='blue' customClass='my-1 scale-90 px-2 py-2'>
                     Uredi dostope
                   </Button>
                 </td>
@@ -196,17 +220,61 @@
           </div>
         </SimpleModal>
 
-        <SimpleModal show={showBuildingAccessModal} {closeBuildingAccessModal}>
-          <div class="z-10 flex-col items-center flex">
+        <SimpleModal show={showBuildingAccessModal} {closeBuildingAccessModal} customClass='w-9/12'>
+          <div class="flex-col items-center flex justify-center">
             <h2 class="text-2xl m-4">Dostopi za uporabnika: {selectedUser.username}</h2>
             
-              
-            <div class="flex items-center justify-between w-full px-4">
-              <Button on:click={console} isLoading='{isRFIDLoading}' type='green' customClass='min-w-48'>
-                {isRFIDLoading ? 'Shranjevanje...' : 'Shrani'}
-              </Button>
-              <Button on:click={closeBuildingAccessModal} type='red' customClass='min-w-48'>Prekliči</Button>
+            <div>
+              <table class="border-collapse border m-2 w-full">
+                <thead class="bg-blue-400">
+                  <tr>
+                    <th class="border p-2">Ime stavbe:</th>
+                    <th class="border p-2">Lokacija stavbe:</th>
+                    <th class="border p-2">Akcija:</th>
+                  </tr>
+                </thead>
+                <tbody>                  
+                  {#each filteredBuildings as b (b.buildingID)}
+                    <tr key={b.buildingID}>
+                      <td class="border p-2">{b.buildingName}</td>
+                      <td class="border p-2">{b.buildingLocation}</td>
+                      <td class="border p-2">
+                        <Button type='red' customClass='scale-90 m-0 p-0' on:click={handleRemoveBuildingAccess}
+                        isLoading='{isRemoveBuildingAccessLoading && selectedBuildingID == b.buildingID}'>
+                          {isRemoveBuildingAccessLoading && selectedBuildingID == b.buildingID ?
+                           'Odstranjevanje...' : 'Odstrani dostop'}
+                        </Button>
+                      </td>
+                    </tr>
+                  {/each}
+                  
+                </tbody>
+              </table>                    
             </div>
+
+
+          <div class="mt-6 flex-col items-center flex">
+            <!--if filteredBuildnings == buildings, dont show anything 
+                  => it means he already has all access -->
+          <p class="text-lg">Dodaj dostop do poslovne stavbe:</p>
+
+          <div class="flex items-center justify-between w-full px-4">
+            <select bind:value={selectedBuildingID} class=" w-96 m-2 border-2 bg-white border-black rounded-lg px-4 py-2">
+              {#each buildings as b}
+              <option value={b.buildingID} class="bg-white hover:bg-blue-300 ">
+                {b.buildingName}
+              </option>
+              {/each}
+            </select>
+
+            <Button on:click={handleAddBuildingAccess} isLoading='{isAddBuildingAccessLoading}' type='green' customClass='px-0 w-36'>
+              {isAddBuildingAccessLoading ? 'Dodajanje...' : 'Dodaj'}
+            </Button>
+          </div>
+          
+          </div>
+
+            <Button on:click={closeBuildingAccessModal} type='red' customClass='min-w-48'>Prekliči</Button>
           </div>
         </SimpleModal>
 

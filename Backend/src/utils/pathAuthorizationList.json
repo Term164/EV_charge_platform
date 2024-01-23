@@ -27,8 +27,6 @@
         "/building/get/assignedCompanies",
         "/building/get/all",
         "/building/patch/edit",
-        "/user/post/assignBuilding",
-        "/user/delete/building_access",
         "/station/post/new",
         "/station/patch/edit",
         "/station/get/all",
@@ -44,6 +42,8 @@
     "cadmin": [
         "/building/get/companyOwned",
         "/user/post/assignCompany",
+        "/user/post/assignBuilding",
+        "/user/delete/building_access",
         "/station/post/assignCompany",
         "/company/patch/edit"
     ],
