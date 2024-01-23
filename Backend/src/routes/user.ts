@@ -62,7 +62,7 @@ router.delete('/delete/account', asyncHandler( async (req, res) => {
 }));
 
 router.delete('/delete/building_access', asyncHandler(async (req, res) => {
-    const response = await userService.deleteBuildingAccess(req.body);
+    const response = await userService.deleteBuildingAccess(req.query);
     res.status(response.status)
         .send(response);
 }));
