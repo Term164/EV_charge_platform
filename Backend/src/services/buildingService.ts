@@ -134,6 +134,26 @@ async function assignCompany(body: unknown): Promise<APIResponse> {
     return ({status: 200, message: 'Successfully assigned a company to a building.', error: null, data: null});
 }
 
+async function deleteAssignedCompany(body: unknown): Promise<APIResponse> {
+    let buildingID;
+    let companyID;
+    try {
+        buildingID = parser.parseBuildingID(body);
+       	companyID = parser.parseCompanyID(body);
+    } catch (error) {
+        log.debug(error);
+        return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
+    }
+
+    const result = await SQLStatementManager.deleteAssignedCompanyStatement.execute({params: [buildingID, companyID]});
+
+    if (result.rowsAffected != 1) // throw new Error("Something went wrong while trying to delete a building.");
+        return ({status: 400, message: 'Failed to delete a building.', error: 'Returned number of rows affected while deleting a building was not 1.', data: null});
+
+    return ({status: 200, message: 'Successfully deleted a building.', error: null, data: null});
+}
+
+
 export default {
     getAllBuildings,
     createBuilding,
@@ -141,5 +161,6 @@ export default {
     deleteBuilding,
     getAllBuildingsOwnedByCompany,
     getAllCompaniesAssignedToBuilding,
-    assignCompany
+    assignCompany,
+    deleteAssignedCompany
 };

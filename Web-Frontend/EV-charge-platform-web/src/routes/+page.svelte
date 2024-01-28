@@ -1,18 +1,12 @@
 <script>
-	import { getRoleOfUser, getUserProfile } from '$lib';
+	import { setRoleAndUserProfile } from '$lib';
 	import { onMount } from 'svelte';
-    import {accountRole} from '../store';
+    import { accountRole, accountID, accountUsername } from '../store';
 
-	import { Circle2 } from 'svelte-loading-spinners';
-
-    let username;
     let isLoading = true;
 
     onMount(async () => {
-        const result = await getUserProfile();
-        username = result.data.username;
-        
-        await getRoleOfUser();
+        await setRoleAndUserProfile();
         isLoading = false;
     });
 
@@ -21,19 +15,14 @@
 <div class="flex flex-col justify-center text-center align-middle">
 
 <h1 class="text-4xl font-bold m-4">
-    Pozdravljeni{username ? ', '+username : ''}
+    Pozdravljeni{$accountUsername ? ', '+$accountUsername: ''}
 </h1>
 
 <p class="text-lg">Vaša vloga je:
-{#if $accountRole == 'padmin'}
-    Administrator Platforme
-{:else if $accountRole == 'badmin'}
-    Administrator Stavbe
-{:else if $accountRole == 'cadmin'}
-    Administrator Podjetja
-{:else}
-    Končni Uporabnik
-{/if}
+{#if $accountRole.includes('padmin')}Administrator Platforme{/if}
+{#if $accountRole.includes('badmin')}Administrator Stavbe{/if}
+{#if $accountRole.includes('cadmin')}Administrator Podjetja{/if}
+{#if $accountRole.length==0}Končni Uporabnik{/if}
 </p>
 
 

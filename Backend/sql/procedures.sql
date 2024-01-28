@@ -294,53 +294,42 @@ $$;
 -- return a string, either 'padmin', 'badmin', 'cadmin' or empty ''
 -- /api/v1/user/get/role
 -- edit_connector(session_secret)
-CREATE OR REPLACE FUNCTION get_role_of_user(session_secret_in text)
-RETURNS text
+CREATE OR REPLACE FUNCTION get_role_of_user(user_id_in int)
+RETURNS text[]
 AS $$
 DECLARE
-  user_id int;
-  user_role text;
-  
   res record;
+  role_list text[];
 BEGIN
-  SELECT account_id FROM Sessions 
-  WHERE session_secret = session_secret_in
-  INTO user_id;
-  
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Session does not match any users.';
-  END IF;
-  RAISE NOTICE 'Foud user %', user_id;
-  
+
   SELECT * FROM platform_admins
-  WHERE account_id = user_id
+  WHERE account_id = user_id_in
   INTO res;
   
   IF FOUND THEN
     RAISE NOTICE 'Found in padmin, %', res;
-    RETURN 'padmin';
+    role_list := role_list || ARRAY['padmin'];
   END IF;
   
   SELECT * FROM building_admins
-  WHERE account_id = user_id
+  WHERE account_id = user_id_in
   INTO res;
   
   IF FOUND THEN
     RAISE NOTICE 'Found in badmin, %', res;
-    RETURN 'badmin';
+    role_list := role_list || ARRAY['badmin'];
   END IF;
   
   SELECT * FROM company_admins
-  WHERE account_id = user_id
+  WHERE account_id = user_id_in
   INTO res;
   
   IF FOUND THEN
     RAISE NOTICE 'Found in cadmin, %', res;
-    RETURN 'cadmin';
+    role_list := role_list || ARRAY['cadmin'];
   END IF;
   
-  RAISE NOTICE 'No role';
-  RETURN '';
+  RETURN role_list;
 END;
 $$ LANGUAGE plpgsql;
 

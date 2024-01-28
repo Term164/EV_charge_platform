@@ -62,19 +62,19 @@ router.delete('/delete/account', asyncHandler( async (req, res) => {
 }));
 
 router.delete('/delete/building_access', asyncHandler(async (req, res) => {
-    const response = await userService.deleteBuildingAccess(req.body);
+    const response = await userService.deleteBuildingAccess(req.query);
     res.status(response.status)
         .send(response);
 }));
 
 router.delete('/delete/badmin', asyncHandler( async (req, res) => {
-    const response = await userService.deleteBuildingAdmin(req.body);
+    const response = await userService.deleteBuildingAdmin(req.query);
     res.status(response.status)
         .send(response);
 }));
 
 router.delete('/delete/cadmin', asyncHandler( async (req, res) => {
-    const response = await userService.deleteCompanyAdmin(req.body);
+    const response = await userService.deleteCompanyAdmin(req.query);
     res.status(response.status)
         .send(response);
 }));
@@ -103,13 +103,19 @@ router.get('/get/users', asyncHandler( async (_req, res) => {
 }));
 
 router.get('/get/role', asyncHandler( async (req, res) => {
-    const response = await userService.getRoleOfUser(req.headers);
+    const response = await userService.getRolesOfUser(req.query);
     res.status(response.status)
         .send(response);
 }));
 
 router.get('/get/companyUsers', asyncHandler( async (req, res) => {
     const response = await userService.getCompanyUsers(req.query);
+    res.status(response.status)
+        .send(response);
+}));
+
+router.get('/get/assignedBuildingAccesses', asyncHandler( async (req, res) => {
+    const response = await userService.getAssignedBuildingAccesses(req.query);
     res.status(response.status)
         .send(response);
 }));

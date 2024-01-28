@@ -68,7 +68,7 @@
 				return;
 			}
 		} else if (response.status == 200) {
-			showSuccessToast("Uspešna registracija. Prijavljanje...");
+			//showSuccessToast("Uspešna registracija. Prijavljanje...");
 			await login(username, password);
 			goto('/');
 			username, email, password, password_confirm = '';

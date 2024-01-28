@@ -82,14 +82,16 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 }
 
 async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
-    let userID: number;
+    let userID: number;    
+    let buildingID: number;
     try {
         userID = parser.parseUserID(requestBody);
+	buildingID = parser.parseBuildingID(requestBody);
     } catch (error) {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID]});
+    const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID, buildingID]});
 
     if (result.rowsAffected != 1) return {status: 400, message: `User with id '${userID}' is not an admin of any building or does not exist.`, error: null, data: null};
     else return {status: 200, message: "operation completed successfully", error: null , data: null};
@@ -179,13 +181,13 @@ async function getAllUsers(): Promise<APIResponse> {
     return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
 }
 
-async function getRoleOfUser(requestBody: unknown): Promise<APIResponse> {
-    const sessionID = parser.parseSessionID(requestBody);
-    const result = await SQLStatementManager.getRoleOfUserstatement.execute({params: [sessionID]});
+async function getRolesOfUser(requestBody: unknown): Promise<APIResponse> {
+    const userID = parser.parseUserID(requestBody);
+    const result = await SQLStatementManager.getRolesOfUserstatement.execute({params: [userID]});
     console.log("res:",result);
     if (result.rows == undefined)
         return {status: 500, message: `Could not retrieve role`, error: 'Something went wrong retrieving a role', data: null};    
-    return {status: 200, message: `Successfully retrieved user role.`, error: null, data: {"Role": result.rows.at(0)[0]}};
+    return {status: 200, message: `Successfully retrieved user role.`, error: null, data: {"Roles": result.rows.at(0)[0]}};
 }
 
 async function getCompanyUsers(requestBody: unknown): Promise<APIResponse> {
@@ -196,6 +198,14 @@ async function getCompanyUsers(requestBody: unknown): Promise<APIResponse> {
     if (result.rows == undefined)
         return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
     return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows}};
+}
+
+async function getAssignedBuildingAccesses(requestBody: unknown): Promise<APIResponse> {
+    const userID = parser.parseUserID(requestBody);
+    const result = await SQLStatementManager.getAssignedBuildingAccesses.execute({params: [userID]});
+    if (result.rows == undefined)
+        return {status: 500, message: `Could not retrieve users`, error: 'Something went wrong while parsing all users', data: null};    
+    return {status: 200, message: `Successfully retrieved user data.`, error: null, data: {"Result": result.rows.at(0)[0]}};
 }
 
 export default {
@@ -210,6 +220,7 @@ export default {
     editUserProfile,
     getUserProfile,
     getAllUsers,
-    getRoleOfUser,
-    getCompanyUsers
+    getRolesOfUser,
+    getCompanyUsers,
+    getAssignedBuildingAccesses
 };
