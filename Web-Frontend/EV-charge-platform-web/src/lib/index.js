@@ -7,17 +7,16 @@ import { accountID, accountRole, accountUsername } from '../store';
 const serverUrl = 'http://ec2-13-49-225-227.eu-north-1.compute.amazonaws.com:3000/api/v1/';
 
 function setSession (session) {
-    document.cookie = 'sessionID='+session+'; sameSite=Strict';
+    document.cookie = 'sessionID='+session+'; SameSite=Strict; Secure';
 }
 
 async function checkSession () {
     if (!document.cookie) {
-        // TODO show him a modal or something
-        alert("Seja je potekla ali pa ne obstaja. Ponovno se prijavite.");
+        // TODO show him a modal or something about session
         goto('/login');
     }
 
-    if (get(accountRole) == [] || get(accountID) == -1)
+    if (get(accountRole) == null || get(accountID) == -1)
         await setRoleAndUserProfile();
 
     return document.cookie.split('; ')[0].split('=')[1];
@@ -25,8 +24,7 @@ async function checkSession () {
 
 async function checkOnlySession () {
     if (!document.cookie) {
-        // TODO show him a modal or something
-        alert("Seja je potekla ali pa ne obstaja. Ponovno se prijavite.");
+        // TODO show him a modal or something about session
         goto('/login');
     }
 
@@ -34,15 +32,21 @@ async function checkOnlySession () {
 }
 
 export const setRoleAndUserProfile = async () => {
-    const res2 = await getUserProfile();
-    if (res2.status == 200){
-        accountID.set(res2.data.id);
-        accountUsername.set(res2.data.username);
-    }
-    
-    const res1 = await getRolesOfUser(get(accountID));
-    if (res1.status == 200)
-        accountRole.set(res1.data.Roles);
+    console.log("BEFORE :accID",get(accountID),"accUsername",get(accountUsername),"roles",get(accountRole));
+    if (get(accountRole) != null) return true;
+    await getUserProfile().then( async x => {
+        if (x.status == 200){
+            accountID.set(x.data.id);
+            accountUsername.set(x.data.username);
+            await getRolesOfUser(get(accountID)).then(async y => {
+                if (y.status == 200)
+                    accountRole.set(y.data.Roles ?? []);
+                else return false;
+            });
+        } else return false;
+    });
+    console.log("DBG:accID",get(accountID),"accUsername",get(accountUsername),"roles",get(accountRole));
+    return true;
 }
 
 function deleteCookies () {
@@ -166,10 +170,10 @@ export const getUserProfile = async () => {
     return res;
 }
 
-export const getCompanyData = async () => {
+export const getCompanyDataOfAdmin = async (userID) => {
     console.log("getting company data");
     const response = await fetch(
-        serverUrl+'company/get/companyOfAdmin', {
+        serverUrl+'company/get/companyOfAdmin?userID='+userID, {
         method: 'GET',
         headers: {
             'sessionID': await checkSession(),
@@ -183,10 +187,105 @@ export const getCompanyData = async () => {
     return res;
 }
 
+export const getAllCompanies = async () => {
+    console.log("getting all company");
+    const response = await fetch(
+        serverUrl+'company/get/all', {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json(); console.log("got",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const patchCompany = async (companyID, companyName) => {
+    let data = {
+        companyID: companyID,
+        newCompanyName: companyName
+    };
+
+    console.log("patching company", data);
+    const response = await fetch(
+        serverUrl+'company/patch/edit', {
+        method: 'PATCH',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const deleteCompany = async (companyID) => {
+    console.log("deleting compnay", companyID);
+    const response = await fetch(
+        serverUrl+'company/delete/company?companyID='+companyID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const createNewCompany = async (companyName) => {
+    let data = {
+        companyName: companyName
+    };
+    console.log("sending",data);
+    const response = await fetch(
+        serverUrl+'company/post/new', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
 export const getCompanyOwnedBuildings = async (companyID) => {
     console.log("getting company owned buildings");
     const response = await fetch(
         serverUrl+'building/get/companyOwned?companyID='+companyID, {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json(); console.log("got",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const getCompaniesInBuilding = async (buildingID) => {
+    console.log("getting companies in building", buildingID);
+    const response = await fetch(
+        serverUrl+'building/get/assignedCompanies?buildingID='+buildingID, {
         method: 'GET',
         headers: {
             'sessionID': await checkSession(),
@@ -239,7 +338,7 @@ export const updateRFID = async (userID, rfid) => {
     return res;
 };
 
-export const assignCompany = async (userID, companyID) => {
+export const assignUserToCompany = async (userID, companyID) => {
     let data = {
         userID: userID,
         companyID: companyID
@@ -261,10 +360,51 @@ export const assignCompany = async (userID, companyID) => {
     return res;
 };
 
-export const assignBuildingAccess = async (userID, buildingID) => {
+export const deleteAssignedCompanyFromBuilding = async (buildingID, companyID) => {
+    console.log("deleting assigned company", buildingID, companyID);
+    const response = await fetch(
+        serverUrl+'building/delete/assignedCompany?buildingID='+buildingID+'&companyID='+companyID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json(); console.log("delete assigned",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+};
+
+export const assignCompanyToBuilding = async (buildingID, companyID) => {
+    let data = {
+        buildingID: buildingID,
+        companyID: companyID
+    };
+    console.log("assigning company to building", data);
+    const response = await fetch(
+        serverUrl+'building/post/assignCompany', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json(); console.log("assigned",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+};
+
+
+export const assignBuildingAccess = async (userID, buildingID, companyAdminID) => {
     let data = {
         userID: userID,
-        buildingID: buildingID
+        buildingID: buildingID,
+        companyAdminID: companyAdminID
     };
     console.log("assigning building access", data);
     const response = await fetch(
@@ -277,6 +417,23 @@ export const assignBuildingAccess = async (userID, buildingID) => {
         body: JSON.stringify(data)
     });
     const res = await response.json(); console.log("assigned",res);
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+};
+
+export const deleteAssignedBuildingAccess = async (userID, buildingID) => {
+    console.log("deleting assigned building access");
+    const response = await fetch(
+        serverUrl+'user/delete/building_access?userID='+userID+'&buildingID='+buildingID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json(); console.log("deleted",res);
     if (res.status && res.status == 401)
         handleResponseIsError(res);
     
@@ -300,19 +457,205 @@ export const getAssignedBuildingAccess = async (userID) => {
     return res;
 };
 
+export const getBuildingAdmins = async () => {
+    console.log("getting badmins");
+    const response = await fetch(
+        serverUrl+'user/get/buildingAdmins', {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const getAllBuildings = async () => {
+    console.log("getting all buildings");
+    const response = await fetch(
+        serverUrl+'building/get/all', {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const deleteBuilding = async (buildingID) => {
+    console.log("deleting buildng", buildingID);
+    const response = await fetch(
+        serverUrl+'building/delete/building?buildingID='+buildingID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const createNewBuilding = async (buildingName, buildingLocation, buildingLongitude, buildingLatitude) => {
+    let data = {
+        buildingName: buildingName,
+        buildingLocation: buildingLocation,
+        buildingLongitude: buildingLongitude,
+        buildingLatitude: buildingLatitude
+    };
+    console.log("sending",data);
+    const response = await fetch(
+        serverUrl+'building/post/new', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const patchBuilding = async (buildingID, buildingName, buildingLocation) => {
+    let data = {buildingID: buildingID};
+    if (buildingName != null)
+        data.newBuildingName = buildingName;
+    if (buildingLocation != null)
+        data.newBuildingLocation = buildingLocation;
+    console.log("patching buildng", data);
+    const response = await fetch(
+        serverUrl+'building/patch/edit', {
+        method: 'PATCH',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const getCompanyAdmins = async () => {
+    console.log("getting cadmins");
+    const response = await fetch(
+        serverUrl+'user/get/companyAdmins', {
+        method: 'GET',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const deleteCompanyAdmin = async (userID) => {
+    console.log("deleting cadmin",userID);
+    const response = await fetch(
+        serverUrl+'user/delete/cadmin?userID='+userID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const assignCompanyAdmin = async (userID, companyID) => {
+    let data = {
+        userID: userID,
+        companyID: companyID
+    };
+    console.log("assigning cadmin",data);
+    const response = await fetch(
+        serverUrl+'user/post/assignCadmin', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const assignBuildingAdmin = async (userID, buildingID) => {
+    let data = {
+        userID: userID,
+        buildingID: buildingID
+    };
+    console.log("assigning badmin",data);
+    const response = await fetch(
+        serverUrl+'user/post/assignBadmin', {
+        method: 'POST',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+export const deleteBuildingAdmin = async (userID, buildingID) => {
+    console.log("deleting badmin",userID, buildingID);
+    const response = await fetch(
+        serverUrl+'user/delete/badmin?userID='+userID+'&buildingID='+buildingID, {
+        method: 'DELETE',
+        headers: {
+            'sessionID': await checkSession(),
+            "Content-Type": "application/json"
+        }
+    });
+    const res = await response.json();
+    if (res.status && res.status == 401)
+        handleResponseIsError(res);
+    
+    return res;
+}
+
+/* ======== Helper error functions ======== */
 function handleResponseIsError (res) {
     console.log("handling", res);
-    if (res.message == 'This sessionID has expired.') {
+    if (res.message == 'This sessionID has expired.')
         alert("Seja je potekla. Ponovno se prijavite.");
-        goto('/login');
-    } else if (res.message == 'No session with this ID exists.') {
-        alert("Seja ne obstaja. Prijavite se.");
-        goto('/login');
-    } else {
-        alert("Neznana napaka. Poskusite kasneje.");
-        goto('/login');
-    }
-
+    goto('/login');
 }
 
 

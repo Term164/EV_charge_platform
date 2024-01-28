@@ -90,7 +90,9 @@
 	<Input placeholder="E-pošta" bind:value={email} type="text" />
 	<Input placeholder="Geslo" bind:value={password} type="password" />	
 	<Input placeholder="Potrdite geslo" bind:value={password_confirm} type="password" />	
-	<Button isLoading='{isLoading}' type='blue'>{isLoading ? 'Registracija poteka...' : 'Registracija'}</Button>
+	<Button isLoading='{isLoading}' type='blue' customClass='px-4 py-2 m-4 mt-6 w-56'>
+		{isLoading ? 'Registracija poteka...' : 'Registracija'}
+	</Button>
 </form>
 
 <div class="flex flex-row ">
