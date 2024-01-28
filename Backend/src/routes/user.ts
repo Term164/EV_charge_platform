@@ -68,13 +68,13 @@ router.delete('/delete/building_access', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/delete/badmin', asyncHandler( async (req, res) => {
-    const response = await userService.deleteBuildingAdmin(req.body);
+    const response = await userService.deleteBuildingAdmin(req.query);
     res.status(response.status)
         .send(response);
 }));
 
 router.delete('/delete/cadmin', asyncHandler( async (req, res) => {
-    const response = await userService.deleteCompanyAdmin(req.body);
+    const response = await userService.deleteCompanyAdmin(req.query);
     res.status(response.status)
         .send(response);
 }));

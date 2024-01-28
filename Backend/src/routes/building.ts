@@ -40,6 +40,12 @@ router.post('/post/assignCompany', asyncHandler(async (req, res) => {
         .send(response);
 }));
 
+router.delete('/delete/assignedCompany', asyncHandler(async (req, res) => {
+    const response = await buildingService.deleteAssignedCompany(req.query);
+    res.status(response.status)
+        .send(response);
+}));
+
 router.get('/get/assignedCompanies', asyncHandler(async (req, res) => {
     const response = await buildingService.getAllCompaniesAssignedToBuilding(req.query);
     res.status(response.status)

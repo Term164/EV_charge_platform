@@ -17,7 +17,7 @@ router.get('/get/all', asyncHandler(async (_req, res) => {
 }));
 
 router.get('/get/companyOfAdmin', asyncHandler(async (req, res) => {
-    const response = await companyService.getCompanyOfAdmin(req.headers);
+    const response = await companyService.getCompanyOfAdmin(req.query);
     res.status(response.status)
         .send(response);
 }));

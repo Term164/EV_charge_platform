@@ -82,14 +82,16 @@ async function getAssignedCompanyAdmins(requestBody: unknown): Promise<APIRespon
 }
 
 async function deleteBuildingAdmin(requestBody: unknown): Promise<APIResponse> {
-    let userID: number;
+    let userID: number;    
+    let buildingID: number;
     try {
         userID = parser.parseUserID(requestBody);
+	buildingID = parser.parseBuildingID(requestBody);
     } catch (error) {
         return {status: 400, message: 'Incorrect data in request', error: 'Error while parsing user data', data: null};
     }
 
-    const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID]});
+    const result = await SQLStatementManager.deleteBuildingAdminStatement.execute({params: [userID, buildingID]});
 
     if (result.rowsAffected != 1) return {status: 400, message: `User with id '${userID}' is not an admin of any building or does not exist.`, error: null, data: null};
     else return {status: 200, message: "operation completed successfully", error: null , data: null};
