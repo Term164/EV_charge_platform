@@ -29,6 +29,7 @@ class StatmentManager {
     getAllBuildingsByCompanyStatement: PreparedStatement;
     getAllCompaniesAssignedToBuildingStatement: PreparedStatement;
     assignCompanyStatement: PreparedStatement;
+    deleteAssignedCompanyStatement: PreparedStatement;	
 
     // Company Service statements
     createCompanyStatement: PreparedStatement;
@@ -232,6 +233,12 @@ class StatmentManager {
             ON CONFLICT ON CONSTRAINT uni_building_company_building_id_company_id DO NOTHING;`, //unique_building_company
             {paramTypes: [DataTypeOIDs.numeric, DataTypeOIDs.numeric]}
         );
+	
+        this.deleteAssignedCompanyStatement = await db.connection.prepare(
+            `DELETE FROM "Building-Company"
+	    WHERE building_id = $1 AND company_id = $2;`,
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4]}
+        );
     }
 
     private async prepareCompanyServiceStatements () {
@@ -261,10 +268,9 @@ class StatmentManager {
 
         this.getCompanyOfAdminStatement = await db.connection.prepare(
             `SELECT c.id, c.company_name 
-            FROM Companies c JOIN Company_admins ca ON c.id = ca.company_id
-            JOIN Sessions s ON ca.account_id = s.account_id
-            WHERE session_secret = $1;`,
-            {paramTypes: [DataTypeOIDs.varchar]}
+            FROM Companies c JOIN company_admins ca ON c.id = ca.company_id
+	    WHERE ca.account_id = $1;`,
+            {paramTypes: [DataTypeOIDs.int4]}
         );
     }
 
@@ -357,9 +363,9 @@ class StatmentManager {
         this.deleteBuildingAdminStatement = await db.connection.prepare(
             `
             DELETE FROM Building_admins
-            WHERE account_id = $1;
+            WHERE account_id = $1 AND building_id = $2;
             `,
-            {paramTypes: [DataTypeOIDs.int4]}
+            {paramTypes: [DataTypeOIDs.int4, DataTypeOIDs.int4]}
         );
 
         this.deleteCompanyAdminStatement = await db.connection.prepare(

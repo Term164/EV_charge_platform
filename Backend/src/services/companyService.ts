@@ -33,8 +33,8 @@ async function getAllCompanies(): Promise<APIResponse> {
 }
 
 async function getCompanyOfAdmin(requestBody: unknown): Promise<APIResponse> {
-    const sessionID = parser.parseSessionID(requestBody);
-    const result = await SQLStatementManager.getCompanyOfAdminStatement.execute({params: [sessionID],
+    const userID = parser.parseUserID(requestBody);
+    const result = await SQLStatementManager.getCompanyOfAdminStatement.execute({params: [userID],
         objectRows: true
     });
     console.log("res:", result);

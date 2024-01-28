@@ -258,7 +258,7 @@ function parseEditUserProfileRequest(request: unknown): EditUserProfileRequest {
             username: 'username' in request ? parseStringParameter(request.username, 'username') : undefined,
             email_account: 'email_account' in request ? parseStringParameter(request.email_account, 'email_account') : undefined,
             profile_picture: 'profile_picture' in request ? request.profile_picture as Buffer : undefined,
-            rfid: 'rfid' in request ? parseStringParameter(request.rfid,'rfid') : undefined,
+            rfid: 'rfid' in request && typeof request.rfid == 'string' ? request.rfid : undefined,
             company_id: 'companyID' in request ? parseNumberParameter(request.companyID, 'companyID') : undefined
         };
 
