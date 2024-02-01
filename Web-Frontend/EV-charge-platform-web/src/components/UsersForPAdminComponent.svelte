@@ -1,0 +1,411 @@
+<script>
+	import { setRoleAndUserProfile } from './../lib/index.js';
+import { getAllUsers, getAllCompanies, getRolesOfUser, getCompanyDataOfAdmin, assignCompanyAdmin, deleteCompanyAdmin, getAllBuildings, getBuildingAdmins, assignBuildingAdmin, deleteBuildingAdmin } from '$lib';
+import Button from './Button.svelte';
+import { accountID, accountCompanyName } from '../store';
+import { SvelteEasyToast, toast } from 'svelte-easy-toast';
+import SimpleModal from './SimpleModal.svelte';
+
+let users = [];
+let filteredList = [];
+let userToRoleMap = new Map();
+
+const allUsersPromise = getAllUsers().then(async x => {
+  if (x.status && x.status == 200 && x.data.Result != undefined) {
+    users = x.data.Result.filter(x => x.company_name == undefined);
+    filteredList = users;
+    for (const x of users){
+      const res = await getRolesOfUser(x.id);
+      const role = res.data.Roles ?? [];
+      userToRoleMap.set(x.id, role);
+    }
+  } else
+    showGeneralErrorToast();
+});
+
+let allCompanies = [];
+getAllCompanies().then(x => {
+  if (x.status == 200)
+    allCompanies = x.data.Result;
+  else 
+    showGeneralErrorToast();
+});
+
+let allBuildings = [];
+getAllBuildings().then(x => {
+  if (x.status == 200)
+    allBuildings = x.data.Result;
+  else
+    showGeneralErrorToast();
+});
+
+let buildingAdminsAllData = [];
+getBuildingAdmins().then(x => {
+  if (x.status == 200)
+    buildingAdminsAllData = x.data.result;
+  else
+    showGeneralErrorToast();
+});
+
+const showGeneralErrorToast = () => {
+  toast({
+  type: 'error', // primary, dark, danger, success, info, warning, default, error
+  position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+  text: 'Poskusite kasneje',
+  title: 'Neznana napaka',
+  });
+}
+const showErrorToast = (message) => {
+  toast({
+  type: 'error', // primary, dark, danger, success, info, warning, default, error
+  position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+  text: message,
+  title: 'Napaka',
+  });
+}
+const showSuccessToast = (message) => {
+  toast({
+  type: 'success', // primary, dark, danger, success, info, warning, default, error
+  position: 'top-center', // top-right top-left, top-center, bottom-left, bottom-right, bottom-center
+  text: message,
+  title: 'Uspeh'
+  });
+}
+
+let showCompanyAdminModal = false;
+let isAssigningCompanyLoading = false;
+let isRemovingCompanyAdminLoading = false;
+
+function closeCompanyAdminModal() {
+  selectedUser = null;
+  isAssigningCompanyLoading =
+  showCompanyAdminModal = false;
+}
+
+let showBuildingAdminModal = false;
+let isAssigningBuildingLoading = false;
+let isRemovingBuildingAdminLoading = false;
+
+function closeBuildingAdminModal() {
+  selectedUser = null;
+  isAssigningBuildingLoading =
+  showBuildingAdminModal = false;
+}
+
+let selectedUser;
+
+let selectedCompanyID;
+let companyOfAdmin;
+
+let selectedBuildingID;
+let buildingsOfAdmin = [];
+let buildingsLeftToChoose = [];
+
+let searchKeyword = '';
+$: filteredList = users.filter((x) => x.username.includes(searchKeyword.trim()));
+
+
+async function handleCompanyAdminModal (user) {
+  await getCompanyDataOfAdmin(user.id).then(x => {
+    if (x.status == 200)
+      companyOfAdmin = x.data.Result;
+    else
+      showGeneralErrorToast();
+  });
+  selectedUser = user;
+  showCompanyAdminModal = true;
+} 
+
+async function assignUserToCompany () {
+  isAssigningCompanyLoading = true;
+  const res = await assignCompanyAdmin(selectedUser.id, selectedCompanyID);
+  if (res.status == 200){
+    const obj = allCompanies.find(x => x.companyID == selectedCompanyID);
+    companyOfAdmin = {id: obj.companyID, company_name: obj.companyName};
+    userToRoleMap.set(selectedUser.id, ['cadmin']);
+    userToRoleMap = userToRoleMap;
+  } else
+    showErrorToast('Napaka pri dodeljevanju pravic.');
+  isAssigningCompanyLoading = false;
+}
+
+async function removeCompanyAdmin () {
+  isRemovingCompanyAdminLoading = true;
+  const res = await deleteCompanyAdmin(selectedUser.id);
+  if (res.status == 200) {
+    companyOfAdmin = null;
+    userToRoleMap.set(selectedUser.id, []);
+    userToRoleMap = userToRoleMap;
+  }
+  else
+    showErrorToast('Napaka pri odstranjevanju pravic.');
+  isRemovingCompanyAdminLoading = false;
+}
+
+
+async function handleBuildingAdminModal (user) {
+  buildingsOfAdmin = buildingAdminsAllData.filter(x => x.account.id == user.id).map(x => x.building);
+  selectedUser = user;
+  showBuildingAdminModal = true;
+}
+
+async function assignUserToBuilding () {
+  isAssigningBuildingLoading = true;
+  const res = await assignBuildingAdmin(selectedUser.id, selectedBuildingID);
+  if (res.status == 200){
+    const obj = allBuildings.find(x => x.buildingID == selectedBuildingID);
+    buildingsOfAdmin.push({id: obj.buildingID, building_name: obj.buildingName, building_location: obj.buildingLocation});
+    buildingsOfAdmin = buildingsOfAdmin;
+    
+    buildingAdminsAllData.push({
+      account: {id: selectedUser.id, username: selectedUser.username, email_account: selectedUser.email_account},
+      building: {id: obj.buildingID, building_name: obj.buildingName, building_location: obj.buildingLocation}
+    });
+    buildingAdminsAllData = buildingAdminsAllData;
+    userToRoleMap.set(selectedUser.id, ['badmin']);
+    userToRoleMap = userToRoleMap;
+  } else
+    showErrorToast('Napaka pri dodeljevanju pravic.');
+  isAssigningBuildingLoading = false;
+}
+
+async function removeUserFromBuilding (buildingID) {
+  isRemovingBuildingAdminLoading = true;
+  const res = await deleteBuildingAdmin(selectedUser.id, buildingID);
+  if (res.status == 200) {
+    buildingsOfAdmin = buildingsOfAdmin.filter(x => x.id != buildingID);
+    
+    buildingAdminsAllData = buildingAdminsAllData.filter(x => x.account.id != selectedUser.id && x.building.id != buildingID);
+
+    if (buildingsOfAdmin.length == 0) {
+      userToRoleMap.set(selectedUser.id, []);
+      userToRoleMap = userToRoleMap;
+    }
+  }
+  else
+    showErrorToast('Napaka pri odstranjevanju pravic.');
+  isRemovingBuildingAdminLoading = false;
+}
+
+
+function mapToMessage (word) {
+  switch (word) {
+    case "padmin":
+      return 'Administrator platforme';
+    case "badmin":
+      return 'Administrator stavbe';
+    case "cadmin":
+      return 'Administrator podjetja';
+    default:
+      return 'Ni dodeljena';
+  }
+}
+
+$: if (buildingsLeftToChoose.length > 0 && !buildingsLeftToChoose.some(b => b.buildingID === selectedBuildingID)) {
+  selectedBuildingID = buildingsLeftToChoose[0].buildingID;
+}
+$: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => y.id == x.buildingID));
+</script>
+<SvelteEasyToast />
+
+<div class="flex flex-col justify-center items-center"><!--Master div-->
+    <h1 class="mt-6 m-2 text-4xl">Pregled Uporabnikov</h1>
+
+    <div class="mt-4 mb-2 flex w-3/5 items-center justify-center"><!--Top part-->
+
+      <div class="flex border w-2/5 border-blue-200 rounded"><!--Search field div-->
+            <input
+                type="text"
+                bind:value={searchKeyword}
+                class="block w-full px-4 py-2  bg-white border rounded-md focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                placeholder="Išči uporabniško ime..."
+            />
+        </div><!--Search field div-->
+    </div><!--Top part-->
+    
+    <!--Horizontal line-->
+    <div class="my-4 w-full mx-auto border-t-2 border-gray-300"></div>
+    
+    {#await allUsersPromise}
+    Pridobivam podatke....
+    {:then _} 
+
+    <div class="flex w-4/5 mb-8 mt-2 overflow-hidden rounded-lg"><!--Main table div-->
+        <table class="border-collapse border w-full">
+          <thead class="bg-blue-400">
+            <tr>
+              <th class="border p-2">Uporabniško ime:</th>
+              <th class="border p-2">E-poštni naslov:</th>
+              <th class="border p-2">Vloga:</th>
+              <th class="border p-2">Akcija:</th>
+              <th class="border p-2">Akcija:</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each filteredList as user (user.id)}
+              {#if user.id != $accountID}
+              <tr key={user.id} class="border p-2">
+                <td class="border p-2 py-4">{user.username}</td>
+                <td class="border p-2">{user.email_account}</td>
+                <td class="border p-2">
+                  {mapToMessage(userToRoleMap.get(user.id)[0])}
+                </td>
+                <td class="border w-64 justify-between bg-inherit bg-none cursor-default text-center">
+                  {#if userToRoleMap.get(user.id)[0] == undefined}
+                  <Button on:click={() => handleCompanyAdminModal(user)} type='green' customClass='my-1 scale-90 px-2 py-2 w-64'>
+                    Naredi administratorja podjetja
+                  </Button>
+                  {:else if userToRoleMap.get(user.id)[0] == 'cadmin'}
+                  <Button on:click={() => handleCompanyAdminModal(user)} type='orange' customClass='my-1 scale-90 px-2 py-2 w-64'>
+                    Uredi administratorja podjetja
+                  </Button>
+                  {/if}
+                </td>
+                <td class="border w-64 justify-between bg-inherit bg-none cursor-default text-center">
+                  {#if userToRoleMap.get(user.id)[0] == undefined}
+                  <Button on:click={() => handleBuildingAdminModal(user)} type='green' customClass='my-1 scale-90 px-2 py-2 w-64'>
+                    Naredi administratorja stavbe
+                  </Button>
+                  {:else if userToRoleMap.get(user.id)[0] == 'badmin'}
+                  <Button on:click={() => handleBuildingAdminModal(user)} type='orange' customClass='my-1 scale-90 px-2 py-2 w-64'>
+                    Uredi administratorja stavbe
+                  </Button>
+                  {/if}
+                </td>
+              </tr>
+              {/if}
+            {/each}
+          </tbody>
+        </table>          
+      </div><!--Main table div-->
+    {/await}
+
+    <!--Modals-->
+
+    <SimpleModal show={showCompanyAdminModal} close={closeCompanyAdminModal} customInnerClass='w-5/12'><!-- Company modal -->
+      <div class="flex-col items-center flex justify-center">
+        <h2 class="text-2xl m-4">Pravice za uporabnika: {selectedUser.username}</h2>
+        
+        <!-- Existing company access content -->
+        <div class="mx-6 w-10/12 flex items-center m-2 justify-center overflow-hidden rounded-lg">
+          {#if companyOfAdmin != null}
+          <table class="border-collapse border w-full">
+            <thead class="bg-blue-400">
+              <tr>
+                <th class="border p-2">Ime podjetja:</th>
+                <th class="border p-2">Akcija:</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr key={companyOfAdmin.id}>
+                  <td class="border p-2">{companyOfAdmin.company_name}</td>
+                  <td class="border p-2 flex justify-center items-center">
+                    <Button type='red' customClass='scale-90 mx-2 p-2' on:click={removeCompanyAdmin}
+                    isLoading='{false}'>
+                      Odstrani pravice
+                    </Button>
+                  </td>
+                </tr>
+            </tbody>
+          </table>
+          {:else}
+            <p class="text-lg">Oseba nima pravic do nobenega podjetja.</p>
+          {/if}
+        </div>
+  
+        <!-- Horizontal line -->
+        <div class="my-4 w-full mx-auto border-t-2 border-gray-300"></div>
+  
+        <!-- Add company rights content -->
+        <div class=" flex-col items-center flex">
+          <p class="text-2xl">Dodaj pravice do podjetja:</p>
+        {#if companyOfAdmin == null}
+          <div class="flex items-center justify-between w-full px-4">
+            <select bind:value={selectedCompanyID} class=" w-96 m-2 border-2 bg-white border-black rounded-lg px-4 py-2">
+              {#each allCompanies as c (c.companyID)}
+                <option value={c.companyID} class="bg-white hover:bg-blue-300 ">
+                {c.companyName}
+                </option>
+              {/each}
+            </select>
+  
+            <Button on:click={assignUserToCompany} isLoading='{isAssigningCompanyLoading}' type='green' customClass='m-4 p-2 w-36 text-center'>
+              Dodaj
+            </Button>
+          </div>
+        {:else}
+          <p class="text-lg">Oseba je že administrator.</p>
+        {/if}
+        </div>
+  
+        <Button on:click={closeCompanyAdminModal} type='red' customClass='min-w-48 m-4 p-2'>Izhod</Button>
+      </div>
+    </SimpleModal><!-- Company modal -->
+
+    <SimpleModal show={showBuildingAdminModal} close={closeBuildingAdminModal} customInnerClass='w-5/12'><!-- Building modal -->
+      <div class="flex-col items-center flex justify-center">
+        <h2 class="text-2xl m-4">Pravice za uporabnika: {selectedUser.username}</h2>
+        
+        <!-- Existing Building rights content -->
+        <div class="mx-6 w-11/12 flex items-center justify-center m-2 overflow-hidden rounded-lg">
+          {#if buildingsOfAdmin.length != 0}
+          <table class="border-collapse border w-full">
+            <thead class="bg-blue-400">
+              <tr>
+                <th class="border p-2">Ime stavbe:</th>
+                <th class="border p-2">Lokacija stavbe:</th>
+                <th class="border p-2">Akcija:</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each buildingsOfAdmin as b (b.id)}
+                <tr key={b.id}>
+                  <td class="border p-2">{b.building_name}</td>
+                  <td class="border p-2">{b.building_location}</td>
+                  <td class="border p-4 flex justify-center">
+                    <Button type='red' customClass='scale-90' on:click={() => removeUserFromBuilding(b.id)}
+                    isLoading='{isRemovingBuildingAdminLoading && selectedBuildingID == b.id}'>
+                      Odstrani pravice
+                    </Button>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+          {:else}
+            <p class="text-lg">Oseba nima nobenih pravic.</p>
+          {/if}
+        </div>
+  
+        <!-- Horizontal line -->
+        <div class="my-4 w-full mx-auto border-t-2 border-gray-300"></div>
+  
+        <!-- Add Building Access content -->
+        <div class=" flex-col items-center flex">
+          <p class="text-2xl">Dodaj uporabniku pravico do poslovne stavbe:</p>
+        {#if buildingsLeftToChoose.length != 0}
+          <div class="flex items-center justify-between w-full px-4">
+            <select bind:value={selectedBuildingID} class=" w-96 m-2 border-2 bg-white border-black rounded-lg px-4 py-2">
+              {#each buildingsLeftToChoose as b (b.buildingID)}
+                <option value={b.buildingID} class="bg-white hover:bg-blue-300 ">
+                {b.buildingName}
+                </option>
+              {/each}
+            </select>
+  
+            <Button on:click={assignUserToBuilding} isLoading='{isAssigningBuildingLoading}' type='green' customClass='m-4 p-2 w-36 text-center'>
+              Dodaj
+            </Button>
+          </div>
+        {:else}
+          <p class="text-lg">Oseba že ima vse pravice.</p>
+        {/if}
+        </div>
+  
+        <Button on:click={closeBuildingAdminModal} type='red' customClass='min-w-48 m-4 p-2'>
+          Izhod
+        </Button>
+      </div>
+    </SimpleModal><!-- Building modal -->
+
+</div><!--Master div-->

@@ -54,8 +54,6 @@
 		const response = await register(username, email, password);
 		isLoading = false;
 
-		console.log("response:", response);
-
 		if (response.status == 400) {
 			if (response.message == "Username is already taken.") {
 				showErrorToast('Uporabniško ime je že zasedeno');
@@ -82,7 +80,7 @@
 <SvelteEasyToast />
 
 <div class="flex flex-col items-center justify-center">
-	<img class="scale-75" src='/logo/Charge-Mate-Logo.png' alt='Logo'/>
+	<img class="scale-75 -mt-8" src='/logo/Charge-Mate-Logo.png' alt='Logo'/>
 	<h1 class="-mt-16 mb-4 text-5xl font-bold">Ustvarite račun</h1>
 
 <form on:submit|preventDefault={handleRegister} class="flex flex-col items-center justify-center">
@@ -90,10 +88,12 @@
 	<Input placeholder="E-pošta" bind:value={email} type="text" />
 	<Input placeholder="Geslo" bind:value={password} type="password" />	
 	<Input placeholder="Potrdite geslo" bind:value={password_confirm} type="password" />	
-	<Button isLoading='{isLoading}' type='blue'>{isLoading ? 'Registracija poteka...' : 'Registracija'}</Button>
+	<Button isLoading='{isLoading}' type='blue' customClass='px-4 py-2 m-4 mt-6 w-56'>
+		{isLoading ? 'Registracija poteka...' : 'Registracija'}
+	</Button>
 </form>
 
-<div class="flex flex-row ">
+<div class="flex flex-row mb-2">
 	<p class="">Že imate račun?</p>
 	<A href="/login">Prijavite se</A>
 </div>

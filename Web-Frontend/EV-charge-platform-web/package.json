@@ -18,6 +18,7 @@
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^4.2.7",
+		"svelte-awesome-icons": "^1.1.0",
 		"svelte-loading-spinners": "^0.3.4",
 		"tailwindcss": "^3.4.1",
 		"vite": "^5.0.3"

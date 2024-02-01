@@ -1,14 +1,19 @@
 <script>
-	import { page } from '$app/stores';
-  import { accountRole } from '../store';
-  import "../app.css";
-  import { logout } from '$lib';  
+import { page } from '$app/stores';
+import { accountRole } from '../store';
+import "../app.css";
+import { logout, setRoleAndUserProfile } from '$lib';
+let promise;
+if ($page.url.pathname != '/login' && $page.url.pathname != '/register')
+  promise = setRoleAndUserProfile();
 
 </script>
 
-{#if $page.url.pathname == '/login' || $page.url.pathname == '/register'}
+{#if $page.url.pathname == '/login' || $page.url.pathname == '/register' || $accountRole == null}
     <slot />
 {:else}
+
+{#await promise then _}
 
 <nav class="bg-white border-gray-200 dark:bg-gray-900">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -31,23 +36,27 @@
           </li>
           {#if $accountRole.includes('padmin')}
           <li>
-            <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+            <a href="/allBuildings" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Stavbe
             </a>
           </li>
           <li>
-            <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+            <a href="/allCompanies" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Podjetja
+            </a>
+          </li>
+          <li>
+            <a href="/admins" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+                Administratorji
             </a>
           </li>
           {/if}
           {#if $accountRole.includes('badmin')}
           <li>
-            <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+            <a href="/buildings" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Moje stavbe
             </a>
           </li>
-
           {/if}
           {#if $accountRole.includes('cadmin')}
           <li>
@@ -56,11 +65,13 @@
             </a>
           </li>
           {/if}
+          {#if $accountRole.length > 0}
           <li>
             <a href="/users" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Pregled Uporabnikov
             </a>
           </li>
+          {/if}
           <li>
             <button on:click={() => logout()} class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
                 Odjava
@@ -72,4 +83,7 @@
   </nav>
   
 <slot />
+
+{/await}
+
 {/if}
