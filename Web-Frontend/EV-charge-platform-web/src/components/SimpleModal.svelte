@@ -6,7 +6,7 @@
 
 {#if show}
     <div class="fixed z-10 inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 {customClass}">
-        <div class="bg-white p-4 rounded {customInnerClass}" on:click|stopPropagation>
+        <div class="bg-white p-4 rounded {customInnerClass} max-h-[90vh] overflow-y-auto" on:click|stopPropagation>
             <slot />
         </div>
     </div>

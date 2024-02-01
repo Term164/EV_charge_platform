@@ -61,7 +61,6 @@ async function assignUser (userID) {
   isUserAssigningLoading = true;
   selectedUserRow = userID;
   const assignResult = await assignUserToCompany(userID, $accountCompanyID);
-  console.log(assignResult);
   if (assignResult.status == 200){
     users[ users.findIndex(x => x.id == userID) ].company_name = $accountCompanyName;
     filteredList = users;
@@ -77,7 +76,7 @@ async function assignUser (userID) {
 <SvelteEasyToast />  
 
 <div class="flex flex-col justify-center items-center">
-    <h1 class="mt-2 text-4xl">Pregled Uporabnikov</h1>
+    <h1 class="mt-6 m-2 text-4xl">Pregled Uporabnikov</h1>
 
     <div class="mt-4 mb-2 flex w-3/5 items-center justify-center">
         <div class="flex border w-2/5 border-blue-200 rounded">
@@ -96,8 +95,8 @@ async function assignUser (userID) {
     Pridobivam podatke....
     {:then _} 
           
-    <div class="flex w-3/5">
-        <table class="border-collapse border w-full mb-8">
+    <div class="flex w-3/5 mb-8 overflow-hidden rounded-lg">
+        <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
               <th class="border p-2">Uporabniško ime:</th>

@@ -4,7 +4,8 @@ import { patchBuilding, getAllBuildings, deleteBuilding, createNewBuilding } fro
 import SimpleModal from './SimpleModal.svelte';
 import Input from './Input.svelte';
 import { SvelteEasyToast, toast } from 'svelte-easy-toast';
-  
+import { CircleInfoSolid } from 'svelte-awesome-icons';
+
 let allBuildings = [];
 
 const getAllBuildingsPromise = getAllBuildings().then(x => {
@@ -161,10 +162,32 @@ async function createBuilding () {
   isCreateBuildingLoading = false;
 }
 
+function showInfoPanel() {
+    var panel = document.getElementById('info-panel');
+    panel.classList.remove('invisible', 'opacity-0');
+    panel.classList.add('visible', 'opacity-100');
+}
+
+function hideInfoPanel() {
+    var panel = document.getElementById('info-panel');
+    panel.classList.remove('visible', 'opacity-100');
+    panel.classList.add('invisible', 'opacity-0');
+}
+
 </script>
 <SvelteEasyToast />
   
 <div class="flex flex-col justify-center items-center"><!-- Master div -->
+  <div class="z-10 fixed flex-col right-10 top-20  bg-gray-300"><!-- Info div -->
+    <CircleInfoSolid size=50 color='blue' class='absolute right-20' on:mouseenter={() => showInfoPanel()} on:mouseleave={() => hideInfoPanel()} />
+    <div id="info-panel" class="px-4 py-6 text-center absolute -right-5 top-16 rounded-lg opacity-0 invisible transition-opacity duration-300 ease-in-out bg-white shadow-lg w-64">
+      <p class="text-xl">Informacije:</p>
+      <p>Ko ustvarite stavbo, pojdite pod zavihek Pregled Uporabnikov in iz tam določite osebo, ki bo administrator stavbe.<br>
+        Alternativno lahko v zavihku Administratorji samo dodate stavbo že obstoječemu administratorju.
+      </p>
+      </div>
+  </div><!-- Info div -->
+  
   <h1 class="mt-6 m-4 text-4xl">Vse poslovne stavbe</h1>
   {#if allBuildings.length != 0}
   
@@ -182,8 +205,8 @@ async function createBuilding () {
         Pridobivam podatke....
       {:then _}
 
-      <div class="w-full px-20 mt-4 flex justify-center"><!-- Table div -->
-        <table class="border-collapse border m-2 w-10/12">
+      <div class="w-8/12 mt-4 m-2 flex justify-center overflow-hidden rounded-lg"><!-- Table div -->
+        <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
               <th class="border p-2">Ime stavbe:</th>

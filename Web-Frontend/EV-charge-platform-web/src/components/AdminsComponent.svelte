@@ -113,15 +113,15 @@ $: if (buildingsLeftToChoose.length > 0 && !buildingsLeftToChoose.some(b => b.bu
 $: buildingsLeftToChoose = allBuildings.filter(x => !(buildingsOfAdmin.find(y => y.id == x.buildingID)));
 </script>
 
-<!--Master div-->
-<div class="flex flex-col justify-center items-center">
-    <h1 class="m-4 text-4xl">Vsi administratorji</h1>
+
+<div class="flex flex-col justify-center items-center"><!--Master div-->
+    <h1 class="mt-6 m-4 text-4xl">Vsi administratorji</h1>
     <!-- Horizontal line -->
     <div class="my-2 w-full mx-auto border-t-2 border-gray-300"></div>
-    <!--Main div that gets split-->
-    <div class="flex justify-center w-full h-full">
-      <!--Left half-->
-      <div class="w-1/2 flex-col items-center flex ">
+    
+    <div class="flex justify-center w-full h-full"><!--Main div that gets split-->
+      
+      <div class="w-1/2 flex-col items-center flex "><!--Left half-->
           
       <h1 class="text-3xl m-2 mb-2 justify-self-center">Administratorji stavb</h1>
 
@@ -130,9 +130,9 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !(buildingsOfAdmin.find(y =>
       {:then _}
       {#if buildingAdminsAllData.length != 0}
         <p class="text-lg mb-4">Administrator stavbe skrbi za eno ali več poslovnih stavb.</p>
-      <!--Table div-->
-      <div class="w-full px-20">
-        <table class="border-collapse border m-2 w-full">
+      
+      <div class="w-11/12 m-2 overflow-hidden rounded-lg"><!--Table div-->
+        <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
               <th class="border p-2">Uporabniško ime:</th>
@@ -165,8 +165,7 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !(buildingsOfAdmin.find(y =>
     <!-- Vertical line -->
     <div class="mx-4 my-0 border-r-2 border-gray-300 min-h-screen flex-grow "></div>
     
-    <!--Right half-->
-    <div class="w-7/12 flex-col items-center flex ">
+    <div class="w-7/12 flex-col items-center flex "><!--Right half-->
       <h1 class="m-2 mb-2 text-3xl justify-self-center">Administratorji podjetij</h1>
 
       {#await getCompanyAdminsPromise}
@@ -174,8 +173,8 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !(buildingsOfAdmin.find(y =>
       {:then _}
       {#if companyAdmins.length != 0}
         <p class="text-lg mb-4">Administrator podjetja skrbi za samo eno podjetje.</p>
-      <!--Table div-->
-      <div class="w-full px-10">
+    
+      <div class="w-11/12 m-2 overflow-hidden rounded-lg "><!--Table div-->
         <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
@@ -209,15 +208,15 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !(buildingsOfAdmin.find(y =>
     </div><!--Right half-->
 
     <!--Modal-->
-    <SimpleModal show={showBuildingAdminModal} customInnerClass='w-5/12'>
+    <SimpleModal show={showBuildingAdminModal} customInnerClass='w-6/12'>
       <!--Master div-->
       <div class="flex-col items-center flex justify-center">
         <h2 class="text-2xl m-4">Pravice za uporabnika: {selectedUser.username}</h2>
         
         <!-- Existing Building Accesses content -->
-        <div class="mx-6 w-full flex items-center justify-center">
+        <div class="mx-6 m-4 w-11/12 flex items-center justify-center overflow-hidden rounded-lg">
           {#if buildingsOfAdmin.length != 0}
-          <table class="border-collapse border m-2 w-full">
+          <table class="border-collapse border w-full">
             <thead class="bg-blue-400">
               <tr>
                 <th class="border p-2">Ime stavbe:</th>

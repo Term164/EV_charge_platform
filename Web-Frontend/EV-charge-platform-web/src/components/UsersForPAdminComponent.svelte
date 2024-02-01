@@ -1,4 +1,5 @@
 <script>
+	import { setRoleAndUserProfile } from './../lib/index.js';
 import { getAllUsers, getAllCompanies, getRolesOfUser, getCompanyDataOfAdmin, assignCompanyAdmin, deleteCompanyAdmin, getAllBuildings, getBuildingAdmins, assignBuildingAdmin, deleteBuildingAdmin } from '$lib';
 import Button from './Button.svelte';
 import { accountID, accountCompanyName } from '../store';
@@ -207,14 +208,12 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
 </script>
 <SvelteEasyToast />
 
-<!--Master div-->
-<div class="flex flex-col justify-center items-center">
-    <h1 class="mt-2 text-4xl">Pregled Uporabnikov</h1>
+<div class="flex flex-col justify-center items-center"><!--Master div-->
+    <h1 class="mt-6 m-2 text-4xl">Pregled Uporabnikov</h1>
 
-    <!--Top part-->
-    <div class="mt-4 mb-2 flex w-3/5 items-center justify-center">
-      <!--Search field div-->
-      <div class="flex border w-2/5 border-blue-200 rounded">
+    <div class="mt-4 mb-2 flex w-3/5 items-center justify-center"><!--Top part-->
+
+      <div class="flex border w-2/5 border-blue-200 rounded"><!--Search field div-->
             <input
                 type="text"
                 bind:value={searchKeyword}
@@ -231,9 +230,8 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
     Pridobivam podatke....
     {:then _} 
 
-    <!--Main table div-->
-    <div class="flex w-4/5">
-        <table class="border-collapse border w-full mb-8">
+    <div class="flex w-4/5 mb-8 mt-2 overflow-hidden rounded-lg"><!--Main table div-->
+        <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
               <th class="border p-2">Uporabniško ime:</th>
@@ -282,16 +280,16 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
       </div><!--Main table div-->
     {/await}
 
-
     <!--Modals-->
-    <SimpleModal show={showCompanyAdminModal} close={closeCompanyAdminModal} customInnerClass='w-2/6'>
+
+    <SimpleModal show={showCompanyAdminModal} close={closeCompanyAdminModal} customInnerClass='w-5/12'><!-- Company modal -->
       <div class="flex-col items-center flex justify-center">
         <h2 class="text-2xl m-4">Pravice za uporabnika: {selectedUser.username}</h2>
         
         <!-- Existing company access content -->
-        <div class="mx-6 w-full flex items-center justify-center">
+        <div class="mx-6 w-10/12 flex items-center m-2 justify-center overflow-hidden rounded-lg">
           {#if companyOfAdmin != null}
-          <table class="border-collapse border m-2 w-10/12">
+          <table class="border-collapse border w-full">
             <thead class="bg-blue-400">
               <tr>
                 <th class="border p-2">Ime podjetja:</th>
@@ -342,17 +340,16 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
   
         <Button on:click={closeCompanyAdminModal} type='red' customClass='min-w-48 m-4 p-2'>Izhod</Button>
       </div>
-    </SimpleModal>
+    </SimpleModal><!-- Company modal -->
 
-
-    <SimpleModal show={showBuildingAdminModal} close={closeBuildingAdminModal} customInnerClass='w-5/12'>
+    <SimpleModal show={showBuildingAdminModal} close={closeBuildingAdminModal} customInnerClass='w-5/12'><!-- Building modal -->
       <div class="flex-col items-center flex justify-center">
         <h2 class="text-2xl m-4">Pravice za uporabnika: {selectedUser.username}</h2>
         
         <!-- Existing Building rights content -->
-        <div class="mx-6 w-full flex items-center justify-center">
+        <div class="mx-6 w-11/12 flex items-center justify-center m-2 overflow-hidden rounded-lg">
           {#if buildingsOfAdmin.length != 0}
-          <table class="border-collapse border m-2 w-full">
+          <table class="border-collapse border w-full">
             <thead class="bg-blue-400">
               <tr>
                 <th class="border p-2">Ime stavbe:</th>
@@ -365,8 +362,8 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
                 <tr key={b.id}>
                   <td class="border p-2">{b.building_name}</td>
                   <td class="border p-2">{b.building_location}</td>
-                  <td class="border p-2 flex justify-center">
-                    <Button type='red' customClass='scale-90 mx-2 p-2' on:click={() => removeUserFromBuilding(b.id)}
+                  <td class="border p-4 flex justify-center">
+                    <Button type='red' customClass='scale-90' on:click={() => removeUserFromBuilding(b.id)}
                     isLoading='{isRemovingBuildingAdminLoading && selectedBuildingID == b.id}'>
                       Odstrani pravice
                     </Button>
@@ -409,9 +406,6 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !buildingsOfAdmin.find(y => 
           Izhod
         </Button>
       </div>
-    </SimpleModal>
-
-
-
+    </SimpleModal><!-- Building modal -->
 
 </div><!--Master div-->

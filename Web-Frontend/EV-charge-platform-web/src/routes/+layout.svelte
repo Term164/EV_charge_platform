@@ -4,22 +4,16 @@ import { accountRole } from '../store';
 import "../app.css";
 import { logout, setRoleAndUserProfile } from '$lib';
 let promise;
-if ($page.url.pathname == '/login' || $page.url.pathname == '/register')
-  console.log("i am layout and I'm on login/register");
-else {
-  console.log("now i, layout, shall call setRole");
+if ($page.url.pathname != '/login' && $page.url.pathname != '/register')
   promise = setRoleAndUserProfile();
-}
+
 </script>
 
 {#if $page.url.pathname == '/login' || $page.url.pathname == '/register' || $accountRole == null}
     <slot />
 {:else}
 
-{#await promise}
-  <script>console.log("Waiting from layout");</script>
-{:then _}
-  <script>console.log("Layout rendering");</script>
+{#await promise then _}
 
 <nav class="bg-white border-gray-200 dark:bg-gray-900">
     <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">

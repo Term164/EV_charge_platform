@@ -5,7 +5,7 @@ import SimpleModal from './SimpleModal.svelte';
 import Input from './Input.svelte';
 import { accountID, accountCompanyID, accountCompanyName } from '../store';
 import { SvelteEasyToast, toast } from 'svelte-easy-toast';
-
+import { CircleInfoSolid } from 'svelte-awesome-icons';
 
 let getCompanyOwnedBuildingsPromise;
 let getCompanyUsersPromise;
@@ -110,7 +110,6 @@ async function handleShowBuildingAccess (user) {
   }
     
   showBuildingAccessModal = true;
-  console.log("ba, fil:",buildingAccessesID, actualBuildingAccesses);
 }
 
 async function handleRemoveBuildingAccess (buildingID) {
@@ -140,10 +139,33 @@ $: if (buildingsLeftToChoose.length > 0 && !buildingsLeftToChoose.some(b => b.bu
 }
 $: actualBuildingAccesses = allBuildings.filter(x => buildingAccessesID.includes(x.buildingID));
 $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find(y => y.buildingID == x.buildingID));
+
+function showInfoPanel() {
+    var panel = document.getElementById('info-panel');
+    panel.classList.remove('invisible', 'opacity-0');
+    panel.classList.add('visible', 'opacity-100');
+}
+
+function hideInfoPanel() {
+    var panel = document.getElementById('info-panel');
+    panel.classList.remove('visible', 'opacity-100');
+    panel.classList.add('invisible', 'opacity-0');
+}
+
 </script>
 <SvelteEasyToast />
 
 <div class="flex flex-col justify-center items-center"><!--Master div-->
+  <div class="z-10 fixed flex-col right-10 top-20  bg-gray-300"><!-- Info div -->
+    <CircleInfoSolid size=50 color='blue' class='absolute right-20' on:mouseenter={() => showInfoPanel()} on:mouseleave={() => hideInfoPanel()} />
+    <div id="info-panel" class="px-4 py-6 text-center absolute -right-5 top-16 rounded-lg opacity-0 invisible transition-opacity duration-300 ease-in-out bg-white shadow-lg w-64">
+      <p class="text-xl">Informacije:</p>
+      <p>Za dodajanje zaposlenih pojdite pod zavihek Pregled Uporabnikov in iz tam najdite zaposlene.<br>
+        Za spreminjanje poslovnih stavb se posvetuje s pravimi administratorji stavb.
+      </p>
+      </div>
+  </div><!-- Info div -->
+  
   <h1 class="mt-6 text-4xl">Moje podjetje</h1>
   {#if $accountCompanyID != -1}
     {#await getCompanyDataPromise}
@@ -157,7 +179,7 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find
         
     <div class="flex justify-center w-full h-full"><!--Main div-->
       
-      <div class="w-5/12 flex-col items-center flex "><!-- Left half -->
+      <div class="w-5/12 px-20 flex-col items-center flex "><!-- Left half -->
           
         <h1 class="text-3xl m-2 mb-2 justify-self-center">Poslovne stavbe</h1>
         <p class="text-lg mb-2">To so vse poslovne stavbe, v katerih posluje naše podjetje.</p>
@@ -166,8 +188,8 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find
           Pridobivam podatke....
         {:then _}
 
-        <div class="w-full px-20">
-          <table class="border-collapse border m-2 w-full">
+        <div class="w-full overflow-hidden rounded-lg">
+          <table class="border w-full">
             <thead class="bg-blue-400">
               <tr>
                 <th class="border p-2">Ime stavbe:</th>
@@ -195,7 +217,7 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find
       <!-- Vertical line -->
       <div class="mx-4 my-0 border-r-2 border-gray-300 min-h-screen flex-grow "></div>
       
-      <div class="w-7/12 flex-col items-center flex "><!-- Right half -->
+      <div class="w-7/12 px-10 flex-col items-center flex "><!-- Right half -->
         <h1 class="m-2 mb-2 text-3xl justify-self-center">Zaposleni</h1>
         <p class="text-lg mb-4">To so vsi zaposleni. Lahko se jim uredi RFID koda ali pa nastavi dostope do stavb.</p>
 
@@ -203,7 +225,7 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find
           Pridobivam podatke....
         {:then _}
 
-        <div class="w-full px-10"><!--Table div-->
+        <div class="w-full overflow-hidden rounded-lg"><!--Table div-->
           <table class="border-collapse border w-full">
             <thead class="bg-blue-400">
               <tr>
@@ -257,14 +279,14 @@ $: buildingsLeftToChoose = allBuildings.filter(x => !actualBuildingAccesses.find
     </div>
   </SimpleModal>
 
-  <SimpleModal show={showBuildingAccessModal}>
+  <SimpleModal show={showBuildingAccessModal} customInnerClass='w-5/12'>
     <div class="flex-col items-center flex justify-center">
       <h2 class="text-2xl m-4">Dostopi za uporabnika: {selectedUser.username}</h2>
       
       <!-- Existing Building Accesses content -->
-      <div>
+      <div class="overflow-hidden rounded-lg">
         {#if actualBuildingAccesses.length != 0}
-        <table class="border-collapse border m-2 w-full">
+        <table class="border-collapse border w-full">
           <thead class="bg-blue-400">
             <tr>
               <th class="border p-2">Ime stavbe:</th>
