@@ -353,8 +353,8 @@ function hideInfoPanel() {
                 
         </div>
         {:else}
-          <p class="text-xl mt-10">Hmmm, kot kaže nimate pravic do nobenega podjetja.</p>
-          <p class="text-xl mt-6">Posvetuje se z administratorjem stavbe ali pa z administratorjem platforme.</p>
+          <p class="text-xl mt-10">Hmmm, kot kaže nimate pravic do nobene stavbe.</p>
+          <p class="text-xl mt-6">Posvetujte se z administratorjem platforme.</p>
         {/if}
         {/await}
    
