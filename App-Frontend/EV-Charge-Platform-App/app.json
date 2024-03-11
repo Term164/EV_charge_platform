@@ -21,10 +21,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/Charge-Mate-Logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.term164.EVChargePlatformApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3e940edf-3859-43ee-b84f-8621371b29b3"
+      }
     }
   }
 }
