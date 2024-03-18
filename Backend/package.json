@@ -41,7 +41,7 @@
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
     "node-cron": "^3.0.2",
-    "nodemailer": "^6.9.3",
+    "nodemailer": "^6.9.12",
     "ocpp-ts": "^0.3.0",
     "postgresql-client": "^2.5.9",
     "tslog": "^4.8.2"
