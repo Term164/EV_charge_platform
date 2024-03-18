@@ -28,7 +28,12 @@ router.get(
     const response = await register.secondStep(req.params);
     if (response.status === 200) {
       console.log(__dirname);
-      res.sendFile(path.join(__dirname + "/src/assets/registration.html"));
+      res.sendFile(
+        path.join(
+          "/home/ec2-user/EV_charge_platform/Backend/" +
+            "/src/assets/registration.html",
+        ),
+      );
     } else {
       res.status(response.status).send(response);
     }
@@ -64,4 +69,3 @@ router.post(
 );
 
 export default router;
-
