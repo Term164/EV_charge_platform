@@ -1,63 +1,59 @@
 {
-    "noauth": [
-        "/auth/login",
-        "/auth/register/step1",
-        "/auth/step2"
-    ],
+  "noauth": ["/auth/login", "/auth/register/step1", "/auth/register/step2"],
 
-    "default": [
-        "/auth/logout",
-        "/reservation/get/all",
-        "/reservation/patch/edit",
-        "/reservation/delete/cancle",
-        "/reservation/post/new",
-        "/reservation/get/stationType",
-        "/user/get/buildingAdmins",
-        "/user/get/companyAdmins",
-        "/user/get/assignedBadmins",
-        "/user/get/assignedCadmins",
-        "/user/delete/account",
-        "/user/patch/editProfile",
-        "/station/get/allAvailable",
-        "/station/type/get/all"
-    ],
+  "default": [
+    "/auth/logout",
+    "/reservation/get/all",
+    "/reservation/patch/edit",
+    "/reservation/delete/cancle",
+    "/reservation/post/new",
+    "/reservation/get/stationType",
+    "/user/get/buildingAdmins",
+    "/user/get/companyAdmins",
+    "/user/get/assignedBadmins",
+    "/user/get/assignedCadmins",
+    "/user/delete/account",
+    "/user/patch/editProfile",
+    "/station/get/allAvailable",
+    "/station/type/get/all"
+  ],
 
-    "badmin": [
-        "/building/post/assignCompany",
-        "/building/get/assignedCompanies",
-        "/building/get/all",
-        "/building/patch/edit",
-        "/station/post/new",
-        "/station/patch/edit",
-        "/station/get/all",
-        "/station/delete/station",
-        "/station/connector/post/new",
-        "/station/connector/delete/connector",
-        "/station/connector/patch/edit",
-        "/station/type/post/new",        
-        "/station/type/delete/type",
-        "/station/type/patch/edit"
-    ],
+  "badmin": [
+    "/building/post/assignCompany",
+    "/building/get/assignedCompanies",
+    "/building/get/all",
+    "/building/patch/edit",
+    "/station/post/new",
+    "/station/patch/edit",
+    "/station/get/all",
+    "/station/delete/station",
+    "/station/connector/post/new",
+    "/station/connector/delete/connector",
+    "/station/connector/patch/edit",
+    "/station/type/post/new",
+    "/station/type/delete/type",
+    "/station/type/patch/edit"
+  ],
 
-    "cadmin": [
-        "/building/get/companyOwned",
-        "/user/post/assignCompany",
-        "/user/post/assignBuilding",
-        "/user/delete/building_access",
-        "/station/post/assignCompany",
-        "/company/patch/edit"
-    ],
+  "cadmin": [
+    "/building/get/companyOwned",
+    "/user/post/assignCompany",
+    "/user/post/assignBuilding",
+    "/user/delete/building_access",
+    "/station/post/assignCompany",
+    "/company/patch/edit"
+  ],
 
-    "padmin": [
-        "/building/post/new",
-        "/building/delete/building",
-        "/company/post/new",
-        "/company/get/all",
-        "/company/delete/company",
-        "/user/post/assignBadmin",
-        "/user/post/assignCadmin",
-        "/user/delete/badmin",
-        "/user/delete/cadmin"
-    ]
-
+  "padmin": [
+    "/building/post/new",
+    "/building/delete/building",
+    "/company/post/new",
+    "/company/get/all",
+    "/company/delete/company",
+    "/user/post/assignBadmin",
+    "/user/post/assignCadmin",
+    "/user/delete/badmin",
+    "/user/delete/cadmin"
+  ]
 }
+
