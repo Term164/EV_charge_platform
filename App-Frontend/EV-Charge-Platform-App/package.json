@@ -33,7 +33,7 @@
     "postcss": "^8.4.23",
     "react": "18.2.0",
     "react-i18next": "^13.5.0",
-    "react-native": "0.73.4",
+    "react-native": "0.73.5",
     "react-native-animatable": "^1.4.0",
     "react-native-animated-spinkit": "^1.5.2",
     "react-native-bouncy-checkbox": "^3.0.7",
