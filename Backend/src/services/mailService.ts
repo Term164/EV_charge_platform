@@ -16,7 +16,7 @@ export function sendConfirmationMail(url: string, email_address: string) {
     from: "jani.bangiev@atlanticbyte.com",
     to: email_address,
     subject: "Charge Mate verification",
-    test:
+    text:
       "To verify your Charge Mate account please visit the following url: " +
       url,
   };
