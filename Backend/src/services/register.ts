@@ -98,7 +98,7 @@ async function firstStep(body: unknown): Promise<APIResponse> {
   await db.connection.commit(); // END startTransaction
 
   sendConfirmationMail(
-    "https://www.atlanticbyte.com:3000/register/step2/" +
+    "https://www.atlanticbyte.com:3000/api/v1/register/step2/" +
       result.rows?.at(0)[0] +
       "/" +
       token,
@@ -179,4 +179,3 @@ async function secondStep(params: unknown): Promise<APIResponse> {
 }
 
 export default { firstStep, secondStep, checkEmailUnique, checkUsernameUnique };
-

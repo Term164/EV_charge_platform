@@ -51,7 +51,7 @@ const sessionChecker = asyncHandler(
       return;
     }
 
-    if (request.url.search("register/step2")) {
+    if (request.url.search("register/step2") != -1) {
       next();
       return;
     }
@@ -203,4 +203,3 @@ export default {
   sessionChecker,
   authorizationChecker,
 };
-
