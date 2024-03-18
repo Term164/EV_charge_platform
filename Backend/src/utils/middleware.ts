@@ -140,7 +140,7 @@ const authorizationChecker = asyncHandler(
 
     if (
       authList.noauth.includes(finalPath) ||
-      finalPath.search("register/step2") == -1
+      finalPath.search("register/step2") != -1
     ) {
       next();
       return;
